@@ -3,8 +3,9 @@
 A magical voice-powered coding playground for kids! Just speak and watch your ideas come to life! ✨
 
 ![VibeKidding](https://img.shields.io/badge/Made%20for-Kids-ff69b4?style=for-the-badge)
-![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791?style=for-the-badge)
 
 ## 🌟 Features
 
@@ -14,6 +15,7 @@ A magical voice-powered coding playground for kids! Just speak and watch your id
 - **👀 Live Preview**: See creations instantly in a beautiful preview pane
 - **💻 Code View**: Optionally view the generated HTML/CSS/JavaScript code
 - **📁 Project Management**: Save and organize multiple creations
+- **🔄 Version History**: Track changes and iterate on your creations
 - **🔗 Shareable Links**: Each creation gets a unique permalink
 - **🌈 Kid-Friendly UI**: Bright colors, fun animations, and playful design
 
@@ -23,12 +25,13 @@ A magical voice-powered coding playground for kids! Just speak and watch your id
 
 - Node.js 18+ installed
 - An Anthropic API key (for Claude AI)
+- A Neon PostgreSQL database (via Vercel Storage or directly from Neon)
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/aemal/vibekidding.git
 cd vibekidding
 ```
 
@@ -39,12 +42,9 @@ npm install
 
 3. Set up your environment variables:
 ```bash
-# Copy the example env file
-cp .env.example .env
-
-# Edit .env and add your Anthropic API key
-ANTHROPIC_API_KEY="your-api-key-here"
-DATABASE_URL="file:./dev.db"
+# Create a .env file with:
+DATABASE_URL="postgresql://..."  # Your Neon PostgreSQL connection string
+ANTHROPIC_API_KEY="sk-ant-..."   # Your Anthropic API key
 ```
 
 4. Initialize the database:
@@ -85,7 +85,7 @@ When kids ask for 3D content, the AI automatically uses Three.js via CDN:
 
 - **Framework**: Next.js 16 (App Router + Turbopack)
 - **Language**: TypeScript
-- **Database**: SQLite with Prisma ORM
+- **Database**: PostgreSQL (Neon) with Prisma ORM
 - **AI**: Anthropic Claude Sonnet 4.5
 - **Speech**: Web Speech API (browser-native)
 - **3D Graphics**: Three.js (via CDN for 3D requests)
@@ -94,33 +94,46 @@ When kids ask for 3D content, the AI automatically uses Three.js via CDN:
 
 ## 📦 Deployment on Vercel
 
-### Option 1: Quick Deploy (Demo)
+This project is configured for seamless deployment on Vercel with Neon PostgreSQL.
 
-For testing and demo purposes, the SQLite database will work but data won't persist across deployments.
+### Step 1: Create a Neon Database via Vercel
 
-### Option 2: Production with Turso
+1. Go to your Vercel Dashboard → **Storage**
+2. Click **Create Database** → Select **Neon** (Serverless Postgres)
+3. Choose the **Free** plan and create the database
 
-For production deployments with persistent data:
+### Step 2: Connect Database to Your Project
 
-1. Create a [Turso](https://turso.tech/) account and database
-2. Update your `prisma/schema.prisma`:
-```prisma
-datasource db {
-  provider = "sqlite"
-  url      = env("TURSO_DATABASE_URL")
-}
+1. In Vercel, go to your project → **Storage** tab
+2. Click **Connect Database** and select your Neon database
+3. The `DATABASE_URL` and other variables will be automatically injected
+
+### Step 3: Add Environment Variables
+
+Add your Anthropic API key in Vercel:
+1. Go to **Settings** → **Environment Variables**
+2. Add `ANTHROPIC_API_KEY` with your key
+
+### Step 4: Deploy
+
+```bash
+# Push to GitHub (auto-deploys to Vercel)
+git push
+
+# Or deploy directly
+npx vercel
 ```
-3. Add `TURSO_DATABASE_URL` to your Vercel environment variables
-4. Deploy!
 
-### Option 3: Use Vercel Postgres
+### Local Development with Vercel Postgres
 
-You can also switch to PostgreSQL for Vercel's native database:
+For local development, you can connect directly to your Vercel/Neon database:
 
-1. Create a Vercel Postgres database
-2. Update the Prisma schema provider to "postgresql"
-3. Update environment variables
-4. Deploy!
+```bash
+# Pull environment variables from Vercel
+vercel env pull .env
+
+# Or manually copy the DATABASE_URL from your Vercel dashboard
+```
 
 ## 🎨 Customization
 
@@ -157,6 +170,7 @@ MIT License - Feel free to use this for teaching kids to code!
 - Made with ❤️ for awesome kids everywhere
 - Powered by [Anthropic Claude](https://anthropic.com)
 - Built with [Next.js](https://nextjs.org)
+- Database by [Neon](https://neon.tech)
 
 ---
 
