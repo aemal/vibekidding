@@ -19,15 +19,12 @@ const cardColors = [
   "from-indigo-400 to-purple-600",
 ];
 
-const emojis = ["🚀", "🎮", "🌟", "🎨", "🦄", "🌈", "🎪", "🎯", "🎸", "🎭"];
-
 export default function ProjectCard({
   project,
   onDelete,
   index,
 }: ProjectCardProps) {
   const colorClass = cardColors[index % cardColors.length];
-  const emoji = emojis[index % emojis.length];
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -48,7 +45,7 @@ export default function ProjectCard({
         <div
           className={`h-24 rounded-t-[22px] bg-gradient-to-r ${colorClass} flex items-center justify-center`}
         >
-          <span className="text-5xl">{emoji}</span>
+          <span className="text-5xl">{project.emoji || "🎮"}</span>
         </div>
       </Link>
 

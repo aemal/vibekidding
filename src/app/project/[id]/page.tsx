@@ -16,6 +16,7 @@ import Microphone from "@/components/Microphone";
 import Preview from "@/components/Preview";
 import CodeView from "@/components/CodeView";
 import VersionHistory from "@/components/VersionHistory";
+import EmojiPicker from "@/components/EmojiPicker";
 import { Project } from "@/types";
 
 type ViewMode = "preview" | "code";
@@ -129,6 +130,23 @@ export default function ProjectEditor() {
     }
   };
 
+  const saveEmoji = async (emoji: string) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      });
+
+      if (response.ok) {
+        const updatedProject = await response.json();
+        setProject(updatedProject);
+      }
+    } catch (error) {
+      console.error("Failed to save emoji:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -150,7 +168,7 @@ export default function ProjectEditor() {
       <header className="bg-white/80 backdrop-blur-md shadow-sm p-4 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Left section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/"
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -158,6 +176,12 @@ export default function ProjectEditor() {
             >
               <ArrowLeft size={24} className="text-gray-600" />
             </Link>
+
+            {/* Emoji picker */}
+            <EmojiPicker
+              selectedEmoji={project.emoji}
+              onSelect={saveEmoji}
+            />
 
             {/* Project name */}
             {isEditingName ? (

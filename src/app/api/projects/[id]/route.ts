@@ -33,7 +33,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const { name, htmlContent, prompt } = await request.json();
+    const { name, emoji, htmlContent, prompt } = await request.json();
 
     // If htmlContent is being updated, save the current state as a version first
     if (htmlContent !== undefined) {
@@ -57,6 +57,7 @@ export async function PUT(
       where: { id },
       data: {
         ...(name && { name }),
+        ...(emoji && { emoji }),
         ...(htmlContent !== undefined && { htmlContent }),
         ...(prompt !== undefined && { prompt }),
       },

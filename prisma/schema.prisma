@@ -10,6 +10,7 @@ datasource db {
 model Project {
   id          String    @id @default(uuid())
   name        String
+  emoji       String    @default("🎮")
   htmlContent String
   prompt      String
   createdAt   DateTime  @default(now())
