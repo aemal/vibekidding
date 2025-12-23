@@ -13,7 +13,7 @@ A magical voice-powered coding playground for kids! Just speak and watch your id
 
 ### 👨‍💻 About This Project
 
-This project was built by **[Aemal Sayer](https://linkedin.com/in/aemal)** for his son during Christmas break 2025 — in just a few hours using vibe coding! 🎄
+This project was built by **[Aemal Sayer](https://linkedin.com/in/aemal)** for his 7 years old son during Christmas break 2025 — in just a few hours using vibe coding! 🎄
 
 **Want more Vibe Coding, n8n tips & tricks?**
 - 🔗 Follow Aemal on **[LinkedIn](https://linkedin.com/in/aemal)**
