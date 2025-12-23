@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Mic, MicOff, Loader2 } from "lucide-react";
+import { Mic, MicOff, Loader2, X } from "lucide-react";
 
 interface MicrophoneProps {
   onTranscript: (transcript: string) => void;
@@ -118,6 +118,14 @@ export default function Microphone({
     }
   }, [transcript, onTranscript]);
 
+  const cancelListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+      setIsListening(false);
+      setTranscript("");
+    }
+  }, []);
+
   if (!isSupported) {
     return (
       <div className="text-center p-6 bg-yellow-50 rounded-2xl border-2 border-yellow-200">
@@ -152,31 +160,48 @@ export default function Microphone({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Main microphone button */}
-      <button
-        onClick={isListening ? stopListening : startListening}
-        disabled={isGenerating}
-        className={`
-          relative w-24 h-24 rounded-full flex items-center justify-center
-          transition-all duration-300 
-          ${
-            isGenerating
-              ? "bg-gray-300 cursor-not-allowed"
-              : isListening
-              ? "bg-gradient-to-br from-red-500 to-pink-600 mic-recording"
-              : "bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-110"
-          }
-          shadow-lg hover:shadow-xl
-        `}
-      >
-        {isGenerating ? (
-          <Loader2 className="w-10 h-10 text-white animate-spin" />
-        ) : isListening ? (
-          <MicOff className="w-10 h-10 text-white" />
-        ) : (
-          <Mic className="w-10 h-10 text-white" />
+      {/* Microphone and Cancel buttons */}
+      <div className="flex items-center gap-4">
+        {/* Cancel button - only shows when listening */}
+        {isListening && (
+          <button
+            onClick={cancelListening}
+            className="w-14 h-14 rounded-full flex items-center justify-center
+              bg-gradient-to-br from-gray-400 to-gray-500 
+              hover:from-gray-500 hover:to-gray-600 hover:scale-110
+              transition-all duration-300 shadow-lg hover:shadow-xl"
+            title="Cancel"
+          >
+            <X className="w-7 h-7 text-white" />
+          </button>
         )}
-      </button>
+
+        {/* Main microphone button */}
+        <button
+          onClick={isListening ? stopListening : startListening}
+          disabled={isGenerating}
+          className={`
+            relative w-24 h-24 rounded-full flex items-center justify-center
+            transition-all duration-300 
+            ${
+              isGenerating
+                ? "bg-gray-300 cursor-not-allowed"
+                : isListening
+                ? "bg-gradient-to-br from-red-500 to-pink-600 mic-recording"
+                : "bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:scale-110"
+            }
+            shadow-lg hover:shadow-xl
+          `}
+        >
+          {isGenerating ? (
+            <Loader2 className="w-10 h-10 text-white animate-spin" />
+          ) : isListening ? (
+            <MicOff className="w-10 h-10 text-white" />
+          ) : (
+            <Mic className="w-10 h-10 text-white" />
+          )}
+        </button>
+      </div>
 
       {/* Status text */}
       <div className="text-center">
@@ -185,9 +210,14 @@ export default function Microphone({
             ✨ Creating your magic...
           </p>
         ) : isListening ? (
-          <p className="text-red-500 font-bold text-lg">
-            🎤 I&apos;m listening! Tap again when done.
-          </p>
+          <div>
+            <p className="text-red-500 font-bold text-lg">
+              🎤 I&apos;m listening!
+            </p>
+            <p className="text-gray-500 text-sm mt-1">
+              Tap mic to submit • Tap ✕ to cancel
+            </p>
+          </div>
         ) : (
           <p className="text-gray-600 font-semibold">
             👆 Tap to start talking!
