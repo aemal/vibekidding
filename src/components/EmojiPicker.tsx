@@ -364,7 +364,6 @@ const EMOJI_KEYWORDS: Record<string, string[]> = {
   "⌚": ["watch", "time", "clock", "wrist"],
   "🔋": ["battery", "power", "charge", "energy"],
   "🔌": ["plug", "electric", "power", "outlet"],
-  "💡": ["light bulb", "idea", "bright", "electric"],
   "🔦": ["flashlight", "light", "torch", "dark"],
   "🕯️": ["candle", "light", "flame", "birthday"],
   "💰": ["money", "bag", "rich", "cash", "dollar"],
