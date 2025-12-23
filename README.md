@@ -2,10 +2,24 @@
 
 A magical voice-powered coding playground for kids! Just speak and watch your ideas come to life! ✨
 
+🌐 **Live Demo**: [vibekidding.aemalsayer.com](https://vibekidding.aemalsayer.com)
+
 ![VibeKidding](https://img.shields.io/badge/Made%20for-Kids-ff69b4?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791?style=for-the-badge)
+
+---
+
+### 👨‍💻 About This Project
+
+This project was built by **[Aemal Sayer](https://linkedin.com/in/aemal)** for his son during Christmas break 2025 — in just a few hours using vibe coding! 🎄
+
+**Want more Vibe Coding, n8n tips & tricks?**
+- 🔗 Follow Aemal on **[LinkedIn](https://linkedin.com/in/aemal)**
+- 📺 Subscribe to **[AgentGeeks on YouTube](https://youtube.com/@AgentGeeks)**
+
+---
 
 ## 🌟 Features
 
