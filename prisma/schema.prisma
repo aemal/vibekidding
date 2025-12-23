@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -11,8 +11,8 @@ model Project {
   id          String    @id @default(uuid())
   name        String
   emoji       String    @default("🎮")
-  htmlContent String
-  prompt      String
+  htmlContent String    @db.Text
+  prompt      String    @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   versions    Version[]
@@ -20,8 +20,8 @@ model Project {
 
 model Version {
   id          String   @id @default(uuid())
-  htmlContent String
-  prompt      String
+  htmlContent String   @db.Text
+  prompt      String   @db.Text
   createdAt   DateTime @default(now())
   projectId   String
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
