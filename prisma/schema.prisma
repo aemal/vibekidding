@@ -8,10 +8,20 @@ datasource db {
 }
 
 model Project {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   htmlContent String
   prompt      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  versions    Version[]
+}
+
+model Version {
+  id          String   @id @default(uuid())
+  htmlContent String
+  prompt      String
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }

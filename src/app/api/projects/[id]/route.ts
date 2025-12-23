@@ -35,6 +35,24 @@ export async function PUT(
     const { id } = await params;
     const { name, htmlContent, prompt } = await request.json();
 
+    // If htmlContent is being updated, save the current state as a version first
+    if (htmlContent !== undefined) {
+      const currentProject = await prisma.project.findUnique({
+        where: { id },
+      });
+
+      // Only save version if there's existing content (not for initial creation)
+      if (currentProject && currentProject.htmlContent) {
+        await prisma.version.create({
+          data: {
+            projectId: id,
+            htmlContent: currentProject.htmlContent,
+            prompt: currentProject.prompt,
+          },
+        });
+      }
+    }
+
     const project = await prisma.project.update({
       where: { id },
       data: {

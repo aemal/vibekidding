@@ -15,3 +15,9 @@ export interface ProjectSummary {
   updatedAt: string;
 }
 
+export interface Version {
+  id: string;
+  prompt: string;
+  createdAt: string;
+}
+

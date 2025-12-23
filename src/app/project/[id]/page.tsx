@@ -15,6 +15,7 @@ import Link from "next/link";
 import Microphone from "@/components/Microphone";
 import Preview from "@/components/Preview";
 import CodeView from "@/components/CodeView";
+import VersionHistory from "@/components/VersionHistory";
 import { Project } from "@/types";
 
 type ViewMode = "preview" | "code";
@@ -33,26 +34,26 @@ export default function ProjectEditor() {
   const [editedName, setEditedName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const response = await fetch(`/api/projects/${projectId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setProject(data);
-          setEditedName(data.name);
-        } else if (response.status === 404) {
-          router.push("/");
-        }
-      } catch (error) {
-        console.error("Failed to fetch project:", error);
-      } finally {
-        setIsLoading(false);
+  const fetchProject = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProject(data);
+        setEditedName(data.name);
+      } else if (response.status === 404) {
+        router.push("/");
       }
-    };
-
-    fetchProject();
+    } catch (error) {
+      console.error("Failed to fetch project:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [projectId, router]);
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
 
   const handleTranscript = useCallback(
     async (transcript: string) => {
@@ -278,6 +279,12 @@ export default function ProjectEditor() {
                 <li>• &quot;Make fireworks when I click&quot;</li>
               </ul>
             </div>
+
+            {/* Version History */}
+            <VersionHistory
+              projectId={projectId}
+              onRestore={fetchProject}
+            />
           </div>
         </div>
 
