@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, existingCode } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -12,7 +12,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const htmlContent = await generateCode(prompt);
+    // Pass existing code to enable chained prompts
+    const htmlContent = await generateCode(prompt, existingCode || undefined);
 
     return NextResponse.json({ htmlContent });
   } catch (error) {

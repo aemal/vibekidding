@@ -61,11 +61,14 @@ export default function ProjectEditor() {
       setError(null);
 
       try {
-        // Generate code from transcript
+        // Generate code from transcript, including existing code for context
         const generateResponse = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: transcript }),
+          body: JSON.stringify({
+            prompt: transcript,
+            existingCode: project?.htmlContent || undefined,
+          }),
         });
 
         if (!generateResponse.ok) {
@@ -97,7 +100,7 @@ export default function ProjectEditor() {
         setIsGenerating(false);
       }
     },
-    [projectId]
+    [projectId, project?.htmlContent]
   );
 
   const saveName = async () => {

@@ -4,8 +4,11 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-export async function generateCode(prompt: string): Promise<string> {
-  const systemPrompt = `You are a friendly coding assistant for kids! A 7-year-old child is asking you to create something fun.
+export async function generateCode(
+  prompt: string,
+  existingCode?: string
+): Promise<string> {
+  const baseSystemPrompt = `You are a friendly coding assistant for kids! A 7-year-old child is asking you to create something fun.
 
 Your task: Generate a SINGLE, COMPLETE HTML file that includes ALL CSS (in a <style> tag) and ALL JavaScript (in a <script> tag).
 
@@ -45,13 +48,43 @@ For 2D content, keep everything self-contained with no external dependencies.
 
 Remember: This is for a 7-year-old, so make it FUN, COLORFUL, and MAGICAL! ✨`;
 
+  // Build the system prompt based on whether we have existing code
+  const systemPrompt = existingCode
+    ? `${baseSystemPrompt}
+
+IMPORTANT - MODIFYING EXISTING CODE:
+The kid already has a project they've been working on. They want to MODIFY or ADD to their existing creation.
+- Keep all the existing features that work well
+- Only change/add what the kid is asking for
+- Don't remove existing functionality unless specifically asked
+- Preserve the existing style and theme
+- Make sure the changes integrate smoothly with the existing code
+- If the kid asks for something that conflicts with existing code, update the existing code to accommodate the new feature`
+    : baseSystemPrompt;
+
+  // Build the user message
+  let userMessage: string;
+  if (existingCode) {
+    userMessage = `Here is my current project code:
+
+\`\`\`html
+${existingCode}
+\`\`\`
+
+Now please modify it to: ${prompt}
+
+Return the COMPLETE updated HTML file with all my existing features PLUS the new changes.`;
+  } else {
+    userMessage = `Create this for me: ${prompt}`;
+  }
+
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 8192,
     messages: [
       {
         role: "user",
-        content: `Create this for me: ${prompt}`,
+        content: userMessage,
       },
     ],
     system: systemPrompt,
