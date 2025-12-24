@@ -315,7 +315,9 @@ export default function ProjectEditor() {
                     <h1 className="text-base md:text-xl font-bold text-gray-800 truncate">
                       {project.name}
                     </h1>
-                    <Lock size={14} className="text-gray-400 shrink-0" title="View only" />
+                    <span title="View only">
+                      <Lock size={14} className="text-gray-400 shrink-0" />
+                    </span>
                   </div>
                 )}
               </div>
