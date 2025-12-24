@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Trophy,
-  Medal,
   Heart,
   Play,
   Gamepad2,
@@ -27,6 +26,25 @@ const rankColors = [
 ];
 
 export default function Leaderboard() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen p-4 md:p-6 lg:p-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="spinner mb-4"></div>
+              <p className="text-gray-500 font-semibold">Loading leaderboard...</p>
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <LeaderboardContent />
+    </Suspense>
+  );
+}
+
+function LeaderboardContent() {
   const searchParams = useSearchParams();
   const typeParam = searchParams.get("type");
   const { userId } = useUser();

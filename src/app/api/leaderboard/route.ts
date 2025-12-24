@@ -11,16 +11,6 @@ export async function GET(request: Request) {
     if (type === "games") {
       // Games leaderboard - sorted by likes
       const games = await prisma.project.findMany({
-        take: limit,
-        orderBy: [
-          {
-            likes: {
-              _count: "desc",
-            },
-          },
-          { playCount: "desc" },
-          { createdAt: "desc" },
-        ],
         select: {
           id: true,
           name: true,
@@ -43,22 +33,30 @@ export async function GET(request: Request) {
         },
       });
 
-      const transformedGames = games.map((game) => ({
-        id: game.id,
-        name: game.name,
-        emoji: game.emoji,
-        playCount: game.playCount,
-        likeCount: game._count.likes,
-        createdAt: game.createdAt.toISOString(),
-        creator: {
-          id: game.creator.id,
-          username: game.creator.username,
-          createdAt: game.creator.createdAt.toISOString(),
-          gameCount: game.creator._count.projects,
-        },
-      }));
+      // Sort by likes (primary), playCount (secondary), createdAt (tertiary)
+      const sortedGames = games
+        .map((game) => ({
+          id: game.id,
+          name: game.name,
+          emoji: game.emoji,
+          playCount: game.playCount,
+          likeCount: game._count.likes,
+          createdAt: game.createdAt.toISOString(),
+          creator: {
+            id: game.creator.id,
+            username: game.creator.username,
+            createdAt: game.creator.createdAt.toISOString(),
+            gameCount: game.creator._count.projects,
+          },
+        }))
+        .sort((a, b) => {
+          if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
+          if (b.playCount !== a.playCount) return b.playCount - a.playCount;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        })
+        .slice(0, limit);
 
-      return NextResponse.json(transformedGames);
+      return NextResponse.json(sortedGames);
     } else if (type === "builders") {
       // Builders leaderboard
       const builders = await prisma.user.findMany({
