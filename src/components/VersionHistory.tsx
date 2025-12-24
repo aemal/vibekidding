@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { History, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Version } from "@/types";
+import { useUser } from "@/lib/UserContext";
 
 interface VersionHistoryProps {
   projectId: string;
@@ -13,6 +14,7 @@ export default function VersionHistory({
   projectId,
   onRestore,
 }: VersionHistoryProps) {
+  const { userId } = useUser();
   const [versions, setVersions] = useState<Version[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,12 +52,16 @@ export default function VersionHistory({
         `/api/projects/${projectId}/versions/${versionId}`,
         {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
         }
       );
 
       if (response.ok) {
         onRestore();
         fetchVersions(); // Refresh the versions list
+      } else if (response.status === 403) {
+        alert("You don't have permission to restore versions for this project.");
       }
     } catch (error) {
       console.error("Failed to restore version:", error);
@@ -80,7 +86,7 @@ export default function VersionHistory({
   };
 
   return (
-    <div className="mt-6">
+    <div className="mt-4 md:mt-6">
       {/* Toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -88,7 +94,7 @@ export default function VersionHistory({
       >
         <div className="flex items-center gap-2">
           <History className="w-5 h-5 text-blue-600" />
-          <span className="font-semibold text-blue-700">Version History</span>
+          <span className="font-semibold text-blue-700 text-sm md:text-base">Version History</span>
           {versions.length > 0 && (
             <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
               {versions.length}
@@ -136,7 +142,7 @@ export default function VersionHistory({
                   <button
                     onClick={() => handleRestore(version.id)}
                     disabled={restoringId === version.id}
-                    className={`ml-3 flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                    className={`ml-3 flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all
                       ${
                         restoringId === version.id
                           ? "bg-gray-200 text-gray-500 cursor-not-allowed"
@@ -161,4 +167,3 @@ export default function VersionHistory({
     </div>
   );
 }
-

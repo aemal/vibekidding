@@ -7,15 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  createdAt DateTime @default(now())
+  projects  Project[]
+  likes     Like[]
+  gamePlays GamePlay[]
+}
+
 model Project {
-  id          String    @id @default(uuid())
+  id          String     @id @default(uuid())
   name        String
-  emoji       String    @default("🎮")
-  htmlContent String    @db.Text
-  prompt      String    @db.Text
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  emoji       String     @default("🎮")
+  htmlContent String     @db.Text
+  prompt      String     @db.Text
+  playCount   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  creatorId   String
+  creator     User       @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   versions    Version[]
+  likes       Like[]
+  gamePlays   GamePlay[]
+
+  @@index([creatorId])
+  @@index([playCount])
 }
 
 model Version {
@@ -25,4 +42,28 @@ model Version {
   createdAt   DateTime @default(now())
   projectId   String
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([projectId])
+}
+
+model GamePlay {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  playedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, projectId])
+  @@index([projectId])
 }

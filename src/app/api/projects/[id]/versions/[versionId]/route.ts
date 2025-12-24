@@ -33,6 +33,7 @@ export async function POST(
 ) {
   try {
     const { id, versionId } = await params;
+    const { userId } = await request.json().catch(() => ({}));
 
     // Get the version to restore
     const version = await prisma.version.findUnique({
@@ -43,12 +44,24 @@ export async function POST(
       return NextResponse.json({ error: "Version not found" }, { status: 404 });
     }
 
-    // Get current project state to save as a version first
+    // Get current project state and verify ownership
     const currentProject = await prisma.project.findUnique({
       where: { id },
     });
 
-    if (currentProject && currentProject.htmlContent) {
+    if (!currentProject) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // Check ownership
+    if (currentProject.creatorId !== userId) {
+      return NextResponse.json(
+        { error: "You don't have permission to restore versions for this project" },
+        { status: 403 }
+      );
+    }
+
+    if (currentProject.htmlContent) {
       // Save current state as a new version before restoring
       await prisma.version.create({
         data: {
@@ -77,4 +90,3 @@ export async function POST(
     );
   }
 }
-

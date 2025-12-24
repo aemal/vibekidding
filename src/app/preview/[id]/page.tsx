@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { getUserId, getOrCreateUser } from "@/lib/user";
 
 export default function FullPreview() {
   const params = useParams();
@@ -29,6 +30,28 @@ export default function FullPreview() {
     };
 
     fetchPreview();
+  }, [projectId]);
+
+  // Record play
+  useEffect(() => {
+    const recordPlay = async () => {
+      try {
+        let userId = getUserId();
+        if (!userId) {
+          userId = await getOrCreateUser();
+        }
+        
+        await fetch(`/api/projects/${projectId}/play`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
+      } catch (e) {
+        console.error("Failed to record play:", e);
+      }
+    };
+
+    recordPlay();
   }, [projectId]);
 
   useEffect(() => {
@@ -116,4 +139,3 @@ export default function FullPreview() {
 
   return null;
 }
-
