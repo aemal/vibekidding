@@ -31,7 +31,7 @@ export default function Preview({ htmlContent }: PreviewProps) {
             Ready to Create Magic!
           </h3>
           <p className="text-gray-500">
-            Click the microphone and tell me what you want to build! ✨
+            Use voice 🎤 or type ⌨️ to tell me what you want to build! ✨
           </p>
         </div>
       </div>
@@ -47,4 +47,5 @@ export default function Preview({ htmlContent }: PreviewProps) {
     />
   );
 }
+
 

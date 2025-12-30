@@ -261,3 +261,152 @@ body {
 .tab-btn:hover:not(.active) {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* Mode Toggle Styles */
+.mode-toggle-container {
+  position: relative;
+  display: flex;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-radius: 20px;
+  padding: 4px;
+  gap: 4px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.mode-toggle-btn {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+}
+
+.mode-toggle-btn.active {
+  color: white;
+}
+
+.mode-toggle-btn:hover:not(.active):not(:disabled) {
+  color: var(--primary);
+}
+
+.mode-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mode-toggle-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-pink) 100%);
+  border-radius: 16px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+  z-index: 1;
+}
+
+.mode-toggle-slider.right {
+  transform: translateX(100%);
+}
+
+/* Prompt Input Styles */
+.prompt-textarea {
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.prompt-textarea:focus {
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+}
+
+.prompt-submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.prompt-submit-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.prompt-submit-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+/* Keyboard shortcut badge */
+.kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Code editor styles */
+.code-editor {
+  font-family: "Fira Code", "Consolas", "Monaco", monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.code-editor::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.code-editor::-webkit-scrollbar-track {
+  background: #313244;
+  border-radius: 5px;
+}
+
+.code-editor::-webkit-scrollbar-thumb {
+  background: #585b70;
+  border-radius: 5px;
+}
+
+.code-editor::-webkit-scrollbar-thumb:hover {
+  background: #6c7086;
+}
+
+/* Animated gradient border for focus states */
+@keyframes gradient-border {
+  0% {
+    border-color: var(--primary);
+  }
+  50% {
+    border-color: var(--accent-pink);
+  }
+  100% {
+    border-color: var(--primary);
+  }
+}
+
+.prompt-textarea:focus {
+  animation: gradient-border 3s ease infinite;
+}

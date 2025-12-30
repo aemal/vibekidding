@@ -20,9 +20,11 @@ import {
 import Link from "next/link";
 import Microphone from "@/components/Microphone";
 import Preview from "@/components/Preview";
-import CodeView from "@/components/CodeView";
+import EditableCodeView from "@/components/EditableCodeView";
 import VersionHistory from "@/components/VersionHistory";
 import EmojiPicker from "@/components/EmojiPicker";
+import InputModeToggle, { InputMode } from "@/components/InputModeToggle";
+import PromptInput from "@/components/PromptInput";
 import { Project } from "@/types";
 import { useUser } from "@/lib/UserContext";
 
@@ -45,6 +47,8 @@ export default function ProjectEditor() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
+  const [inputMode, setInputMode] = useState<InputMode>("voice");
+  const [isSavingCode, setIsSavingCode] = useState(false);
 
   const isOwner = project?.isOwner ?? false;
 
@@ -133,6 +137,36 @@ export default function ProjectEditor() {
       }
     },
     [projectId, project?.htmlContent, isOwner, userId]
+  );
+
+  const handleCodeSave = useCallback(
+    async (newCode: string) => {
+      if (!isOwner || !userId) return;
+      setIsSavingCode(true);
+
+      try {
+        const response = await fetch(`/api/projects/${projectId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            htmlContent: newCode,
+            prompt: "Code edited manually",
+            userId,
+          }),
+        });
+
+        if (response.ok) {
+          const updatedProject = await response.json();
+          setProject(updatedProject);
+        }
+      } catch (error) {
+        console.error("Failed to save code:", error);
+        setError("Failed to save code changes!");
+      } finally {
+        setIsSavingCode(false);
+      }
+    },
+    [projectId, isOwner, userId]
   );
 
   const saveName = async () => {
@@ -416,18 +450,38 @@ export default function ProjectEditor() {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 max-w-7xl mx-auto w-full min-h-0">
-        {/* Left side - Microphone controls (only for owner) */}
+        {/* Left side - Input controls (only for owner) */}
         {isOwner && (
           <div className="lg:w-96 shrink-0 order-2 lg:order-1">
             <div className="card p-4 md:p-6 lg:sticky lg:top-36">
+              {/* Mode Toggle */}
+              <div className="mb-6">
+                <InputModeToggle
+                  mode={inputMode}
+                  onModeChange={setInputMode}
+                  disabled={isGenerating}
+                />
+              </div>
+
               <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4 md:mb-6 text-center">
-                🎤 Voice Creator
+                {inputMode === "voice" ? "🎤 Voice Creator" : "⌨️ Type Creator"}
               </h2>
 
-              <Microphone
-                onTranscript={handleTranscript}
-                isGenerating={isGenerating}
-              />
+              {/* Voice Mode */}
+              {inputMode === "voice" && (
+                <Microphone
+                  onTranscript={handleTranscript}
+                  isGenerating={isGenerating}
+                />
+              )}
+
+              {/* Typing Mode */}
+              {inputMode === "typing" && (
+                <PromptInput
+                  onSubmit={handleTranscript}
+                  isGenerating={isGenerating}
+                />
+              )}
 
               {error && (
                 <div className="mt-4 p-4 bg-red-50 rounded-xl border-2 border-red-200">
@@ -443,7 +497,9 @@ export default function ProjectEditor() {
               )}
 
               <div className="mt-4 md:mt-6 p-3 md:p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
-                <h3 className="font-bold text-orange-600 mb-2 text-sm md:text-base">💡 Try saying:</h3>
+                <h3 className="font-bold text-orange-600 mb-2 text-sm md:text-base">
+                  💡 {inputMode === "voice" ? "Try saying:" : "Try typing:"}
+                </h3>
                 <ul className="text-xs md:text-sm text-gray-600 space-y-1">
                   <li>• &quot;Make a rainbow button that bounces&quot;</li>
                   <li>• &quot;Create a 3D spinning cube game&quot;</li>
@@ -452,6 +508,18 @@ export default function ProjectEditor() {
                   <li>• &quot;Make fireworks when I click&quot;</li>
                 </ul>
               </div>
+
+              {/* Typing mode hint for code editing */}
+              {inputMode === "typing" && (
+                <div className="mt-4 p-3 md:p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+                  <h3 className="font-bold text-green-600 mb-2 text-sm md:text-base">
+                    ✏️ Pro tip!
+                  </h3>
+                  <p className="text-xs md:text-sm text-gray-600">
+                    In typing mode, you can also edit the code directly! Click on the <strong>Code</strong> tab to see and modify the HTML code.
+                  </p>
+                </div>
+              )}
 
               {/* Version History */}
               <VersionHistory
@@ -468,7 +536,12 @@ export default function ProjectEditor() {
             {viewMode === "preview" ? (
               <Preview htmlContent={project.htmlContent} />
             ) : (
-              <CodeView code={project.htmlContent} />
+              <EditableCodeView
+                code={project.htmlContent}
+                isEditable={isOwner && inputMode === "typing"}
+                onSave={handleCodeSave}
+                isSaving={isSavingCode}
+              />
             )}
           </div>
         </div>
