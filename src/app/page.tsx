@@ -13,7 +13,7 @@ export default function Dashboard() {
   const { userId, username, isLoading: isUserLoading, gameCount } = useUser();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewFilter, setViewFilter] = useState<ViewFilter>("all");
+  const [viewFilter, setViewFilter] = useState<ViewFilter>("selected");
   const [isPowerUser, setIsPowerUser] = useState(false);
 
   useEffect(() => {
@@ -231,6 +231,12 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
               <div className="tab-switcher">
                 <button
+                  onClick={() => setViewFilter("selected")}
+                  className={`tab-btn ${viewFilter === "selected" ? "active" : ""}`}
+                >
+                  🏆 Selected Games ({selectedProjectCount})
+                </button>
+                <button
                   onClick={() => setViewFilter("all")}
                   className={`tab-btn ${viewFilter === "all" ? "active" : ""}`}
                 >
@@ -241,12 +247,6 @@ export default function Dashboard() {
                   className={`tab-btn ${viewFilter === "mine" ? "active" : ""}`}
                 >
                   ⭐ My Games ({myProjectCount})
-                </button>
-                <button
-                  onClick={() => setViewFilter("selected")}
-                  className={`tab-btn ${viewFilter === "selected" ? "active" : ""}`}
-                >
-                  🏆 Selected Games ({selectedProjectCount})
                 </button>
               </div>
               {isPowerUser && (
