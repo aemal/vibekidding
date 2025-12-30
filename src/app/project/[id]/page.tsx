@@ -95,6 +95,9 @@ export default function ProjectEditor() {
       setIsGenerating(true);
       setError(null);
 
+      // Check if this is the first generation (no existing content)
+      const isFirstGeneration = !project?.htmlContent;
+
       try {
         // Generate code from transcript, including existing code for context
         const generateResponse = await fetch("/api/generate", {
@@ -103,6 +106,7 @@ export default function ProjectEditor() {
           body: JSON.stringify({
             prompt: transcript,
             existingCode: project?.htmlContent || undefined,
+            isFirstGeneration,
           }),
         });
 
@@ -110,9 +114,9 @@ export default function ProjectEditor() {
           throw new Error("Failed to generate code");
         }
 
-        const { htmlContent } = await generateResponse.json();
+        const { htmlContent, title } = await generateResponse.json();
 
-        // Save the project
+        // Save the project (include title only on first generation)
         const saveResponse = await fetch(`/api/projects/${projectId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -120,12 +124,17 @@ export default function ProjectEditor() {
             htmlContent,
             prompt: transcript,
             userId,
+            ...(isFirstGeneration && title ? { name: title } : {}),
           }),
         });
 
         if (saveResponse.ok) {
           const updatedProject = await saveResponse.json();
           setProject(updatedProject);
+          // Update the edited name state if title was set
+          if (isFirstGeneration && title) {
+            setEditedName(title);
+          }
         }
       } catch (error) {
         console.error("Failed to generate:", error);

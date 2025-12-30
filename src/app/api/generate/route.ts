@@ -1,9 +1,9 @@
-import { generateCode } from "@/lib/anthropic";
+import { generateCode, generateTitle } from "@/lib/anthropic";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { prompt, existingCode } = await request.json();
+    const { prompt, existingCode, isFirstGeneration } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -15,7 +15,13 @@ export async function POST(request: Request) {
     // Pass existing code to enable chained prompts
     const htmlContent = await generateCode(prompt, existingCode || undefined);
 
-    return NextResponse.json({ htmlContent });
+    // Generate title only on first creation
+    let title: string | undefined;
+    if (isFirstGeneration) {
+      title = await generateTitle(prompt);
+    }
+
+    return NextResponse.json({ htmlContent, title });
   } catch (error) {
     console.error("Failed to generate code:", error);
     return NextResponse.json(

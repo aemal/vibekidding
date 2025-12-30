@@ -4,6 +4,49 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+export async function generateTitle(prompt: string): Promise<string> {
+  const message = await anthropic.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 50,
+    messages: [
+      {
+        role: "user",
+        content: `Generate a short, catchy game title (2-4 words max) for this creation request: "${prompt}"
+
+Rules:
+- Keep it very short (2-4 words)
+- Make it fun and kid-friendly
+- No quotes or punctuation
+- Just the title, nothing else
+
+Examples:
+- "make a bouncing ball game" → "Bouncy Ball Fun"
+- "create fireworks when I click" → "Click Fireworks"
+- "draw a cat that moves" → "Dancing Cat"
+- "make a space shooter" → "Space Blaster"
+
+Title:`,
+      },
+    ],
+  });
+
+  const textContent = message.content.find((block) => block.type === "text");
+  if (!textContent || textContent.type !== "text") {
+    return "My Creation";
+  }
+
+  // Clean up the response
+  let title = textContent.text.trim();
+  // Remove any quotes if present
+  title = title.replace(/^["']|["']$/g, "");
+  // Limit length
+  if (title.length > 40) {
+    title = title.substring(0, 40);
+  }
+
+  return title || "My Creation";
+}
+
 export async function generateCode(
   prompt: string,
   existingCode?: string
