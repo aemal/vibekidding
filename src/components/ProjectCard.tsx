@@ -1,7 +1,7 @@
 "use client";
 
 import { ProjectSummary } from "@/types";
-import { Trash2, ExternalLink, Heart, Play, User, Gamepad2 } from "lucide-react";
+import { Trash2, ExternalLink, Heart, Play, User, Gamepad2, CheckCircle2, Circle, Star } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog";
@@ -10,8 +10,10 @@ interface ProjectCardProps {
   project: ProjectSummary;
   onDelete?: (id: string) => void;
   onLike?: (id: string, liked: boolean) => void;
+  onToggleSelected?: (id: string, isSelected: boolean) => void;
   index: number;
   showOwnerControls?: boolean;
+  isPowerUser?: boolean;
 }
 
 const cardColors = [
@@ -27,14 +29,18 @@ export default function ProjectCard({
   project,
   onDelete,
   onLike,
+  onToggleSelected,
   index,
   showOwnerControls = true,
+  isPowerUser = false,
 }: ProjectCardProps) {
   const colorClass = cardColors[index % cardColors.length];
   const [isLiking, setIsLiking] = useState(false);
   const [liked, setLiked] = useState(project.isLikedByUser);
   const [likeCount, setLikeCount] = useState(project.likeCount);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isSelected, setIsSelected] = useState(project.isSelected);
+  const [isTogglingSelected, setIsTogglingSelected] = useState(false);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -80,6 +86,28 @@ export default function ProjectCard({
     }
   };
 
+  const handleToggleSelected = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isTogglingSelected || !onToggleSelected) return;
+
+    setIsTogglingSelected(true);
+    const newSelected = !isSelected;
+    
+    // Optimistic update
+    setIsSelected(newSelected);
+
+    try {
+      await onToggleSelected(project.id, newSelected);
+    } catch (error) {
+      // Revert on error
+      setIsSelected(!newSelected);
+      console.error("Failed to toggle selected:", error);
+    } finally {
+      setIsTogglingSelected(false);
+    }
+  };
+
   return (
     <div
       className="card group hover:scale-[1.02] transition-all duration-300"
@@ -94,6 +122,13 @@ export default function ProjectCard({
           {project.isOwner && (
             <span className="absolute top-2 left-2 bg-white/90 text-purple-600 text-xs font-bold px-2 py-1 rounded-full">
               Your Game
+            </span>
+          )}
+          {/* Selected badge */}
+          {isSelected && (
+            <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+              <Star size={12} className="fill-current" />
+              Selected
             </span>
           )}
         </div>
@@ -158,6 +193,25 @@ export default function ProjectCard({
           </span>
 
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Power user selection toggle */}
+            {isPowerUser && onToggleSelected && (
+              <button
+                onClick={handleToggleSelected}
+                disabled={isTogglingSelected}
+                className={`p-2 rounded-full transition-colors ${
+                  isSelected
+                    ? "bg-amber-100 text-amber-600 hover:bg-amber-200"
+                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                }`}
+                title={isSelected ? "Unselect game" : "Select game"}
+              >
+                {isSelected ? (
+                  <CheckCircle2 size={16} className="fill-current" />
+                ) : (
+                  <Circle size={16} />
+                )}
+              </button>
+            )}
             <Link
               href={`/preview/${project.id}`}
               target="_blank"
@@ -167,7 +221,8 @@ export default function ProjectCard({
             >
               <ExternalLink size={16} />
             </Link>
-            {showOwnerControls && project.isOwner && onDelete && (
+            {/* Delete button - show for owner OR power user */}
+            {((showOwnerControls && project.isOwner) || isPowerUser) && onDelete && (
               <button
                 onClick={(e) => {
                   e.preventDefault();

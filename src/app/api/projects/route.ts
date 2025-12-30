@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { isPowerUser } from "@/lib/constants";
 import { NextResponse } from "next/server";
 
 // Random emojis for new projects
@@ -18,6 +19,7 @@ export async function GET(request: Request) {
         emoji: true,
         prompt: true,
         playCount: true,
+        isSelected: true,
         createdAt: true,
         updatedAt: true,
         creatorId: true,
@@ -43,6 +45,9 @@ export async function GET(request: Request) {
       },
     });
 
+    // Check if current user is power user (server-side validation)
+    const userIsPowerUser = isPowerUser(currentUserId);
+
     // Transform the response
     const transformedProjects = projects.map((project) => ({
       id: project.id,
@@ -50,6 +55,7 @@ export async function GET(request: Request) {
       emoji: project.emoji,
       prompt: project.prompt,
       playCount: project.playCount,
+      isSelected: project.isSelected,
       createdAt: project.createdAt.toISOString(),
       updatedAt: project.updatedAt.toISOString(),
       creatorId: project.creatorId,
@@ -66,7 +72,10 @@ export async function GET(request: Request) {
       isOwner: currentUserId === project.creatorId,
     }));
 
-    return NextResponse.json(transformedProjects);
+    return NextResponse.json({
+      projects: transformedProjects,
+      isPowerUser: userIsPowerUser,
+    });
   } catch (error) {
     console.error("Failed to fetch projects:", error);
     return NextResponse.json(

@@ -13,6 +13,7 @@ export interface Project {
   htmlContent: string;
   prompt: string;
   playCount: number;
+  isSelected: boolean;
   createdAt: string;
   updatedAt: string;
   creatorId: string;
@@ -28,6 +29,7 @@ export interface ProjectSummary {
   emoji: string;
   prompt: string;
   playCount: number;
+  isSelected: boolean;
   createdAt: string;
   updatedAt: string;
   creatorId: string;

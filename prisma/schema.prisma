@@ -23,6 +23,7 @@ model Project {
   htmlContent String     @db.Text
   prompt      String     @db.Text
   playCount   Int        @default(0)
+  isSelected  Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   creatorId   String
@@ -33,6 +34,7 @@ model Project {
 
   @@index([creatorId])
   @@index([playCount])
+  @@index([isSelected])
 }
 
 model Version {

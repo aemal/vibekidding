@@ -156,6 +156,8 @@ export async function PUT(
   }
 }
 
+import { isPowerUser } from "@/lib/constants";
+
 // DELETE project
 export async function DELETE(
   request: Request,
@@ -166,7 +168,7 @@ export async function DELETE(
     const url = new URL(request.url);
     const userId = url.searchParams.get("userId");
 
-    // Check ownership
+    // Check ownership or power user
     const existingProject = await prisma.project.findUnique({
       where: { id },
       select: { creatorId: true },
@@ -176,7 +178,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    if (existingProject.creatorId !== userId) {
+    // Allow deletion if user is owner OR power user
+    const userIsPowerUser = isPowerUser(userId);
+    const isOwner = existingProject.creatorId === userId;
+
+    if (!isOwner && !userIsPowerUser) {
       return NextResponse.json(
         { error: "You don't have permission to delete this project" },
         { status: 403 }

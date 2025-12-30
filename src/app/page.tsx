@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Sparkles, Rocket, Trophy, Users, User } from "lucide-react";
+import { Plus, Sparkles, Rocket, Trophy, Users, User, Shield } from "lucide-react";
 import Link from "next/link";
 import ProjectCard from "@/components/ProjectCard";
 import { ProjectSummary } from "@/types";
 import { useUser } from "@/lib/UserContext";
 
-type ViewFilter = "all" | "mine";
+type ViewFilter = "all" | "mine" | "selected";
 
 export default function Dashboard() {
   const { userId, username, isLoading: isUserLoading, gameCount } = useUser();
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewFilter, setViewFilter] = useState<ViewFilter>("all");
+  const [isPowerUser, setIsPowerUser] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -27,7 +28,9 @@ export default function Dashboard() {
       const response = await fetch(`/api/projects?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
-        setProjects(data);
+        // API now returns { projects, isPowerUser }
+        setProjects(data.projects);
+        setIsPowerUser(data.isPowerUser);
       }
     } catch (error) {
       console.error("Failed to fetch projects:", error);
@@ -69,6 +72,26 @@ export default function Dashboard() {
     }
   };
 
+  const handleToggleSelected = async (projectId: string, isSelected: boolean) => {
+    if (!userId || !isPowerUser) return;
+    try {
+      const response = await fetch(`/api/projects/${projectId}/select`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, isSelected }),
+      });
+      if (response.ok) {
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.id === projectId ? { ...p, isSelected } : p
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Failed to toggle selected:", error);
+    }
+  };
+
   const createNewProject = async () => {
     if (!userId) return;
     try {
@@ -94,9 +117,12 @@ export default function Dashboard() {
   const filteredProjects =
     viewFilter === "all"
       ? projects
-      : projects.filter((p) => p.isOwner);
+      : viewFilter === "mine"
+      ? projects.filter((p) => p.isOwner)
+      : projects.filter((p) => p.isSelected);
 
   const myProjectCount = projects.filter((p) => p.isOwner).length;
+  const selectedProjectCount = projects.filter((p) => p.isSelected).length;
 
   if (isUserLoading) {
     return (
@@ -216,7 +242,19 @@ export default function Dashboard() {
                 >
                   ⭐ My Games ({myProjectCount})
                 </button>
+                <button
+                  onClick={() => setViewFilter("selected")}
+                  className={`tab-btn ${viewFilter === "selected" ? "active" : ""}`}
+                >
+                  🏆 Selected Games ({selectedProjectCount})
+                </button>
               </div>
+              {isPowerUser && (
+                <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-md">
+                  <Shield size={16} />
+                  Power User
+                </div>
+              )}
             </div>
 
             {filteredProjects.length === 0 ? (
@@ -225,6 +263,8 @@ export default function Dashboard() {
                 <p className="text-gray-600 font-medium">
                   {viewFilter === "mine"
                     ? "You haven't created any games yet. Click 'Create New!' to get started!"
+                    : viewFilter === "selected"
+                    ? "No selected games yet. Power users can select games to feature here!"
                     : "No games found."}
                 </p>
               </div>
@@ -236,7 +276,9 @@ export default function Dashboard() {
                     project={project}
                     onDelete={handleDelete}
                     onLike={handleLike}
+                    onToggleSelected={isPowerUser ? handleToggleSelected : undefined}
                     index={index}
+                    isPowerUser={isPowerUser}
                   />
                 ))}
               </div>

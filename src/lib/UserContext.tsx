@@ -26,6 +26,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [gameCount, setGameCount] = useState(0);
 
   const fetchUserData = async (id: string) => {
+    // All user data is fetched from the API (including power user handling)
     try {
       const response = await fetch(`/api/users/${id}`);
       if (response.ok) {

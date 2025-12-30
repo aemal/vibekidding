@@ -49,6 +49,8 @@ export async function GET(request: Request) {
             gameCount: game.creator._count.projects,
           },
         }))
+        // Filter out games with zero likes and zero plays
+        .filter((game) => game.likeCount > 0 || game.playCount > 0)
         .sort((a, b) => {
           if (b.likeCount !== a.likeCount) return b.likeCount - a.likeCount;
           if (b.playCount !== a.playCount) return b.playCount - a.playCount;
@@ -99,6 +101,10 @@ export async function GET(request: Request) {
             totalPlays,
           };
         })
+        // Filter out builders with zero values across all metrics
+        .filter((builder) => 
+          builder.gameCount > 0 || builder.totalLikes > 0 || builder.totalPlays > 0
+        )
         // Sort by: total likes (primary), games count (secondary), total plays (tertiary)
         .sort((a, b) => {
           if (b.totalLikes !== a.totalLikes) return b.totalLikes - a.totalLikes;

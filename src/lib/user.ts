@@ -38,15 +38,16 @@ export function setUserId(id: string): void {
 
 // Get or create user - returns the user ID
 export async function getOrCreateUser(): Promise<string> {
-  let userId = getUserId();
+  const userId = getUserId();
   
   if (userId) {
-    // Verify the user still exists in the database
+    // Verify the user exists in the database (or is a special user handled by API)
     try {
       const response = await fetch(`/api/users/${userId}`);
       if (response.ok) {
         return userId;
       }
+      // If 404, user doesn't exist - will create a new one below
     } catch (e) {
       console.error("Failed to verify user:", e);
     }
