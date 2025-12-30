@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { History, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Version } from "@/types";
 import { useUser } from "@/lib/UserContext";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface VersionHistoryProps {
   projectId: string;
@@ -19,6 +20,7 @@ export default function VersionHistory({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [confirmRestoreId, setConfirmRestoreId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -41,11 +43,8 @@ export default function VersionHistory({
     }
   };
 
-  const handleRestore = async (versionId: string) => {
-    if (!confirm("Are you sure you want to restore this version? Your current work will be saved as a new version.")) {
-      return;
-    }
-
+  const handleRestoreConfirm = async (versionId: string) => {
+    setConfirmRestoreId(null);
     setRestoringId(versionId);
     try {
       const response = await fetch(
@@ -140,7 +139,7 @@ export default function VersionHistory({
                     </p>
                   </div>
                   <button
-                    onClick={() => handleRestore(version.id)}
+                    onClick={() => setConfirmRestoreId(version.id)}
                     disabled={restoringId === version.id}
                     className={`ml-3 flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all
                       ${
@@ -164,6 +163,23 @@ export default function VersionHistory({
           )}
         </div>
       )}
+
+      {/* Restore Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmRestoreId !== null}
+        title="Restore this version?"
+        message="Your current work will be saved as a new version before restoring. You can always go back to it later."
+        confirmText="Restore"
+        cancelText="Cancel"
+        confirmVariant="success"
+        icon={<RotateCcw size={32} />}
+        onConfirm={() => {
+          if (confirmRestoreId) {
+            handleRestoreConfirm(confirmRestoreId);
+          }
+        }}
+        onCancel={() => setConfirmRestoreId(null)}
+      />
     </div>
   );
 }

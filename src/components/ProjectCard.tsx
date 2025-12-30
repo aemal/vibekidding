@@ -4,6 +4,7 @@ import { ProjectSummary } from "@/types";
 import { Trash2, ExternalLink, Heart, Play, User, Gamepad2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface ProjectCardProps {
   project: ProjectSummary;
@@ -33,6 +34,7 @@ export default function ProjectCard({
   const [isLiking, setIsLiking] = useState(false);
   const [liked, setLiked] = useState(project.isLikedByUser);
   const [likeCount, setLikeCount] = useState(project.likeCount);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -170,9 +172,7 @@ export default function ProjectCard({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  if (confirm("Are you sure you want to delete this creation?")) {
-                    onDelete(project.id);
-                  }
+                  setShowDeleteConfirm(true);
                 }}
                 className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
                 title="Delete"
@@ -183,6 +183,24 @@ export default function ProjectCard({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete this creation?"
+        message="Are you sure you want to delete this creation? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Keep it"
+        confirmVariant="danger"
+        icon={<Trash2 size={32} />}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          if (onDelete) {
+            onDelete(project.id);
+          }
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }
