@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { isPowerUser } from "@/lib/constants";
 import { NextResponse } from "next/server";
 
 // GET single project
@@ -61,6 +62,7 @@ export async function GET(
         ? project.likes.length > 0
         : false,
       isOwner: currentUserId === project.creatorId,
+      isPowerUser: isPowerUser(currentUserId),
     };
 
     return NextResponse.json(response);
@@ -82,7 +84,7 @@ export async function PUT(
     const { id } = await params;
     const { name, emoji, htmlContent, prompt, userId } = await request.json();
 
-    // Check ownership
+    // Check ownership or power user
     const existingProject = await prisma.project.findUnique({
       where: { id },
       select: { creatorId: true, htmlContent: true, prompt: true },
@@ -92,15 +94,29 @@ export async function PUT(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    if (existingProject.creatorId !== userId) {
+    const userIsPowerUser = isPowerUser(userId);
+    const isOwner = existingProject.creatorId === userId;
+
+    // Power users can only edit name and emoji, not content
+    if (!isOwner && !userIsPowerUser) {
       return NextResponse.json(
         { error: "You don't have permission to edit this project" },
         { status: 403 }
       );
     }
 
+    // If not owner (power user), only allow name and emoji changes
+    if (!isOwner && userIsPowerUser) {
+      if (htmlContent !== undefined || prompt !== undefined) {
+        return NextResponse.json(
+          { error: "Power users can only edit game name and emoji" },
+          { status: 403 }
+        );
+      }
+    }
+
     // If htmlContent is being updated, save the current state as a version first
-    if (htmlContent !== undefined) {
+    if (htmlContent !== undefined && isOwner) {
       // Only save version if there's existing content (not for initial creation)
       if (existingProject.htmlContent) {
         await prisma.version.create({
@@ -118,8 +134,8 @@ export async function PUT(
       data: {
         ...(name && { name }),
         ...(emoji && { emoji }),
-        ...(htmlContent !== undefined && { htmlContent }),
-        ...(prompt !== undefined && { prompt }),
+        ...(htmlContent !== undefined && isOwner && { htmlContent }),
+        ...(prompt !== undefined && isOwner && { prompt }),
       },
       include: {
         creator: {
@@ -145,7 +161,7 @@ export async function PUT(
         gameCount: project.creator._count.projects,
       },
       likeCount: project._count.likes,
-      isOwner: true,
+      isOwner,
     });
   } catch (error) {
     console.error("Failed to update project:", error);
@@ -155,8 +171,6 @@ export async function PUT(
     );
   }
 }
-
-import { isPowerUser } from "@/lib/constants";
 
 // DELETE project
 export async function DELETE(

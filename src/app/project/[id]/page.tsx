@@ -49,8 +49,10 @@ export default function ProjectEditor() {
   const [isLiking, setIsLiking] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>("voice");
   const [isSavingCode, setIsSavingCode] = useState(false);
+  const [isPowerUser, setIsPowerUser] = useState(false);
 
   const isOwner = project?.isOwner ?? false;
+  const canEditMeta = isOwner || isPowerUser; // Can edit name and emoji
 
   const fetchProject = useCallback(async () => {
     if (!userId) return;
@@ -62,6 +64,7 @@ export default function ProjectEditor() {
         setEditedName(data.name);
         setLiked(data.isLikedByUser || false);
         setLikeCount(data.likeCount || 0);
+        setIsPowerUser(data.isPowerUser || false);
       } else if (response.status === 404) {
         router.push("/");
       }
@@ -179,7 +182,7 @@ export default function ProjectEditor() {
   );
 
   const saveName = async () => {
-    if (!isOwner || !editedName.trim() || editedName === project?.name) {
+    if (!canEditMeta || !editedName.trim() || editedName === project?.name) {
       setIsEditingName(false);
       return;
     }
@@ -205,7 +208,7 @@ export default function ProjectEditor() {
   };
 
   const saveEmoji = async (emoji: string) => {
-    if (!isOwner) return;
+    if (!canEditMeta) return;
     try {
       const response = await fetch(`/api/projects/${projectId}`, {
         method: "PUT",
@@ -294,8 +297,8 @@ export default function ProjectEditor() {
               <ArrowLeft size={20} className="text-gray-600 md:w-6 md:h-6" />
             </Link>
 
-            {/* Emoji picker - only editable for owner */}
-            {isOwner ? (
+            {/* Emoji picker - editable for owner or power user */}
+            {canEditMeta ? (
               <EmojiPicker
                 selectedEmoji={project.emoji}
                 onSelect={saveEmoji}
@@ -305,7 +308,7 @@ export default function ProjectEditor() {
             )}
 
             {/* Project name */}
-            {isEditingName && isOwner ? (
+            {isEditingName && canEditMeta ? (
               <div className="flex items-center gap-2 min-w-0">
                 <input
                   type="text"
@@ -340,7 +343,7 @@ export default function ProjectEditor() {
               </div>
             ) : (
               <div className="flex items-center gap-2 min-w-0">
-                {isOwner ? (
+                {canEditMeta ? (
                   <button
                     onClick={() => setIsEditingName(true)}
                     className="flex items-center gap-2 group min-w-0"
@@ -447,12 +450,21 @@ export default function ProjectEditor() {
         </div>
       </div>
 
-      {/* Read-only banner */}
-      {!isOwner && (
+      {/* Read-only banner - show only if not owner and not power user */}
+      {!isOwner && !isPowerUser && (
         <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border-b border-orange-200 py-2 px-4">
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-orange-700 text-sm font-medium">
             <Lock size={14} />
             <span>This is someone else&apos;s creation. You can view and play, but not edit.</span>
+          </div>
+        </div>
+      )}
+      {/* Power user banner */}
+      {!isOwner && isPowerUser && (
+        <div className="bg-gradient-to-r from-amber-100 to-orange-100 border-b border-amber-200 py-2 px-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-amber-700 text-sm font-medium">
+            <Pencil size={14} />
+            <span>Power user mode: You can edit the name and emoji of this game.</span>
           </div>
         </div>
       )}
