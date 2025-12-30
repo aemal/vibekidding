@@ -167,13 +167,16 @@ export default function Dashboard() {
                 </div>
               </Link>
             )}
-            <button
-              onClick={createNewProject}
-              className="btn-primary flex items-center gap-2 text-base md:text-xl px-6 md:px-8 py-3 md:py-4"
-            >
-              <Plus size={24} />
-              Create New!
-            </button>
+            {/* Hide create button for power users - they manage games, not create them */}
+            {!isPowerUser && (
+              <button
+                onClick={createNewProject}
+                className="btn-primary flex items-center gap-2 text-base md:text-xl px-6 md:px-8 py-3 md:py-4"
+              >
+                <Plus size={24} />
+                Create New!
+              </button>
+            )}
           </div>
         </div>
 
