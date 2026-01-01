@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { isPowerUser } from "@/lib/constants";
 import { NextResponse } from "next/server";
 
 // POST - Like a project
@@ -14,6 +15,14 @@ export async function POST(
       return NextResponse.json(
         { error: "User ID is required" },
         { status: 400 }
+      );
+    }
+
+    // Power user can't like (they don't exist in DB)
+    if (isPowerUser(userId)) {
+      return NextResponse.json(
+        { error: "Power users cannot like games" },
+        { status: 403 }
       );
     }
 
@@ -80,6 +89,14 @@ export async function DELETE(
       return NextResponse.json(
         { error: "User ID is required" },
         { status: 400 }
+      );
+    }
+
+    // Power user can't unlike (they can't like in the first place)
+    if (isPowerUser(userId)) {
+      return NextResponse.json(
+        { error: "Power users cannot unlike games" },
+        { status: 403 }
       );
     }
 

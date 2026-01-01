@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { isPowerUser } from "@/lib/constants";
 import { NextResponse } from "next/server";
 
 // 5 minutes in milliseconds
@@ -28,6 +29,15 @@ export async function POST(
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // Power user doesn't exist in DB, so skip recording their plays
+    if (isPowerUser(userId)) {
+      return NextResponse.json({
+        counted: false,
+        playCount: project.playCount,
+        message: "Power user plays are not recorded",
+      });
     }
 
     // Check for recent play from this user (anti-cheat)
