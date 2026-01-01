@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { Mic, MicOff, Loader2, X } from "lucide-react";
+import { Mic, MicOff, Loader2, X, Globe } from "lucide-react";
+import LanguagesModal from "./LanguagesModal";
 
 interface MicrophoneProps {
   onTranscript: (transcript: string) => void;
@@ -16,6 +17,7 @@ export default function Microphone({
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState("");
+  const [showLanguagesModal, setShowLanguagesModal] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -231,6 +233,25 @@ export default function Microphone({
           </p>
         </div>
       )}
+
+      {/* Language hint - Subtle but discoverable */}
+      <button
+        onClick={() => setShowLanguagesModal(true)}
+        className="flex items-center gap-1.5 mt-3 px-3 py-1.5 
+          text-gray-500 hover:text-purple-600 
+          text-sm rounded-full hover:bg-purple-50
+          transition-all duration-200"
+      >
+        <Globe size={14} />
+        <span>Speak in any language</span>
+        <span className="text-xs text-gray-400">(99+)</span>
+      </button>
+
+      {/* Languages Modal */}
+      <LanguagesModal
+        isOpen={showLanguagesModal}
+        onClose={() => setShowLanguagesModal(false)}
+      />
     </div>
   );
 }

@@ -18,10 +18,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Convert File to a format OpenAI accepts
+    // Note: Not specifying language enables auto-detection for 99+ languages
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: "whisper-1",
-      language: "en",
+      // language auto-detected - supports 99+ languages including:
+      // Arabic, Chinese, Spanish, French, German, Hindi, Japanese, Korean, and many more
     });
 
     return NextResponse.json({ text: transcription.text });

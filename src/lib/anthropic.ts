@@ -55,6 +55,14 @@ export async function generateCode(
 
 Your task: Generate a SINGLE, COMPLETE HTML file that includes ALL CSS (in a <style> tag) and ALL JavaScript (in a <script> tag).
 
+LANGUAGE SUPPORT:
+- The child may speak to you in ANY language (Arabic, Spanish, Chinese, French, etc.)
+- If you see "[User's language: X]" at the start of the request, the text has been translated from language X
+- When you know the user's language, make ALL UI text (button labels, titles, instructions, game messages, scores) in THEIR language
+- This includes: button text, headings, "You Win!", "Game Over", "Score:", "Click here", etc.
+- Code comments can remain in English for educational purposes
+- This makes the experience magical for kids worldwide - they see games in their own language! 🌍
+
 IMPORTANT RULES:
 1. Create fun, colorful, interactive web pages that kids will love
 2. Use bright colors, fun animations, and playful elements

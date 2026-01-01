@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, KeyboardEvent } from "react";
-import { Send, Loader2, Sparkles, X } from "lucide-react";
+import { Send, Loader2, Sparkles, X, Globe } from "lucide-react";
+import LanguagesModal from "./LanguagesModal";
 
 interface PromptInputProps {
   onSubmit: (prompt: string) => void;
@@ -13,6 +14,7 @@ export default function PromptInput({
   isGenerating,
 }: PromptInputProps) {
   const [prompt, setPrompt] = useState("");
+  const [showLanguagesModal, setShowLanguagesModal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = () => {
@@ -109,6 +111,25 @@ export default function PromptInput({
           </p>
         </div>
       )}
+
+      {/* Language hint - Subtle but discoverable */}
+      <button
+        onClick={() => setShowLanguagesModal(true)}
+        className="flex items-center gap-1.5 mx-auto px-3 py-1.5 
+          text-gray-500 hover:text-purple-600 
+          text-sm rounded-full hover:bg-purple-50
+          transition-all duration-200"
+      >
+        <Globe size={14} />
+        <span>Type in any language</span>
+        <span className="text-xs text-gray-400">(99+)</span>
+      </button>
+
+      {/* Languages Modal */}
+      <LanguagesModal
+        isOpen={showLanguagesModal}
+        onClose={() => setShowLanguagesModal(false)}
+      />
     </div>
   );
 }
