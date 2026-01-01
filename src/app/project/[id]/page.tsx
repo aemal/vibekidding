@@ -50,6 +50,7 @@ export default function ProjectEditor() {
   const [inputMode, setInputMode] = useState<InputMode>("voice");
   const [isSavingCode, setIsSavingCode] = useState(false);
   const [isPowerUser, setIsPowerUser] = useState(false);
+  const [currentTranscript, setCurrentTranscript] = useState<string | null>(null);
 
   const isOwner = project?.isOwner ?? false;
   const canEditMeta = isOwner || isPowerUser; // Can edit name and emoji
@@ -95,6 +96,7 @@ export default function ProjectEditor() {
   const handleTranscript = useCallback(
     async (transcript: string) => {
       if (!isOwner) return;
+      setCurrentTranscript(transcript);
       setIsGenerating(true);
       setError(null);
 
@@ -146,6 +148,7 @@ export default function ProjectEditor() {
         );
       } finally {
         setIsGenerating(false);
+        setCurrentTranscript(null);
       }
     },
     [projectId, project?.htmlContent, isOwner, userId]
@@ -510,7 +513,16 @@ export default function ProjectEditor() {
                 </div>
               )}
 
-              {project.prompt && (
+              {/* Show current transcript while generating */}
+              {currentTranscript && isGenerating && (
+                <div className="mt-4 md:mt-6 p-3 md:p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-300 animate-pulse">
+                  <p className="text-sm text-purple-600 mb-1 font-medium">✨ Creating from your request:</p>
+                  <p className="text-purple-800 font-bold text-sm md:text-base">&ldquo;{currentTranscript}&rdquo;</p>
+                </div>
+              )}
+
+              {/* Show last request when not generating */}
+              {project.prompt && !isGenerating && (
                 <div className="mt-4 md:mt-6 p-3 md:p-4 bg-purple-50 rounded-xl">
                   <p className="text-sm text-gray-500 mb-1">Last request:</p>
                   <p className="text-purple-700 font-medium text-sm md:text-base">{project.prompt}</p>

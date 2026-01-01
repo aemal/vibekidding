@@ -16,7 +16,7 @@ export default function InputModeToggle({
   disabled = false,
 }: InputModeToggleProps) {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex justify-center">
       <div className="mode-toggle-container">
         <button
           onClick={() => onModeChange("voice")}
@@ -40,9 +40,6 @@ export default function InputModeToggle({
           className={`mode-toggle-slider ${mode === "typing" ? "right" : ""}`}
         />
       </div>
-      <p className="text-xs text-gray-500 font-medium">
-        {mode === "voice" ? "🎤 Talk to create!" : "⌨️ Type your ideas!"}
-      </p>
     </div>
   );
 }

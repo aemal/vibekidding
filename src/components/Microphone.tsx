@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Mic, MicOff, Loader2, X } from "lucide-react";
 
 interface MicrophoneProps {
@@ -8,136 +8,125 @@ interface MicrophoneProps {
   isGenerating: boolean;
 }
 
-// Type definitions for Web Speech API
-interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList;
-  resultIndex: number;
-}
-
-interface SpeechRecognitionErrorEvent {
-  error: string;
-  message: string;
-}
-
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  onstart: (() => void) | null;
-  onend: (() => void) | null;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition: new () => SpeechRecognition;
-    webkitSpeechRecognition: new () => SpeechRecognition;
-  }
-}
-
 export default function Microphone({
   onTranscript,
   isGenerating,
 }: MicrophoneProps) {
   const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(true);
-  const [transcript, setTranscript] = useState("");
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const [liveTranscript, setLiveTranscript] = useState("");
 
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
-    ) {
-      setIsSupported(false);
-    }
-  }, []);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const startListening = useCallback(() => {
-    if (!isSupported || isGenerating) return;
+  const startListening = useCallback(async () => {
+    if (isGenerating) return;
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
-
-    recognition.onstart = () => {
-      setIsListening(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
       setPermissionDenied(false);
-      setTranscript("");
-    };
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let finalTranscript = "";
-      let interimTranscript = "";
+      // Create MediaRecorder with webm format (widely supported)
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "audio/webm;codecs=opus",
+      });
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          finalTranscript += result[0].transcript;
-        } else {
-          interimTranscript += result[0].transcript;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
         }
-      }
+      };
 
-      setTranscript(finalTranscript || interimTranscript);
-    };
+      mediaRecorder.onstart = () => {
+        setIsListening(true);
+        setLiveTranscript("");
+      };
 
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error("Speech recognition error:", event.error);
-      if (event.error === "not-allowed") {
+      mediaRecorder.onstop = async () => {
+        setIsListening(false);
+        setIsTranscribing(true);
+
+        // Stop all tracks
+        stream.getTracks().forEach((track) => track.stop());
+
+        // Create audio blob
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/webm",
+        });
+
+        // Only transcribe if we have audio data
+        if (audioBlob.size > 0) {
+          try {
+            const formData = new FormData();
+            formData.append("audio", audioBlob, "recording.webm");
+
+            const response = await fetch("/api/transcribe", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              throw new Error("Transcription failed");
+            }
+
+            const data = await response.json();
+            const transcript = data.text?.trim();
+
+            if (transcript) {
+              setLiveTranscript(transcript);
+              onTranscript(transcript);
+            } else {
+              setLiveTranscript("(no speech detected)");
+            }
+          } catch (error) {
+            console.error("Transcription error:", error);
+            setLiveTranscript("(transcription failed)");
+          }
+        }
+
+        setIsTranscribing(false);
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+    } catch (error) {
+      console.error("Microphone access error:", error);
+      if (
+        error instanceof DOMException &&
+        (error.name === "NotAllowedError" ||
+          error.name === "PermissionDeniedError")
+      ) {
         setPermissionDenied(true);
       }
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
-  }, [isSupported, isGenerating]);
+    }
+  }, [isGenerating, onTranscript]);
 
   const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-
-      if (transcript.trim()) {
-        onTranscript(transcript.trim());
-      }
+    if (mediaRecorderRef.current && isListening) {
+      mediaRecorderRef.current.stop();
     }
-  }, [transcript, onTranscript]);
+  }, [isListening]);
 
   const cancelListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.abort();
-      setIsListening(false);
-      setTranscript("");
+    if (mediaRecorderRef.current && isListening) {
+      // Clear chunks before stopping to prevent transcription
+      audioChunksRef.current = [];
+      mediaRecorderRef.current.stop();
     }
-  }, []);
 
-  if (!isSupported) {
-    return (
-      <div className="text-center p-6 bg-yellow-50 rounded-2xl border-2 border-yellow-200">
-        <p className="text-yellow-700 font-semibold">
-          😢 Your browser doesn&apos;t support voice input!
-        </p>
-        <p className="text-yellow-600 text-sm mt-2">
-          Try using Chrome or Edge for the best experience!
-        </p>
-      </div>
-    );
-  }
+    // Stop the stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+
+    setIsListening(false);
+    setLiveTranscript("");
+  }, [isListening]);
 
   if (permissionDenied) {
     return (
@@ -179,12 +168,12 @@ export default function Microphone({
         {/* Main microphone button */}
         <button
           onClick={isListening ? stopListening : startListening}
-          disabled={isGenerating}
+          disabled={isGenerating || isTranscribing}
           className={`
             relative w-24 h-24 rounded-full flex items-center justify-center
             transition-all duration-300 
             ${
-              isGenerating
+              isGenerating || isTranscribing
                 ? "bg-gray-300 cursor-not-allowed"
                 : isListening
                 ? "bg-gradient-to-br from-red-500 to-pink-600 mic-recording"
@@ -193,7 +182,7 @@ export default function Microphone({
             shadow-lg hover:shadow-xl
           `}
         >
-          {isGenerating ? (
+          {isGenerating || isTranscribing ? (
             <Loader2 className="w-10 h-10 text-white animate-spin" />
           ) : isListening ? (
             <MicOff className="w-10 h-10 text-white" />
@@ -208,6 +197,10 @@ export default function Microphone({
         {isGenerating ? (
           <p className="text-purple-600 font-bold text-lg animate-pulse">
             ✨ Creating your magic...
+          </p>
+        ) : isTranscribing ? (
+          <p className="text-blue-600 font-bold text-lg animate-pulse">
+            🎧 Processing your voice...
           </p>
         ) : isListening ? (
           <div>
@@ -226,15 +219,18 @@ export default function Microphone({
       </div>
 
       {/* Live transcript */}
-      {(isListening || transcript) && !isGenerating && (
+      {(isListening || liveTranscript || isTranscribing) && !isGenerating && (
         <div className="w-full max-w-md p-4 bg-white/80 rounded-2xl shadow-inner">
           <p className="text-sm text-gray-500 mb-1">What I heard:</p>
           <p className="text-gray-800 font-medium min-h-[3rem]">
-            {transcript || "..."}
+            {isTranscribing
+              ? "Processing..."
+              : isListening
+              ? "Recording..."
+              : liveTranscript || "..."}
           </p>
         </div>
       )}
     </div>
   );
 }
-
