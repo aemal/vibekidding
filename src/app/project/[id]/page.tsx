@@ -25,8 +25,11 @@ import VersionHistory from "@/components/VersionHistory";
 import EmojiPicker from "@/components/EmojiPicker";
 import InputModeToggle, { InputMode } from "@/components/InputModeToggle";
 import PromptInput from "@/components/PromptInput";
+import PromptModal from "@/components/PromptModal";
 import { Project } from "@/types";
 import { useUser } from "@/lib/UserContext";
+
+const PROMPT_TRUNCATE_LENGTH = 150;
 
 type ViewMode = "preview" | "code";
 
@@ -51,6 +54,8 @@ export default function ProjectEditor() {
   const [isSavingCode, setIsSavingCode] = useState(false);
   const [isPowerUser, setIsPowerUser] = useState(false);
   const [currentTranscript, setCurrentTranscript] = useState<string | null>(null);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [promptToShowInModal, setPromptToShowInModal] = useState<string>("");
 
   const isOwner = project?.isOwner ?? false;
   const canEditMeta = isOwner || isPowerUser; // Can edit name and emoji
@@ -517,7 +522,22 @@ export default function ProjectEditor() {
               {currentTranscript && isGenerating && (
                 <div className="mt-4 md:mt-6 p-3 md:p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-300 animate-pulse">
                   <p className="text-sm text-purple-600 mb-1 font-medium">✨ Creating from your request:</p>
-                  <p className="text-purple-800 font-bold text-sm md:text-base">&ldquo;{currentTranscript}&rdquo;</p>
+                  <p className="text-purple-800 font-bold text-sm md:text-base">
+                    &ldquo;{currentTranscript.length > PROMPT_TRUNCATE_LENGTH
+                      ? `${currentTranscript.slice(0, PROMPT_TRUNCATE_LENGTH)}...`
+                      : currentTranscript}&rdquo;
+                  </p>
+                  {currentTranscript.length > PROMPT_TRUNCATE_LENGTH && (
+                    <button
+                      onClick={() => {
+                        setPromptToShowInModal(currentTranscript);
+                        setShowPromptModal(true);
+                      }}
+                      className="mt-2 text-sm font-semibold text-purple-700 hover:text-purple-900 underline underline-offset-2 transition-colors"
+                    >
+                      View full request
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -525,7 +545,22 @@ export default function ProjectEditor() {
               {project.prompt && !isGenerating && (
                 <div className="mt-4 md:mt-6 p-3 md:p-4 bg-purple-50 rounded-xl">
                   <p className="text-sm text-gray-500 mb-1">Last request:</p>
-                  <p className="text-purple-700 font-medium text-sm md:text-base">{project.prompt}</p>
+                  <p className="text-purple-700 font-medium text-sm md:text-base">
+                    {project.prompt.length > PROMPT_TRUNCATE_LENGTH
+                      ? `${project.prompt.slice(0, PROMPT_TRUNCATE_LENGTH)}...`
+                      : project.prompt}
+                  </p>
+                  {project.prompt.length > PROMPT_TRUNCATE_LENGTH && (
+                    <button
+                      onClick={() => {
+                        setPromptToShowInModal(project.prompt);
+                        setShowPromptModal(true);
+                      }}
+                      className="mt-2 text-sm font-semibold text-purple-600 hover:text-purple-800 underline underline-offset-2 transition-colors"
+                    >
+                      View full request
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -579,6 +614,13 @@ export default function ProjectEditor() {
           </div>
         </div>
       </div>
+
+      {/* Full Prompt Modal */}
+      <PromptModal
+        isOpen={showPromptModal}
+        prompt={promptToShowInModal}
+        onClose={() => setShowPromptModal(false)}
+      />
     </div>
   );
 }
