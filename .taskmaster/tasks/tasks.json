@@ -941,14 +941,14 @@
         "description": "Make a practical child-created tool retain its own small data across reopening, using a demo-only parent storage adapter and a remembering notes starter. No account or cloud database required.",
         "details": "Fixed bounded per-project browser namespace, opaque sandbox maintained, typed read/write SDK, no access to arbitrary parent storage. New copies/duplicates isolated. Explicit saving feedback and unavailable-storage fallback. Shared/exported snapshots do not include personal app data and remain usable in memory without the SDK. Keep production authenticated runtime and frozen template renderer unchanged.",
         "testStrategy": "Unit namespace/size/error tests; real browser save notes,reload,reopen; duplicate and sharedcopy isolation; quota failure truthful; existing iframe restrictions unchanged; exported/shared standalone memory fallback. Local browser evidence only, not cloud/per-user DB acceptance.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "19",
           "26"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T02:42:53.164Z",
+        "updatedAt": "2026-10-23T03:21:49.273Z",
         "metadata": {
           "verification": {
             "unitTests": 269,
@@ -956,6 +956,13 @@
             "checks": "production build, lint and types passed",
             "liveAI": "Robot notebook generated, form submit failed, AI revised to button handler, actual Save then page reload/reopen restored fictional note",
             "boundary": "browser-local only; no cloud or production database acceptance; release pending"
+          },
+          "release": {
+            "pr": "https://github.com/aemal/vibekidding/pull/10",
+            "merged": true,
+            "ci": "Both correctness runs passed at 6f17bcd",
+            "publicBrowser": "2026-10-23: hosted Remembering notes saved fictional note, full page reload/reopen restored exact note",
+            "boundary": "browser-local not cloud DB; existing dependency audit fails"
           }
         }
       },
@@ -981,17 +988,53 @@
             "boundary": "local browser evidence; no cloud sync; release pending"
           }
         }
+      },
+      {
+        "id": 30,
+        "title": "Match revision guidance to available demo capabilities",
+        "description": "Prevent template-only users following unsupported revision examples or trying to revise custom notes apps that need AI.",
+        "details": "Classify selected build capability using existing template validation, not claimed mode label alone. Supported templates show real supported suggestions; custom/notes explain play and save remain available but changes need AI. Actual AI configuration remains able to revise custom builds. No renderer/version format change or production gate changes.",
+        "testStrategy": "Browser first-use notes path, canonical template supported suggestion modifies build, custom shared build guidance, AI-configured readiness permits custom revisions, no extra provider calls in fixtures.",
+        "status": "in-progress",
+        "dependencies": [
+          "28"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T03:17:29.343Z",
+        "metadata": {
+          "verification": {
+            "unitTests": 280,
+            "browserChecks": 38,
+            "checks": "lint and production build passed",
+            "boundary": "AI readiness mocked without provider submit; release pending"
+          }
+        }
+      },
+      {
+        "id": 31,
+        "title": "Guide recovery when a generated preview reports a runtime error",
+        "description": "Show a child-readable preview problem and an explicit repair or previous-version path without automatically making paid calls.",
+        "details": "Bounded exact frame/session generic runtime error categories only; do not collect DOM, form values, storage or raw diagnostic text. Reset between versions, ignore stale/spoofed messages. Explicit repair prepares a generic prompt for user review, never auto-generates. Existing history restore remains available. Error-free does not imply app correctness.",
+        "testStrategy": "Synthetic runtime throw and rejection, staleframe/spoof/flood tests, no false claim for healthy frame, explicit repair preserves history and makes no call until submit, previous version restore.",
+        "status": "in-progress",
+        "dependencies": [
+          "30"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T03:19:18.124Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T03:06:23.298Z",
-      "taskCount": 29,
-      "completedCount": 19,
+      "lastModified": "2026-10-23T03:21:49.273Z",
+      "taskCount": 31,
+      "completedCount": 20,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T03:13:51.018Z",
+      "created": "2026-10-23T03:23:15.711Z",
       "description": "Tasks for master context"
     }
   }

@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chromium, expect as baseExpect, type Page } from '@playwright/test';
+import { templateProject } from '../src/lib/demo-server/template';
 const expect=baseExpect.configure({timeout:15000});
 const base=new URL(process.env.DEMO_BASE_URL||'http://127.0.0.1:3217');
 assert.ok(['localhost','127.0.0.1','[::1]'].includes(base.hostname));
 const key='vibekidding-demo-projects-v1';
 const output=path.resolve(`tests/demo-browser-artifacts/cancel-${new Date().toISOString().replace(/[:.]/g,'-')}`);
 const steps:{name:string;status:string;error?:string}[]=[];const violations:string[]=[];const errors:string[]=[];
-const fixture=(label:string)=>({title:label,html:`<!doctype html><html><body><h1>${label}</h1></body></html>`,mode:'template',message:'Synthetic cancellation acceptance fixture'});
+const fixture=(label:string)=>({title:label,html:templateProject(label==='Current result'?'garden tic-tac-toe':label==='Current revision result'?'blue ocean tic-tac-toe':'pink space tic-tac-toe').html,mode:'template',message:'Synthetic cancellation acceptance fixture'});
 type Pending={aborted:boolean;resolve:(value:unknown)=>void;reject:(error:Error)=>void;bodyResolve?:(value:unknown)=>void};
 type Harness={requests:Pending[]};
 async function count(page:Page,n:number){await expect.poll(()=>page.evaluate(()=>(window as unknown as {__cancel:Harness}).__cancel.requests.length)).toBe(n);}
