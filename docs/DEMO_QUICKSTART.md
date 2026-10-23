@@ -10,6 +10,8 @@ Open the workshop at `/demo` and stay with your child while trying projects. Sta
 | [Local template workshop](http://127.0.0.1:3217/demo) | Template features without AI credentials | Arbitrary AI revisions; it needs a running local server |
 | [Local AI workshop](http://127.0.0.1:3219/demo) | Generate and revise code through the configured provider; optional app AI and Samantha require their separate settings | Guaranteed working generated code, cloud storage, production approval or billing acceptance |
 
+In local development demo mode, opening `/` also goes straight into the workshop with a **Local studio - no sign-in needed** label. It uses the same browser shelf as `/demo`. This does not unlock account administration, cloud sync or publishing. Use **Open account studio** (`/account-studio`) to reach the original sign-in and account workflow. Production and public-template mode keep the normal sign-in page at `/`.
+
 The local links work on this computer while their server is running. A phone opening `127.0.0.1` reaches the phone itself, not this computer. The public deployment can lag the latest local work; check the controls actually present on the page.
 
 ## Start locally if needed
