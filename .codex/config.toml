@@ -1,0 +1,8 @@
+[mcp_servers.taskmaster]
+command = "npx"
+args = ["-y", "task-master-ai@0.43.1"]
+startup_timeout_sec = 60
+tool_timeout_sec = 300
+
+[mcp_servers.taskmaster.env]
+TASK_MASTER_TOOLS = "all"

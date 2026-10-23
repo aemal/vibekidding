@@ -1,0 +1,655 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Track rollout and acceptance criteria",
+        "status": "done",
+        "description": "Create a local Task Master backlog with explicit local versus live acceptance.",
+        "details": "Create a local Task Master backlog with explicit local versus live acceptance.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": []
+      },
+      {
+        "id": "2",
+        "title": "Reliable notification retries",
+        "status": "done",
+        "description": "Lease queue jobs, freeze payloads, bound retries and expose an authenticated worker endpoint. Verify expiry, duplicate and access controls locally.",
+        "details": "Implemented migration 003, service-only leased queue, fixed payloads, bounded backoff, 23-hour cutoff, authenticated POST worker and admin job status. 26 local tests, targeted lint and production build pass. Deployment schedule and real-provider delivery remain task 7.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": []
+      },
+      {
+        "id": "3",
+        "title": "Live identity and parent approval",
+        "status": "blocked",
+        "description": "Configure Supabase and apply reviewed migrations. Verify Google, OTP, consent gates and separate accounts.",
+        "details": "Added npm run setup:check and admin setup checklist. No secret values are exposed and no provider calls made. Supabase config and administrator UUID still missing; live auth/OTP/approval not verified. Migration 010 invalidates studio approval, consent, supervision, parent unlocks and publication on Auth email change or confirmation revocation; preserves credits and suspension. 61 tests pass with all ten migrations in embedded PostgreSQL. Supabase Auth integration remains unverified; see docs/GUARDIAN_IDENTITY_CHANGES.md. Migration 011 makes approval/suspension atomic with audit, rejects outdated admin review revisions, and revokes supervision/unlocks/publication on suspension. 63 local tests pass; live admin/Auth concurrency remains outstanding. Parent UI/API and migration 012 now support explicit consent withdrawal after fresh OTP unlock, stopping access/publication and preserving projects/credits. 64 local tests pass across all twelve migrations; live OTP withdrawal flow remains unverified. Parent screen now clears displayed history/rule text on unlock expiry or 401/403 rejection; API returns unlock expiry. Local Chrome fixture confirms both paths using synthetic mocked responses. Real OTP/Auth acceptance remains outstanding. Bundled Chromium 156.0.8078.4 now passes the preview isolation fixture and parent history clearing against a separate local production server. Parent fixture supports the CI browser and aborts all other API requests. CI now includes bounded server startup/cleanup and parent expiry/rejection checks. Targeted lint, typecheck and workflow YAML validation pass. Mocked account responses only; hosted Linux, real OTP and deployment remain unverified. Migration 015 finalizes OTP unlock under the profile lock using pre-verification email/revision. Stale checks reject; 67 local tests and fourteen concurrency scenarios pass, plus lint/types/build. No live OTP acceptance. Migration 016 adds concurrency-safe parent-code send and OTP attempt limits before provider calls. Three sends and ten attempts per account per fifteen minutes; provider errors do not refund attempts. 76 local tests, fifteen PostgreSQL races, lint/types/build pass; live OTP remains unverified. Migration025 moves final parent-session validation for start/rules under profile/session locks. Revoked/expired tokens reject after lock wait; database-owned 30-minute duration and bounded rule arrays. 128 local tests, 23 independent PostgreSQL concurrency scenarios, full zero-warning lint and typecheck pass. No live migration or OTP acceptance. Production build also passed. Migration026 extends atomic parent checks to clear-history, consent withdrawal and deletion requests. Other-family history isolation and waiting-clear revocation verified. After correcting an invalid fixture role, 131 local tests, 24 independent PostgreSQL races, zero-warning lint, types and production build pass. No real deletion, live migration or OTP acceptance. Studio clears private project/model/prompt/account state on auth change and rejects stale reload, generation, review and credit responses. Actual component browser fixture passes in Chrome and bundled Chromium with synthetic auth/API and delayed generation after account switch. Zero-warning lint, types and production build pass. Added fixture to CI; no hosted CI or live Supabase acceptance. Existing 133-test SQL/unit count unchanged, not rerun for this UI-only change. Admin panel now clears sensitive family/model data on auth changes or failed requests and rejects stale privileged loads/catalog replies. Chrome admin fixture and bundled Chromium Studio/Admin fixtures pass with synthetic auth/API. Full zero-warning lint/types and production build pass. Parent account-change UI check remains separate work; no live role-change acceptance. Parent controls now invalidates pending operations and clears history/rules/code on account change, expiry and unmount. Late refresh cannot restore prior-family content. Chrome parent fixture and combined Chromium Studio/Admin/Parent fixtures pass with synthetic auth/API; full zero-warning lint/types and build pass. Live OTP/cross-tab provider behavior remains unverified. Status audit: Local guardian controls, atomic admin review and parent attempt limits are verified. Remaining acceptance needs configured Supabase Google/OTP, separate real accounts and human consent-eligibility review.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Guardian controls and consent revocation",
+            "description": "Implemented OTP-gated controls, consent withdrawal, identity invalidation and local expiry fixtures.",
+            "details": "Implemented OTP-gated controls, consent withdrawal, identity invalidation and local expiry fixtures. Migration025 moves final parent-session validation for start/rules under profile/session locks. Revoked/expired tokens reject after lock wait; database-owned 30-minute duration and bounded rule arrays. 128 local tests, 23 independent PostgreSQL concurrency scenarios, full zero-warning lint and typecheck pass. No live migration or OTP acceptance. Migration026 extends atomic parent checks to clear-history, consent withdrawal and deletion requests. Other-family history isolation and waiting-clear revocation verified. After correcting an invalid fixture role, 131 local tests, 24 independent PostgreSQL races, zero-warning lint, types and production build pass. No real deletion, live migration or OTP acceptance. Studio clears private project/model/prompt/account state on auth change and rejects stale reload, generation, review and credit responses. Actual component browser fixture passes in Chrome and bundled Chromium with synthetic auth/API and delayed generation after account switch. Zero-warning lint, types and production build pass. Added fixture to CI; no hosted CI or live Supabase acceptance. Existing 133-test SQL/unit count unchanged, not rerun for this UI-only change. Parent controls now invalidates pending operations and clears history/rules/code on account change, expiry and unmount. Late refresh cannot restore prior-family content. Chrome parent fixture and combined Chromium Studio/Admin/Parent fixtures pass with synthetic auth/API; full zero-warning lint/types and build pass. Live OTP/cross-tab provider behavior remains unverified.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Atomic administrator review",
+            "description": "Revision-aware approval/suspension with local SQL and concurrency checks.",
+            "details": "Revision-aware approval/suspension with local SQL and concurrency checks. Admin panel now clears sensitive family/model data on auth changes or failed requests and rejects stale privileged loads/catalog replies. Chrome admin fixture and bundled Chromium Studio/Admin fixtures pass with synthetic auth/API. Full zero-warning lint/types and production build pass. Parent account-change UI check remains separate work; no live role-change acceptance.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Verify Google and OTP with separate real accounts",
+            "description": "Requires configured Supabase and administrator identity.",
+            "details": "Requires configured Supabase and administrator identity.",
+            "status": "blocked",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Review consent eligibility and live guardian flow",
+            "description": "Requires human review and live service acceptance.",
+            "details": "Requires human review and live service acceptance.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Limit parent code sending and verification attempts",
+            "description": "Database-backed per-account limits before OTP provider calls.",
+            "details": "Three sends and ten verification attempts in independent fifteen-minute windows. SQL boundary/reset tests and actual concurrent attempts pass. No live OTP acceptance.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Synthetic PostgreSQL unit and independent-connection contention checks.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Safety provider acceptance",
+        "status": "blocked",
+        "description": "Configure TypeSafe. Evaluate multilingual attacks, false positives and provider failure paths with reviewed fixtures and live results.",
+        "details": "Added 23 synthetic cases across seven languages, shared 15-second/64-KiB provider adapter, zero-width normalization, strict outcome scoring and an explicit-call/budget-limited live CLI. Dry-run verified, no provider calls. 41 tests, targeted lint, typecheck and production build pass. Live TypeSafe configuration, human label review and real classifier acceptance remain required. Read docs/GUARD_EVALUATION.md. Safety provider adapter now has a whole-attempt deadline, strict UTF-8 bounded body reader and nonblocking cancellation. Stalled/ignored-abort/oversized/malformed/late-success fixtures remain unavailable with no retry. 137 local tests, full zero-warning lint, typecheck and production build pass. No live TypeSafe call or accuracy/billing acceptance; uncertain usage remains reserved. Status audit: Local fail-closed classifier adapter and synthetic evaluations are verified. Remaining acceptance needs human multilingual-label review and configured live safety provider.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Fail-closed classifier adapter and synthetic evaluations",
+            "description": "23 fixture cases, bounded provider adapter and local tests.",
+            "details": "23 fixture cases, bounded provider adapter and local tests. Safety provider adapter now has a whole-attempt deadline, strict UTF-8 bounded body reader and nonblocking cancellation. Stalled/ignored-abort/oversized/malformed/late-success fixtures remain unavailable with no retry. 137 local tests, full zero-warning lint, typecheck and production build pass. No live TypeSafe call or accuracy/billing acceptance; uncertain usage remains reserved.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Human review of multilingual safety labels",
+            "description": "Synthetic fixtures are not classifier acceptance.",
+            "details": "Synthetic fixtures are not classifier acceptance.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Live classifier and failure-path evaluation",
+            "description": "Requires TypeSafe configuration and reviewed cost cap.",
+            "details": "Requires TypeSafe configuration and reviewed cost cap.",
+            "status": "blocked",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "Live voice relay and accounting",
+        "status": "in-progress",
+        "description": "Server-owned duration-limited relay, private agent, authenticated usage reconciliation and replay tests. Keep voice disabled until verified.",
+        "details": "Started server relay protocol foundation after inspecting official ElevenLabs WebSocket/client-event docs and installed SDK. Strict browser message allowlist rejects configuration/tool/text injection; caps audio/message/ping budgets and closes on deadline/revocation. 90 local tests, targeted lint and types pass. Module is not connected to an endpoint or provider. Admission, sockets/timers, durable metering, moderation-before-playback and live acceptance remain incomplete. See docs/VOICE_RELAY.md; voice stays disabled. Added inactive-until-authorized server watchdog with deadline timer, bounded authorization polling, abort/cleanup and permanent closure on revocation/error/timeout. Both transport callbacks are independently attempted; late success cannot reopen. 93 local tests pass, plus focused async-cleanup checks and lint/types. Real transport termination, DB authorization, reservations and playback moderation remain unfinished. Migration 019 adds atomic reserved-credit admission with hashed secret, authenticated-account binding, 30-second expiry and one-use claim under locks. Expired/replayed/stale/settled claims reject. 96 local tests and 17 independent PostgreSQL concurrency scenarios pass; targeted lint and types pass. Whole-repository lint has 13 errors and 7 warnings in legacy UI. No live migration or provider connection. Migration 020 adds service-only durable authorization and idempotent session end: claimed-session deadline, current supervision/revision/ownership/reservation checks, permanent end on denial, and no automatic refund. 99 local tests and 18 PostgreSQL races pass; targeted lint/types pass. Not yet wired to watchdog or transport. Added database/watchdog adapter with immutable authenticated binding, strict boolean authorization, abort propagation and independent bounded end persistence. 103 local tests, targeted lint and types pass. Fixture RPC responses only; no provider/socket acceptance. Added inert bounded output review gate: copied one-turn PCM, strict byte/chunk/transcript limits, whole-turn deadline, literal-safe verdict only, one-use release and permanent discard on closure/error/timeout/late frames. Six focused tests and all 147 local tests pass; full zero-warning lint and types pass. Provider transcript/audio association, real moderation adapter and actual playback authorization are not established; live voice stays disabled. Migration028 adds service-only settled-admission retention to privacy maintenance: older than 30 days, claimed duration also expired, matching settled usage required, maximum 1000, skip locked. No credit changes/refunds or billing deletion; unresolved admissions remain. 154 local tests and 26 PostgreSQL concurrency scenarios pass, including locked-row retry and preserved billing. TypeScript and zero-warning lint pass. No live migration or scheduled cleanup verified.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement server-owned bounded voice relay",
+            "description": "No browser provider credentials; voice stays disabled.",
+            "details": "Protocol policy, watchdog, durable admission/authorization, database-watchdog adapter and bounded output review component are implemented and locally tested. Host/runtime endpoint, token issuance, real socket adapters, verified transcript/audio association, moderation integration, provider reconciliation remain unfinished. No microphone/provider connection enabled.",
+            "status": "in-progress",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Meter and reconcile voice sessions",
+            "description": "Requires trustworthy provider usage and durable reservations.",
+            "details": "Requires trustworthy provider usage and durable reservations.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Live supervised multilingual voice acceptance",
+            "description": "Requires private agent, provider configuration and reviewed child-safety terms.",
+            "details": "Requires private agent, provider configuration and reviewed child-safety terms.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Retain uncertain voice usage and clean settled admissions",
+            "description": "Bounded local admission retention without credit mutation.",
+            "details": "Migration028 adds service-only settled-admission retention to privacy maintenance: older than 30 days, claimed duration also expired, matching settled usage required, maximum 1000, skip locked. No credit changes/refunds or billing deletion; unresolved admissions remain. 154 local tests and 26 PostgreSQL concurrency scenarios pass, including locked-row retry and preserved billing. TypeScript and zero-warning lint pass. No live migration or scheduled cleanup verified.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Voice admission SQL tests, privacy maintenance tests and independent PostgreSQL locked-admission scenario.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "Provider cost reconciliation",
+        "status": "in-progress",
+        "description": "Resolve ambiguous OpenAI and TypeSafe reservations using verified provider records. Never automatically refund uncertain billed requests.",
+        "details": "Migration 005 and administrator UI support audited manual reconciliation with provider evidence, one-hour minimum reservation age, bounded charge, atomic refund and conflict/idempotency checks. Provider IDs captured when available. Tests pass. Automated provider billing import and live reconciliation remain incomplete. Migration 009 binds reservations to the checked safety revision and current supervision under the profile lock. Tests reject pause/resume stale requests without debiting credits and deny unchecked service access. Live provider/concurrency acceptance still outstanding. Independent local PostgreSQL connections now confirm overlapping identical reconciliation calls refund once and write one audit record. Provider evidence/import acceptance remains outstanding. Migration 013 claims build UUIDs before any paid classifier/generator call, preventing duplicate requests from buying repeat safety checks. 65 local tests pass; actual PostgreSQL runner covers overlapping claims. No automatic retry/refund is inferred from failure; see docs/GENERATION_RETRIES.md. Generation now checks account model grant, enabled/bounded/recent pricing and live model catalog before claiming the request or invoking paid safety checks. Invalid/future/stale timestamps and unsafe numeric pricing fail closed; unavailable pricing is hidden from model choices. 83 tests, lint/types/build pass. Grant revocation during an already-running call remains subject to reservation recheck; no live provider acceptance. Migration 018 rejects conflicting settlement replay and invalid charge/token values, while preserving identical replay and paired unknown token counts for reviewed reconciliation. 85 local tests and sixteen independent PostgreSQL race checks pass; corrected test typing then reran focused tests, lint/types/build successfully. No provider billing import or live reconciliation acceptance. Added normalized reviewed billing-import CLI with read-only default, explicit apply, bounded strict JSON, source SHA-256, stored request matching and atomic batch reconciliation. Migration021 enforces provider/request uniqueness and identical replay. 107 local tests, 19 PostgreSQL races, targeted lint/types pass. No live provider evidence obtained or imported. See docs/BILLING_IMPORT.md. Billing CLI now validates exact confirmation mode/counts/fields, enforces a ten-second submission deadline with no automatic retries, redacts transport exceptions and treats malformed/late outcomes as unconfirmed. Four focused tests and all 151 local tests pass; TypeScript and zero-warning lint pass. No live credits or provider evidence accessed.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Audited manual reconciliation and duplicate prevention",
+            "description": "Database reconciliation, generation claims and concurrency fixtures pass.",
+            "details": "Database reconciliation, generation claims and concurrency fixtures pass.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Verified provider billing import",
+            "description": "Provider data integration remains unimplemented.",
+            "details": "Reviewed normalized import is implemented. Provider-specific export/API acquisition, independent evidence verification and live acceptance remain unfinished; do not treat normalized input as authenticated provider evidence.",
+            "status": "in-progress",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Live reconciliation acceptance",
+            "description": "Requires actual provider records; fixture values are synthetic.",
+            "details": "Requires actual provider records; fixture values are synthetic.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Reviewed normalized billing import workflow",
+            "description": "Read-only preview and explicit atomic apply with request matching, SHA-256 audit evidence and duplicate protection.",
+            "details": "Implemented CLI and migration021; four new local tests plus real PostgreSQL duplicate-import race pass. Synthetic evidence only. Usage: docs/BILLING_IMPORT.md. Billing CLI now validates exact confirmation mode/counts/fields, enforces a ten-second submission deadline with no automatic retries, redacts transport exceptions and treats malformed/late outcomes as unconfirmed. Four focused tests and all 151 local tests pass; TypeScript and zero-warning lint pass. No live credits or provider evidence accessed.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Preview makes no credit changes; invalid row rolls back batch; duplicate concurrent imports reconcile once. Does not prove provider-source authenticity.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "7",
+        "title": "Email delivery confirmation",
+        "status": "blocked",
+        "description": "Signed provider webhooks, bounce reporting and deployed schedule. Distinguish provider acceptance from delivery.",
+        "details": "Migration 004, Svix signature/replay verification, bounded webhook body, idempotent minimal events, out-of-order reconciliation, 30-day event retention and parent/admin delivery status implemented. Scheduler retries and delivery reconciliation endpoint ready. Provider webhook configuration, deployed schedule and real email delivery remain unverified. Actual independent local PostgreSQL connections verify competing claims, callback-before-send-commit reconciliation, and deletion racing send completion. All ten concurrency scenarios pass; no mail sent or provider callback received. Live signed delivery and deployed scheduler remain unverified. Notification webhook now uses the shared ten-second bounded stream reader while preserving the exact signed UTF-8 representation, including whitespace and Unicode. Synthetic chunked signature verification and hanging-cancel timeout tests pass. Full suite: 75 passed; targeted lint, types and production build pass. No real provider callbacks received. Outbound mail adapter bounds response bytes/time, preserves durable idempotency keys, does no internal retry and treats malformed/unusable success responses as ambiguous. Message IDs match webhook correlation rules. 81 local tests, targeted lint/types and build pass; no actual email sent. Migration027 adds atomic fresh-parent authorization for manual alert claims, wired through recipient verification and send queue. Automatic safety notifications remain independent. 133 local tests, 25 PostgreSQL race scenarios, zero-warning lint, typecheck and production build pass. Revocation before a waiting manual claim creates no job. No real email/provider request or live migration. Mail adapter now enforces a ten-second whole-attempt deadline even if transport ignores abort; stalled success bodies remain ambiguous, cancellation is nonblocking and late replies cannot replace timeout results. Durable retries/idempotency unchanged. 141 local tests, full zero-warning lint and typecheck pass. No live mail or duplicate-send acceptance; build evidence remains from prior run. Status audit: Local signed callbacks, durable delivery reconciliation, manual parent authorization and bounded send adapter are verified. Remaining acceptance needs deployed worker/webhook configuration and actual delivery/bounce tests.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Signed callbacks and durable delivery reconciliation",
+            "description": "Local signature/event handling and PostgreSQL worker races verified.",
+            "details": "Local signature/event handling and PostgreSQL worker races verified. Migration027 adds atomic fresh-parent authorization for manual alert claims, wired through recipient verification and send queue. Automatic safety notifications remain independent. 133 local tests, 25 PostgreSQL race scenarios, zero-warning lint, typecheck and production build pass. Revocation before a waiting manual claim creates no job. No real email/provider request or live migration. Mail adapter now enforces a ten-second whole-attempt deadline even if transport ignores abort; stalled success bodies remain ambiguous, cancellation is nonblocking and late replies cannot replace timeout results. Durable retries/idempotency unchanged. 141 local tests, full zero-warning lint and typecheck pass. No live mail or duplicate-send acceptance; build evidence remains from prior run.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Configure deployed worker and provider webhook",
+            "description": "Requires mail and deployment configuration.",
+            "details": "Requires mail and deployment configuration.",
+            "status": "blocked",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Verify actual delivery and bounce handling",
+            "description": "No live mail delivery acceptance yet.",
+            "details": "No live mail delivery acceptance yet.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "8",
+        "title": "Generated-app AI and storage bridge",
+        "status": "in-progress",
+        "description": "Isolated origin, authenticated viewers, approved operations and per-viewer/app budgets.",
+        "details": "Consolidated current studio, admin review and published previews into GeneratedPreview with fixed sandbox/no-referrer and explicit feature denials. Targeted lint and production build passed. Documented limitations in docs/GENERATED_APP_BOUNDARIES.md. Isolated execution origin, authenticated approved operations, per-viewer/app budgets and real browser acceptance remain unfinished; no generated AI/storage bridge enabled. Added repeatable test:preview-browser using the real preview component and production header configuration on an isolated loopback server. Chrome 155.0.8059.85 denied parent DOM/storage/fetch/popups/top navigation and sensitive features; no image/form/fetch probe requests arrived. Fixture-only acceptance, not deployed/cross-browser/CPU isolation. Existing dependency audit findings and machina Node engine warning persist. Bundled Chromium 156.0.8078.4 also passes the local preview fixture with zero probe requests. Runtime mismatch resolved by Node 22.23.3; other launch limitations remain. Added inert AppCapabilityPolicy transport validator with exact source/origin/session binding, strict field/operation allowlist, bounded string payloads, replay rejection, deadline and 100-request lifetime quota. 120 local tests, zero-warning full lint and typecheck pass. No listener, dispatcher, separate execution origin, server authorization/budgets or live bridge enabled. See docs/GENERATED_APP_BOUNDARIES.md. Shared-page loader now requires current ready schema before publication lookup, rejects malformed/oversized results and enforces a ten-second aborting deadline. Invalid routes/disabled safety gate make no database calls. 124 local tests, zero-warning lint, typecheck and production build pass. Request-time revocation only; already-delivered content cannot be recalled, no active-preview revocation or live acceptance. Shared page now checks current schema/publication via no-store status endpoint before iframe execution and every 30 seconds; changed digest, withdrawal, failure or 12-second timeout removes preview. Hidden tabs unmount and foreground requires revalidation. Actual component Chromium fixture covers these paths and no automatic reopening. TypeScript, zero-warning lint and production build pass. Best-effort browser behavior only; cannot recall delivered content or establish deployed revocation/load acceptance. Migration029 implements service-only viewer/project storage, exact reviewed-HTML permissions, fresh supervision/publication/deletion checks, durable request replay denial and atomic viewer/app quotas. Authenticated API, admin approval/revocation and parent inventory/erasure are wired. 163 local tests, 29 PostgreSQL scenarios, Chromium admin/account fixture, types/lint/build pass. Default disabled; no live migration or isolated browser bridge acceptance. 2026-10-21: parent storage dispatcher implemented and locally verified with 168 tests, installed Chrome two-origin synthetic fixture, typecheck and targeted zero-warning lint. Binds project/source/origin/session, filters replies, caps concurrency, aborts and suppresses late results. Not mounted in published pages; trusted shell, authenticated transport/lifecycle integration and deployed acceptance remain unfinished. Bundled Chromium unavailable; no live provider calls. 2026-10-21: implemented mountAppRuntime trusted shell with opaque allow-scripts inner frame, bounded storage SDK, exact parent/source bindings, reply filtering, pending-call limits and teardown. Actual shell plus dispatcher passed installed Chrome two-origin synthetic fixture for read/write, DOM/local-storage/network denial, direct-parent bypass rejection and removal. Typecheck and targeted zero-warning lint pass. Trusted bootstrap, real authenticated page integration and separate-origin deployment remain unfinished. Production gates unchanged. 2026-10-21: runtime bootstrap now accepts one bounded initialization only from the configured exact HTTPS parent origin and WindowProxy. Rejects invalid sessions/fields, duplicate initialization, wrong-session closure and late initialization after ten-second expiry; valid close removes runtime and prevents reopening. Extended actual two-origin Chrome fixture passes, as do typecheck and targeted zero-warning lint. Authenticated published-page integration and separate-origin deployment remain unfinished. No Task Master MCP tools exposed in this session; backlog file updated as fallback.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Shared restricted preview and browser isolation fixtures",
+            "description": "Chrome and bundled Chromium fixtures pass.",
+            "details": "Chrome and bundled Chromium fixtures pass. Shared-page loader now requires current ready schema before publication lookup, rejects malformed/oversized results and enforces a ten-second aborting deadline. Invalid routes/disabled safety gate make no database calls. 124 local tests, zero-warning lint, typecheck and production build pass. Request-time revocation only; already-delivered content cannot be recalled, no active-preview revocation or live acceptance.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Separate execution origin and capability protocol",
+            "description": "No AI/storage bridge enabled.",
+            "details": "Added inert AppCapabilityPolicy transport validator with exact source/origin/session binding, strict field/operation allowlist, bounded string payloads, replay rejection, deadline and 100-request lifetime quota. 120 local tests, zero-warning full lint and typecheck pass. No listener, dispatcher, separate execution origin, server authorization/budgets or live bridge enabled. See docs/GENERATED_APP_BOUNDARIES.md. 2026-10-21: parent storage dispatcher implemented and locally verified with 168 tests, installed Chrome two-origin synthetic fixture, typecheck and targeted zero-warning lint. Binds project/source/origin/session, filters replies, caps concurrency, aborts and suppresses late results. Not mounted in published pages; trusted shell, authenticated transport/lifecycle integration and deployed acceptance remain unfinished. Bundled Chromium unavailable; no live provider calls. 2026-10-21: implemented mountAppRuntime trusted shell with opaque allow-scripts inner frame, bounded storage SDK, exact parent/source bindings, reply filtering, pending-call limits and teardown. Actual shell plus dispatcher passed installed Chrome two-origin synthetic fixture for read/write, DOM/local-storage/network denial, direct-parent bypass rejection and removal. Typecheck and targeted zero-warning lint pass. Trusted bootstrap, real authenticated page integration and separate-origin deployment remain unfinished. Production gates unchanged. 2026-10-21: runtime bootstrap now accepts one bounded initialization only from the configured exact HTTPS parent origin and WindowProxy. Rejects invalid sessions/fields, duplicate initialization, wrong-session closure and late initialization after ten-second expiry; valid close removes runtime and prevents reopening. Extended actual two-origin Chrome fixture passes, as do typecheck and targeted zero-warning lint. Authenticated published-page integration and separate-origin deployment remain unfinished. No Task Master MCP tools exposed in this session; backlog file updated as fallback.",
+            "status": "in-progress",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Implement scoped operations and viewer/app budgets",
+            "description": "Requires isolated execution design.",
+            "details": "Published viewer storage backend and parent dispatcher are implemented (subtasks 6 and 7). Runtime shell, authenticated page integration, approved AI operations and monetary viewer/app budgets remain unfinished. Storage remains disabled by default.",
+            "status": "in-progress",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Deployed supported-browser acceptance",
+            "description": "Local fixtures do not establish production isolation.",
+            "details": "Local fixtures do not establish production isolation.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Revalidate and remove open shared previews",
+            "description": "Locally verified publication lifecycle; deployed acceptance stays separate.",
+            "details": "Shared page now checks current schema/publication via no-store status endpoint before iframe execution and every 30 seconds; changed digest, withdrawal, failure or 12-second timeout removes preview. Hidden tabs unmount and foreground requires revalidation. Actual component Chromium fixture covers these paths and no automatic reopening. TypeScript, zero-warning lint and production build pass. Best-effort browser behavior only; cannot recall delivered content or establish deployed revocation/load acceptance.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "npm run test:publication-browser with synthetic endpoint responses; production build, lint and types.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Implement reviewed per-viewer published storage backend",
+            "description": "Separate tenant storage with atomic quotas and administrator review. Browser integration remains separate.",
+            "details": "Migration029 implements service-only viewer/project storage, exact reviewed-HTML permissions, fresh supervision/publication/deletion checks, durable request replay denial and atomic viewer/app quotas. Authenticated API, admin approval/revocation and parent inventory/erasure are wired. 163 local tests, 29 PostgreSQL scenarios, Chromium admin/account fixture, types/lint/build pass. Default disabled; no live migration or isolated browser bridge acceptance.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Published storage SQL fixtures, PostgreSQL replay/quota/revocation races, actual admin Chromium fixture, types/lint/build.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Parent storage dispatcher and two-origin browser fixture",
+            "description": "Bounded storage dispatch adapter; production integration remains separate.",
+            "details": "2026-10-21: parent storage dispatcher implemented and locally verified with 168 tests, installed Chrome two-origin synthetic fixture, typecheck and targeted zero-warning lint. Binds project/source/origin/session, filters replies, caps concurrency, aborts and suppresses late results. Not mounted in published pages; trusted shell, authenticated transport/lifecycle integration and deployed acceptance remain unfinished. Bundled Chromium unavailable; no live provider calls.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Five dispatcher unit tests and installed Chrome two-origin fixture; full 168-test suite, typecheck and targeted lint.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "9",
+        "title": "Production database and multiplayer verification",
+        "status": "blocked",
+        "description": "Real concurrent Postgres tests, two-device multiplayer and publishing-review race tests.",
+        "details": "Migration 006 adds database supervision checks for project/storage/room mutations, active supervision for both multiplayer participants, realtime read restrictions, and atomic publishing with exact reviewed content and current owner eligibility. All six migrations pass together in embedded PostgreSQL; 46 local tests, targeted lint and production build pass. No live migrations applied. Real multi-connection concurrency, Supabase realtime and two-device acceptance remain unverified. See docs/SUPERVISED_MUTATIONS.md. Migration 008 now invalidates in-flight generated results after session/policy/approval changes, including pause then resume and rules changed back. 53 local tests with all eight migrations, targeted lint and build verified; no live concurrency acceptance. Added full-schema regression checks for RLS on every studio table, denied browser writes/privileged procedure execution, fixed security-definer search paths, guardian-only table reads and cross-family usage isolation. 58 local tests and targeted lint pass. These inspect effective database permissions in embedded PostgreSQL, not deployed Supabase. Real independent local PostgreSQL 14.17 connections now verify three races: overlapping balance reservations, supervision expiry during lock wait and stale admin review after concurrent consent change. The runner observes actual lock waits, uses a temporary Unix-socket-only cluster and stops it afterward. Lint/typecheck pass. Supabase target-version/Auth/realtime/two-device and other contention scenarios remain outstanding; see docs/POSTGRES_CONCURRENCY.md. Local PostgreSQL concurrency suite expanded to six passing scenarios, adding cross-family global daily cap contention, exactly-once duplicate reconciliation refunds and competing same-player moves. This does not verify Supabase realtime delivery. Thirteen independent PostgreSQL concurrency scenarios now pass, including changed content and revoked consent during publication lock waits, and duplicate publication producing one audit entry. Targeted lint and typecheck pass. Multiplayer now clears room, invite and QR on authentication changes and ignores late actions, refreshes, realtime and QR callbacks. Chrome multiplayer fixture and combined Chromium Studio/Admin/Parent/Play fixtures pass with synthetic adapters. Full zero-warning lint/types and production build pass. No live two-device Supabase acceptance. Status audit: Local tenant boundaries, independent PostgreSQL races and multiplayer account privacy are verified. Remaining acceptance needs reviewed target migration deployment and two-device realtime verification.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Tenant database boundaries and revision checks",
+            "description": "Embedded SQL permission/tenant checks pass.",
+            "details": "Embedded SQL permission/tenant checks pass. 2026-10-21 status audit: all 28 migrations are now loaded by supervised-mutation fixtures. Corrected the interrupted storage test setup to restore synthetic consent withdrawn by the prior publication test. All 157 local tests pass, including cross-family storage denial, browser write denial, UTF-8/key limits and 100-record quota. TypeScript and full zero-warning lint passed in this audit. No production access controls changed.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Independent PostgreSQL race tests",
+            "description": "18 independent PostgreSQL concurrency scenarios pass, including voice admission replay and parental revocation. Local fixture cluster only.",
+            "details": "Fourteen independent PostgreSQL concurrency scenarios pass, including publication review races and consent withdrawal racing parent unlock.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Deploy reviewed migrations and verify schema preflight",
+            "description": "Requires configured target Supabase database.",
+            "details": "Requires configured target Supabase database.",
+            "status": "blocked",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Two-device realtime and target-database acceptance",
+            "description": "Local PostgreSQL fixtures do not verify realtime delivery.",
+            "details": "Local PostgreSQL fixtures do not verify realtime delivery.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Multiplayer account-change privacy",
+            "description": "Clear room/invite state and reject late responses from the previous account.",
+            "details": "Multiplayer now clears room, invite and QR on authentication changes and ignores late actions, refreshes, realtime and QR callbacks. Chrome multiplayer fixture and combined Chromium Studio/Admin/Parent/Play fixtures pass with synthetic adapters. Full zero-warning lint/types and production build pass. No live two-device Supabase acceptance. Multiplayer refresh now runs single-flight with a ten-second UI-clearing deadline, abort on cleanup, caught network rejection and rejection of late reads/realtime after failure. Actual Play component passed bundled Chromium fixture for errors, ignored cancellation, no overlapping reads and late replies. TypeScript, zero-warning full lint and production build pass. Synthetic auth/transport only; no live realtime acceptance.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Actual component in Chrome/Chromium with delayed synthetic move and realtime messages; no live provider acceptance.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "title": "Production readiness",
+        "status": "in-progress",
+        "description": "Consent eligibility, privacy retention/deletion, dependency review, deployment and end-to-end acceptance.",
+        "details": "Added migration 007 and service-only, bounded privacy maintenance endpoint, independent of mail configuration. Proposed 30-day activity retention cascades related notification metadata; expired sessions/rooms and old orphan mail events also cleaned. All seven migrations tested together; 49 local tests, targeted lint and production build pass; unauthenticated maintenance returns 401. No live migration or schedule installed. Human retention/consent review, full account deletion/provider retention, dependency review, deployment and end-to-end acceptance remain outstanding. See docs/PRIVACY_MAINTENANCE.md. Reviewed audit and upgraded matching Prisma/client 6.19.3, moving Effect to 3.21.0. Build and 58 tests pass; high audit entries reduced from nine to eight. DeepmergeTS/braces chains and machina Node >=22.22 warning remain unresolved. See docs/DEPENDENCY_REVIEW.md. Added local GitHub Actions workflow for build/types, SQL/unit, PostgreSQL concurrency and Chromium fixture checks, plus a separate failing-on-high dependency audit. Pinned actions, read-only permission, no provider credentials. YAML parsed; lint/typecheck/local Chrome pass. No push, hosted CI run or branch protection configured. See docs/CONTINUOUS_CHECKS.md. Migration 014 adds service-only structural schema preflight; approved studio requests fail closed on mismatch. Read-only setup:database CLI has a ten-second timeout and prints no secrets. 66 local tests pass including simulated RLS/privilege/trigger drift. CLI missing-config path verified with no request. Live database check still blocked; see docs/DATABASE_PREFLIGHT.md. Node 22.23.3 is now installed and pinned in .nvmrc; package engines and CI require >=22.22 <23, satisfying the machina engine requirement. 66 local tests, ten independent PostgreSQL concurrency scenarios, Chrome preview isolation, production build and typecheck pass on this runtime. Existing running dev process was not restarted; no live voice or hosted CI acceptance. Eight high audit entries remain from the last audit. Bundled Chromium 156.0.8078.4 now passes the preview isolation fixture and parent history clearing against a separate local production server. Parent fixture supports the CI browser and aborts all other API requests. CI now includes bounded server startup/cleanup and parent expiry/rejection checks. Targeted lint, typecheck and workflow YAML validation pass. Mocked account responses only; hosted Linux, real OTP and deployment remain unverified. Shared studio/parent JSON body reader now enforces a ten-second total read deadline, strict UTF-8/object validation and 120000-byte limit; stalled/aborted/oversized/broken streams return controlled errors without awaiting a hanging cancellation hook. Full 72-test suite and build passed; an additional exact-byte/multibyte boundary case passed in the six-test focused suite. Targeted lint/types pass. No deployment load or gateway-rate-limit acceptance. Migration 017 adds parent-only family data inventory and manual deletion-review email draft. Counts are scoped and contain no content/provider IDs; unresolved charges and active mail leases are visible. 77 tests, targeted lint/types/build and Chromium parent-expiry fixture pass. No automatic erasure or message sending; provider retention and actual erasure execution remain unfinished. Reviewed a scoped @prisma/config@6.19.3 override to deepmerge-ts 8.0.2. Actual config-loader regression, 77 existing tests, production build, lint/types pass. Audit reduced from eight to five high entries, all in unpatched braces/Next lint chain. No forced Prisma major upgrade or deployment. See dependency review for Map-merge compatibility limits. Deletion request workflow now implemented with database hold and admin visibility. 109 local tests, 20 PostgreSQL race scenarios, targeted lint/types, production build and mocked Chrome parent confirmation/expiry checks pass. Full account deletion remains in progress.",
+        "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Bounded privacy maintenance and schema preflight",
+            "description": "Local migrations and failure-path fixtures pass.",
+            "details": "Local migrations and failure-path fixtures pass.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Compatible runtime and local continuous checks",
+            "description": "Node 22.23.3; tests/build/types/browser checks pass; workflow defined.",
+            "details": "Node 22.23.3; tests/build/types/browser checks pass; workflow defined. Full-project lint now passes with zero errors/warnings after legacy React lifecycle/navigation cleanup. Workflow enforces --max-warnings=0. Typecheck and production build pass. Chrome smoke verifies /v1, /v1/original and preserved /leaderboard redirect with no runtime errors (APIs mocked). No hosted CI claim.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Resolve remaining dependency advisories",
+            "description": "Five high findings at last audit after scoped dependency remediation; do not force major changes.",
+            "details": "Prisma merge-helper advisory removed via scoped compatibility-tested override. Five high lint-chain audit entries remain; braces latest remains vulnerable. Actual loader/build/types/tests pass; hosted CI remains unverified. Rechecked 2026-10-20: npm audit still reports five high lint-chain findings; registry latest braces is 3.0.3 and GHSA-vfj7-8cjw-p6xm lists no patched version. Waiting for compatible upstream remediation; audit remains failing, no suppression or forced Next downgrade. 2026-10-21 npm audit recheck still reports five high entries and zero critical; remains blocked.",
+            "status": "blocked",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Full account deletion and provider retention workflow",
+            "description": "Current history cleanup is not complete account erasure.",
+            "details": "Added verified-parent deletion review request, confirmation UI, persistent request status and administrator queue. Migration022 stops access/publication, invalidates parent unlocks and blocks reapproval/restart; accounting can still settle. Two SQL tests, a concurrent-approval race and mocked Chrome parent flow pass. Actual erasure, provider retention/deletion, identity removal and receipts remain unimplemented. No live request sent. Migration023 also blocks new/retried mail claims after deletion request under a profile lock, excludes held families from worker discovery, and preserves in-flight outcomes. 111 local tests, 21 PostgreSQL concurrency scenarios, full zero-warning lint and typecheck pass. Still no erasure executor or live provider deletion. Reviewed local-content erasure is now implemented with admin confirmation, stale-request check, billing/mail blockers, idempotent receipt and late-write holds (migration024). Identity/profile, audit/billing and provider/backup retention remain unfinished. Synthetic verification only.",
+            "status": "in-progress",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Production deployment and end-to-end launch review",
+            "description": "Hosted CI, consent/privacy review, live services and deployment remain outstanding.",
+            "details": "Hosted CI, consent/privacy review, live services and deployment remain outstanding. Added setup:release strict local prerequisite check with sanitized JSON output. Missing/review-required configuration exits 2; unknown flags exit 1. Actual local invocation correctly blocks on nine checks without provider calls. This is not provider acceptance or release approval.",
+            "status": "pending",
+            "dependencies": [],
+            "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Bound request ingestion and validate failure paths",
+            "description": "Strict bounded JSON stream reader shared by studio and parent routes.",
+            "details": "Bounded stream reader covers studio/parent JSON and signed webhook text. Full suite of 75 tests plus targeted lint/types/build pass. Deployment rate limiting remains outside this milestone.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Synthetic Request streams, no provider traffic.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Reviewed local-content erasure and scoped receipt",
+            "description": "Administrator confirms parent request; removes local child content only, with billing/mail blockers and late-write prevention.",
+            "details": "114 local tests, 22 PostgreSQL races, full zero-warning lint/types/build and mocked Chrome admin confirmation pass. No real deletion or full account/provider erasure claimed.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Other-family isolation, stale request, duplicate receipt, unresolved charges, active mail leases and late content writes. Browser API mocked.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Strict release prerequisite reporting",
+            "description": "Fail closed on missing configuration and required review without exposing secrets.",
+            "details": "116 local tests pass; full zero-warning lint passes; typecheck and focused CLI tests pass after fixture typing correction. Actual setup:release exits 2 for nine blockers. No provider calls or live acceptance. 2026-10-21 strict release check still reports nine missing configuration/review items. OpenAI configuration presence is not credential validation. No provider calls made.",
+            "status": "done",
+            "dependencies": [],
+            "testStrategy": "Temporary isolated environment fixtures verify strict/informational exit behavior, unknown flags, secret redaction and review gates.",
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "11",
+        "title": "Demo milestone: backend generation",
+        "description": "Worker 1: implement the scoped demo generation backend and tests.",
+        "details": "Ownership: src/app/api/demo/** and src/lib/demo-server/** plus assigned tests. Support the demo contract agreed with the coordinator and UX worker. Keep provider credentials server-side. Clearly distinguish fixture/local demonstration from live provider generation; no production identity, voice, email, or storage acceptance is implied.",
+        "testStrategy": "Run focused backend tests covering request validation, failure paths and generation contract; report exact commands and whether provider evidence is live or synthetic.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:41:29.982Z"
+      },
+      {
+        "id": "12",
+        "title": "Demo milestone: interactive demo UX",
+        "description": "Worker 2: implement the scoped demo UI and connect it to the agreed backend contract.",
+        "details": "Ownership: src/app/demo/** and src/components/demo/**. Provide an understandable creation flow, visible generation state, playable preview and useful recoverable errors. Label fixture/demo behavior honestly. Coordinate API contract with backend worker.",
+        "testStrategy": "Run relevant type/lint checks and exercise creation, loading, success, error and preview states; browser acceptance is tracked separately.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:41:29.987Z"
+      },
+      {
+        "id": "13",
+        "title": "Demo milestone: browser acceptance",
+        "description": "Coordinator: verify the integrated demo in a real browser with reproducible evidence.",
+        "details": "Verify the actual local app after backend and UX integration. Record route, viewport, generation source, successful creation and preview, error handling and any unresolved defects. Do not count mocks or build-only checks as live browser or provider acceptance.",
+        "testStrategy": "Capture browser screenshots and observed interactions for the integrated demo; document console/runtime errors and distinguish local acceptance from production readiness.",
+        "status": "done",
+        "dependencies": [
+          "11",
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:41:29.989Z",
+        "metadata": {
+          "browserAcceptance20261023": {
+            "result": "passed",
+            "scope": "Installed Chrome headless, actual local production build at http://127.0.0.1:3217/demo, public template mode. No mocks and no live AI/provider or deployed-service acceptance.",
+            "command": "DEMO_BASE_URL=http://127.0.0.1:3217 node_modules/.bin/tsx scripts/check-demo-browser.ts",
+            "report": "tests/demo-browser-artifacts/2026-10-23T00-37-04-477Z/report.json",
+            "checks": [
+              "actual demo route and enabled backend",
+              "starter creation and playable isolated preview",
+              "prompt creation through real local backend",
+              "revision creates a distinct saved version",
+              "rename dialog and durable shelf reload",
+              "history restore preserves original and revision",
+              "export downloads a complete sandboxed HTML document",
+              "delete cancellation retains project; confirmation persists removal",
+              "mobile layout has no page-level horizontal overflow",
+              "no uncaught browser runtime errors"
+            ],
+            "generationModes": [
+              "template",
+              "template"
+            ],
+            "pageErrors": [],
+            "statusNote": "Task remains in-progress pending coordinator review; no done status set by worker."
+          }
+        }
+      },
+      {
+        "id": "14",
+        "title": "Demo milestone: PR integration",
+        "description": "Coordinator: integrate the demo work into a reviewable pull request with accurate validation and scope.",
+        "details": "Review combined changes, resolve integration conflicts, run required checks, preserve existing backlog and report remaining live-provider or deployment gates. Use user-authorized PR workflow; no production deployment is implied.",
+        "testStrategy": "Confirm PR diff, required checks and browser acceptance evidence; link the actual PR and avoid claiming merge/deployment unless verified.",
+        "status": "in-progress",
+        "dependencies": [
+          "13"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:45:16.065Z"
+      },
+      {
+        "id": "15",
+        "title": "Demo milestone: service setup and live-provider functional demo",
+        "description": "Coordinator: configure the required services and verify a functional demo against the intended live provider.",
+        "details": "Keep credentials in approved local secret storage, outside task data and committed files. Identify setup prerequisites and authorized provider calls before execution. Verify actual generation and preview using the integrated demo. Record provider/model and observed result without prompts containing child data or secret values. This milestone does not establish production identity, consent, voice, email, database, or deployment acceptance for tasks 3-10.",
+        "testStrategy": "Verify required service connectivity and one authorized end-to-end live generation with playable preview; report exact observed outcome, failure/retry behavior and remaining setup blockers.",
+        "status": "blocked",
+        "dependencies": [
+          "11",
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "metadata": {
+          "providerCheck": {
+            "date": "2026-10-23",
+            "openai": "HTTP 401",
+            "anthropicModels": "HTTP 200, Haiku available",
+            "anthropicGeneration": "HTTP 400 insufficient credit",
+            "vercelKeys": "Existing project development keys match local values",
+            "liveGenerationVerified": false
+          }
+        },
+        "updatedAt": "2026-10-23T00:45:19.090Z"
+      },
+      {
+        "id": "16",
+        "title": "Expand playable offline project variety",
+        "description": "Provide several distinct project types for a useful demo while live providers are unavailable.",
+        "details": "Add deterministic self-contained templates for learning, creative play and games with explicit supported edit controls. Preserve existing generated projects when a requested offline edit is unsupported; label all templates honestly.",
+        "testStrategy": "Unit template selection/revision tests plus browser interaction for each new project type.",
+        "status": "done",
+        "dependencies": [
+          "11"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:45:13.078Z"
+      },
+      {
+        "id": "17",
+        "title": "Portable project backups and demo usability",
+        "description": "Let families export/import project backups and duplicate creations while keeping browser-local storage clear.",
+        "details": "Validate bounded backup files, keep imported project code sandboxed, confirm overwrite/destructive actions and handle invalid files clearly. Make hosted template-demo labeling accurate.",
+        "testStrategy": "Browser export/import round trip, duplicate independence, malformed backup handling and responsive layout.",
+        "status": "done",
+        "dependencies": [
+          "12"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:45:13.082Z"
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2026-10-23T00:45:19.090Z",
+      "taskCount": 17,
+      "completedCount": 7,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}

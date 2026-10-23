@@ -49,3 +49,5 @@ next-env.d.ts
 !.env.studio.example
 
 /work/guard-evaluations/
+
+/tests/demo-browser-artifacts/
