@@ -10,6 +10,10 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-demo-ai/**",
+    ".next-v2*/**",
+    ".vibekidding-v2/**",
+    "infra/local/**",
+    "infra/backups/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
