@@ -17,6 +17,7 @@ export function DemoDataBackup({ projectId, title, onClose, onRestored }: {
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
   const epoch = useRef(0);
   const [reading, setReading] = useState(false);
   const [review, setReview] = useState<Review | null>(null);
@@ -24,10 +25,27 @@ export function DemoDataBackup({ projectId, title, onClose, onRestored }: {
   const [notice, setNotice] = useState("");
   useEffect(() => {
     const lifetime = epoch;
+    // The parent temporarily disables this button while the modal is open.
+    // Capture it before showModal moves focus into the dialog.
+    const active = document.activeElement;
+    if (!opener.current && active instanceof HTMLElement && active !== document.body && !dialog.current?.contains(active)) opener.current = active;
     dialog.current?.showModal();
     return () => { lifetime.current++; };
   }, [projectId]);
-  function close() { epoch.current++; onClose(); }
+  function finish(callback: () => void) {
+    epoch.current++;
+    const trigger = opener.current;
+    dialog.current?.close();
+    callback();
+    // Wait for the parent to remove the dialog and re-enable the trigger.
+    // Only explicit dismissal/restoration schedules focus, never effect cleanup.
+    requestAnimationFrame(() => {
+      const active = document.activeElement;
+      if (trigger?.isConnected && !trigger.matches(":disabled") && !document.querySelector("dialog:modal") &&
+          (active === document.body || active === trigger || !active?.isConnected)) trigger.focus({ preventScroll: true });
+    });
+  }
+  function close() { finish(onClose); }
   function exportData() {
     setError(""); setNotice("");
     try {
@@ -61,8 +79,7 @@ export function DemoDataBackup({ projectId, title, onClose, onRestored }: {
     if (!review || reading) return;
     try {
       restoreProjectData(storage, projectId, review.backup, review.baseline);
-      epoch.current++;
-      onRestored();
+      finish(onRestored);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Restore could not be confirmed. Your preview has not been restarted."); }
   }
   return <dialog ref={dialog} className="demo-dialog demo-data-dialog" aria-labelledby="demo-data-title" onCancel={event => { event.preventDefault(); close(); }}>
