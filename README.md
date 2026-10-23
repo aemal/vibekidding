@@ -1,3 +1,41 @@
+# VibeKidding: current demo
+
+The login-free workshop is at `/demo`. It supports playable starters, prompt-selected template variations, revisions, browser-saved projects, version history, duplication, JSON backup/import, and HTML export. Google sign-in is not required for this demo.
+
+## Run locally
+
+Use Node 22.22 or newer in the Node 22 series, then:
+
+```sh
+npm ci
+npm run dev:demo
+```
+
+Open http://127.0.0.1:3217/demo. This command explicitly uses template mode; no AI credentials or database are needed. Templates are preset programs, not arbitrary AI generation. Projects are stored in the browser, not a cloud account. Export backups before clearing browser data.
+
+For a hosted or production-build template demo, set `VIBEKIDDING_PUBLIC_TEMPLATE_DEMO=1` in the deployment environment. That mode never calls an AI provider, even when provider credentials exist. The full account-based studio is separate and retains its configuration requirements. See [studio setup](docs/STUDIO_SETUP.md).
+
+For optional **local-only AI**, set `VIBEKIDDING_DEMO_ENABLED=1` and `VIBEKIDDING_DEMO_PROVIDER=openai` or `anthropic`, with a working server-side provider key, then run Next development bound to `127.0.0.1`. Public template mode takes precedence. Provider errors fall back to labeled templates. Current provider account acceptance is not complete.
+
+## Verify
+
+```sh
+npm run test:studio
+npm run lint -- --max-warnings=0
+npm run build
+npm run typecheck
+# Against a running template demo, with installed Chrome:
+npm run test:demo-browser
+```
+
+Do not run a build against the same `.next` directory while testing a development server. Browser acceptance reports distinguish local testing from deployed acceptance.
+
+---
+
+## Historical V1 documentation
+
+The following describes the original app, not the current demo or a claim that its services are configured. `/v1` preserves the archive; legacy APIs are disabled.
+
 > **Studio upgrade (local, not deployed):** See [setup, verification and launch blockers](docs/STUDIO_SETUP.md). The new studio is at `/`; `/v1` preserves the former dashboard as an archive with legacy APIs disabled. The original documentation below describes the prior app.
 
 # 🎮 VibeKidding

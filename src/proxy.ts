@@ -6,6 +6,8 @@ export function proxy(req: NextRequest) {
   if (
     path.startsWith("/api/") &&
     !path.startsWith("/api/studio/") &&
+    !path.startsWith("/api/published/") &&
+    path !== "/api/demo/generate" &&
     path !== "/api/parents"
   )
     return NextResponse.json(

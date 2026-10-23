@@ -215,7 +215,8 @@ export default function Studio() {
               <a className="parent-nav-link" href="#questions">
                 Questions
               </a>
-              <a href="#get-started">Get started ↗</a>
+              <Link href="/demo">Try the demo ↗</Link>
+              <a href="#get-started">Parent sign-in</a>
             </>
           )}
           {account?.admin && <Link href="/admin">Admin</Link>}
@@ -274,12 +275,12 @@ export default function Studio() {
             </p>
             {!account && (
               <div className="hero-parent-actions">
-                <a className="parent-cta" href="#get-started">
+                <Link className="parent-cta" href="/demo">
                   Start creating together <ArrowUpRight size={18} />
-                </a>
+                </Link>
                 <a href="#languages">Explore an idea in your language ↓</a>
                 <small>
-                  Made for supervised exploration · Guardian approval required
+                  Try the demo without sign-in · Build with a grown-up
                 </small>
               </div>
             )}

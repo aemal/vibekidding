@@ -42,7 +42,7 @@ const faqs = [
   ],
   [
     "What can we try right now?",
-    "Explore the example prompts and language directory on this page without an account. Live building needs a configured, approved account. Sign-in and voice availability depend on the pilot setup; this page does not run a paid AI demo.",
+    "Open the demo studio without an account to try starter projects, make changes, play and save projects in this browser. The hosted demo uses clearly labeled templates for memory games, drawing, addition quizzes, stories and collector games. It does not call an AI provider. The connected family studio and live voice still need setup.",
   ],
 ];
 export function ParentLanding({ onIdea }: { onIdea: (idea: string) => void }) {
