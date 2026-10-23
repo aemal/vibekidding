@@ -1,8 +1,10 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | undefined;
+function getOpenAI(): OpenAI {
+  // Archived routes are still imported during builds without provider credentials.
+  return openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 // Languages that Claude handles excellently - no translation needed
 // These match the "starred" languages in the LanguagesModal
@@ -51,7 +53,7 @@ interface TranslationResult {
  */
 export async function detectLanguage(text: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -83,7 +85,7 @@ Do not include any other text, punctuation, or explanation.`,
  */
 export async function translateToEnglish(text: string, sourceLanguage: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
