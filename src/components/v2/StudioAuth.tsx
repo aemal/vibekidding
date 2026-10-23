@@ -6,14 +6,16 @@ import { api, type StudioSession } from "./api";
 import { EmailSignIn } from "./EmailSignIn";
 export function StudioAuth({
   setupRequired,
+  inviteOnly = false,
   onAuthenticated,
 }: {
   setupRequired: boolean;
+  inviteOnly?: boolean;
   onAuthenticated(): void;
 }) {
-  const [emailMode, setEmailMode] = useState(false);
+  const [emailMode, setEmailMode] = useState(inviteOnly);
   const [setupUnavailable, setSetupUnavailable] = useState(false);
-  const creatingAccount = setupRequired && !setupUnavailable;
+  const creatingAccount = setupRequired && !setupUnavailable && !inviteOnly;
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -64,10 +66,16 @@ export function StudioAuth({
       <section className="v2-auth-card">
         <span className="v2-eyebrow">YOUR IDEAS, BUILT TOGETHER</span>
         <h1>
-          {creatingAccount ? "Your own little launchpad." : "Welcome back."}
+          {inviteOnly
+            ? "Your invitation starts here."
+            : creatingAccount
+              ? "Your own little launchpad."
+              : "Welcome back."}
         </h1>
         <p>
-          {creatingAccount
+          {inviteOnly
+            ? "This studio is invitation-only. Use your invited email address, or sign in with an existing username and password."
+            : creatingAccount
             ? "Create your studio account. Use the same account on your computer and phone."
             : "Sign in to your studio and pick up where you left off."}
         </p>

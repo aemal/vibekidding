@@ -12,7 +12,7 @@ The account hostname and project slug provide a friendly entry point. The gatewa
 
 ## Studio and accounts
 
-The studio and landing page use HeroUI with VibeBoard's light/dark colors. The initial account is created with a username and password. The same account can be used from a desktop and phone, with separate sessions and shared server-side projects. The initial password account remains available for local setup. Invite-only email OTP accounts are an additional access path; email delivery and final public acceptance are separate launch checks.
+The studio and landing page use HeroUI with VibeBoard's light/dark colors. The initial account is created with a username and password. The same account can be used from a desktop and phone, with separate sessions and shared server-side projects. The initial password account remains available for local setup. Public mode disables first-account password registration and defaults to invite-only email access; previously created password accounts can still sign in. Invite-only email OTP accounts are an additional access path; email delivery and final public acceptance are separate launch checks.
 
 Generation, revisions, source editing, deployment logs and version history are separate operations. Failed deployment should preserve the previous running application. A source rollback cannot undo a destructive database migration; compatible schema changes remain necessary.
 

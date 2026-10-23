@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Track rollout and acceptance criteria",
         "status": "done",
         "description": "Create a local Task Master backlog with explicit local versus live acceptance.",
@@ -13,7 +13,7 @@
         "subtasks": []
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Reliable notification retries",
         "status": "done",
         "description": "Lease queue jobs, freeze payloads, bound retries and expose an authenticated worker endpoint. Verify expiry, duplicate and access controls locally.",
@@ -24,7 +24,7 @@
         "subtasks": []
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Live identity and parent approval",
         "status": "blocked",
         "description": "Configure Supabase and apply reviewed migrations. Verify Google, OTP, consent gates and separate accounts.",
@@ -86,7 +86,7 @@
         ]
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Safety provider acceptance",
         "status": "blocked",
         "description": "Configure TypeSafe. Evaluate multilingual attacks, false positives and provider failure paths with reviewed fixtures and live results.",
@@ -128,7 +128,7 @@
         ]
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Live voice relay and accounting",
         "status": "in-progress",
         "description": "Server-owned duration-limited relay, private agent, authenticated usage reconciliation and replay tests. Keep voice disabled until verified.",
@@ -180,7 +180,7 @@
         ]
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Provider cost reconciliation",
         "status": "in-progress",
         "description": "Resolve ambiguous OpenAI and TypeSafe reservations using verified provider records. Never automatically refund uncertain billed requests.",
@@ -232,7 +232,7 @@
         ]
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Email delivery confirmation",
         "status": "blocked",
         "description": "Signed provider webhooks, bounce reporting and deployed schedule. Distinguish provider acceptance from delivery.",
@@ -274,7 +274,7 @@
         ]
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Generated-app AI and storage bridge",
         "status": "in-progress",
         "description": "Isolated origin, authenticated viewers, approved operations and per-viewer/app budgets.",
@@ -356,7 +356,7 @@
         ]
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Production database and multiplayer verification",
         "status": "blocked",
         "description": "Real concurrent Postgres tests, two-device multiplayer and publishing-review race tests.",
@@ -418,7 +418,7 @@
         ]
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Production readiness",
         "status": "in-progress",
         "description": "Consent eligibility, privacy retention/deletion, dependency review, deployment and end-to-end acceptance.",
@@ -510,7 +510,7 @@
         ]
       },
       {
-        "id": "11",
+        "id": 11,
         "title": "Demo milestone: backend generation",
         "description": "Worker 1: implement the scoped demo generation backend and tests.",
         "details": "Ownership: src/app/api/demo/** and src/lib/demo-server/** plus assigned tests. Support the demo contract agreed with the coordinator and UX worker. Keep provider credentials server-side. Clearly distinguish fixture/local demonstration from live provider generation; no production identity, voice, email, or storage acceptance is implied.",
@@ -522,7 +522,7 @@
         "updatedAt": "2026-10-23T00:41:29.982Z"
       },
       {
-        "id": "12",
+        "id": 12,
         "title": "Demo milestone: interactive demo UX",
         "description": "Worker 2: implement the scoped demo UI and connect it to the agreed backend contract.",
         "details": "Ownership: src/app/demo/** and src/components/demo/**. Provide an understandable creation flow, visible generation state, playable preview and useful recoverable errors. Label fixture/demo behavior honestly. Coordinate API contract with backend worker.",
@@ -534,7 +534,7 @@
         "updatedAt": "2026-10-23T00:41:29.987Z"
       },
       {
-        "id": "13",
+        "id": 13,
         "title": "Demo milestone: browser acceptance",
         "description": "Coordinator: verify the integrated demo in a real browser with reproducible evidence.",
         "details": "Verify the actual local app after backend and UX integration. Record route, viewport, generation source, successful creation and preview, error handling and any unresolved defects. Do not count mocks or build-only checks as live browser or provider acceptance.",
@@ -575,7 +575,7 @@
         }
       },
       {
-        "id": "14",
+        "id": 14,
         "title": "Demo milestone: PR integration",
         "description": "Coordinator: integrate the demo work into a reviewable pull request with accurate validation and scope.",
         "details": "Review combined changes, resolve integration conflicts, run required checks, preserve existing backlog and report remaining live-provider or deployment gates. Use user-authorized PR workflow; no production deployment is implied.",
@@ -614,7 +614,7 @@
         }
       },
       {
-        "id": "15",
+        "id": 15,
         "title": "Demo milestone: service setup and live-provider functional demo",
         "description": "Coordinator: configure the required services and verify a functional demo against the intended live provider.",
         "details": "Keep credentials in approved local secret storage, outside task data and committed files. Identify setup prerequisites and authorized provider calls before execution. Verify actual generation and preview using the integrated demo. Record provider/model and observed result without prompts containing child data or secret values. This milestone does not establish production identity, consent, voice, email, database, or deployment acceptance for tasks 3-10.",
@@ -661,7 +661,7 @@
         "updatedAt": "2026-10-23T01:09:55.088Z"
       },
       {
-        "id": "16",
+        "id": 16,
         "title": "Expand playable offline project variety",
         "description": "Provide several distinct project types for a useful demo while live providers are unavailable.",
         "details": "Add deterministic self-contained templates for learning, creative play and games with explicit supported edit controls. Preserve existing generated projects when a requested offline edit is unsupported; label all templates honestly.",
@@ -675,7 +675,7 @@
         "updatedAt": "2026-10-23T00:45:13.078Z"
       },
       {
-        "id": "17",
+        "id": 17,
         "title": "Portable project backups and demo usability",
         "description": "Let families export/import project backups and duplicate creations while keeping browser-local storage clear.",
         "details": "Validate bounded backup files, keep imported project code sandboxed, confirm overwrite/destructive actions and handle invalid files clearly. Make hosted template-demo labeling accurate.",
@@ -689,7 +689,7 @@
         "updatedAt": "2026-10-23T00:45:13.082Z"
       },
       {
-        "id": "18",
+        "id": 18,
         "title": "Optional browser voice dictation for demo prompts",
         "description": "Add explicit browser-native dictation with language selection and typing fallback; stage transcript for user review without auto-building.",
         "details": "No paid API or app audio upload. Explain browser speech service processing; cap sessions and cancel on context changes. Real microphone acceptance remains separate.",
@@ -703,7 +703,7 @@
         "updatedAt": "2026-10-23T00:58:59.095Z"
       },
       {
-        "id": "19",
+        "id": 19,
         "title": "Fix demo multi-tab saving and starter revisions",
         "description": "Prevent stale tabs from silently replacing saved projects and make all advertised starters support template revisions without fake unchanged history entries.",
         "details": "Verified two-tab overwrite and unchanged starter HTML during PR2 postmerge review. Preserve unsaved work on conflict; provide recoverable action. Regression browser tests required.",
@@ -719,7 +719,7 @@
         "updatedAt": "2026-10-23T00:58:59.100Z"
       },
       {
-        "id": "20",
+        "id": 20,
         "title": "Large play view for demo creations",
         "description": "Give kids a bigger play and drawing area with a clear return to workshop and Escape support, keeping project edits/history intact.",
         "details": "",
@@ -741,7 +741,7 @@
         }
       },
       {
-        "id": "21",
+        "id": 21,
         "title": "Same-device two-player tic-tac-toe demo",
         "description": "Add playable turn-based tic-tac-toe template for two people sharing one device, with accessible board, winner/draw/reset and template themes.",
         "details": "This is a useful offline demo feature, not acceptance of the separate Supabase realtime multiplayer task.",
@@ -763,7 +763,7 @@
         "updatedAt": "2026-10-23T01:09:09.406Z"
       },
       {
-        "id": "22",
+        "id": 22,
         "title": "Optional local Samantha voice ideation demo",
         "description": "Add dedicated zero-tool ElevenLabs agent conversation for local supervised ideation, with explicit start/stop and manual transfer of an idea into the project prompt.",
         "details": "Separate from production StudioVoice. Server-only dedicated config, local admission, one-use signed session where supported, provider60s/daily3/concurrency1 caps, no business tools or callbacks. Public template demo does not enable provider voice. Live speech acceptance remains distinct from setup and mocked tests.",
@@ -797,7 +797,7 @@
         }
       },
       {
-        "id": "23",
+        "id": 23,
         "title": "Portable playable project links without login",
         "description": "Share a snapshot of current project HTML and title in a compressed URL; recipient explicitly chooses Play without Google, database or provider calls.",
         "details": "Versioned bounded fragment codec, current build only, clear copy/manual fallback, separate demo/play reader, no execution before Play. Initial scope excludes Save copy, cloud publishing, live sync and multiplayer. Oversize projects retain HTML/backup export.",
@@ -821,7 +821,7 @@
         }
       },
       {
-        "id": "24",
+        "id": 24,
         "title": "Creative music and everyday checklist templates",
         "description": "Broaden the login-free workshop beyond games with a musical garden and a simple checklist.",
         "details": "Preset local oscillator notes start only on interaction; checklist supports bounded add/toggle/remove/reset and explicitly visit-only state. Theme/color revisions and portable links should work. No claims of persistent habits or arbitrary music generation.",
@@ -853,7 +853,7 @@
         }
       },
       {
-        "id": "25",
+        "id": 25,
         "title": "Compact template links and QR sharing",
         "description": "Offer short versioned links and locally rendered QR codes for exact built-in template snapshots, retaining full snapshot links for custom projects.",
         "details": "Frozen renderer version, strict settings and exact HTML/title equality before compact encoding. Existing v1 links remain supported. QR opens an independent playable copy, not realtime multiplayer. No external QR service, cloud shortener or provider calls. Dense/custom links retain copy/export fallback.",
@@ -883,7 +883,7 @@
         }
       },
       {
-        "id": "26",
+        "id": 26,
         "title": "Save and remix a shared project in the login-free workshop",
         "description": "Let a recipient explicitly save an independent copy of a shared snapshot to their browser shelf and open it for revisions without login, preserving existing projects and avoiding automatic execution or generation.",
         "details": "Reuse existing project backup validation and local storage persistence. Explicit user action only; independent project ID and one imported version; no prompt or conversation history; graceful storage failure and stale hash protection; no provider call until a later build action. Shared reader remains playback-only until action.",
@@ -911,7 +911,7 @@
         }
       },
       {
-        "id": "27",
+        "id": 27,
         "title": "Cancel builds through provider and prevent late saved results",
         "description": "Make the existing Cancel build action abort server-side generation and response reading, suppress late results, preserve budget reservations and leave subsequent builds usable.",
         "details": "Pass request signal to provider; combine deadlines; distinguish cancellation from provider outages; release concurrency; UI epoch/signal guards before save. No retry or budget refund for potentially dispatched paid calls.",
@@ -936,7 +936,7 @@
         }
       },
       {
-        "id": "28",
+        "id": 28,
         "title": "Browser-local project data for a remembering notes demo",
         "description": "Make a practical child-created tool retain its own small data across reopening, using a demo-only parent storage adapter and a remembering notes starter. No account or cloud database required.",
         "details": "Fixed bounded per-project browser namespace, opaque sandbox maintained, typed read/write SDK, no access to arbitrary parent storage. New copies/duplicates isolated. Explicit saving feedback and unavailable-storage fallback. Shared/exported snapshots do not include personal app data and remain usable in memory without the SDK. Keep production authenticated runtime and frozen template renderer unchanged.",
@@ -967,7 +967,7 @@
         }
       },
       {
-        "id": "29",
+        "id": 29,
         "title": "Export and restore browser-local app data",
         "description": "Let families explicitly back up a projects saved notes or other bounded runtime data separately from source backups and public sharing.",
         "details": "Versioned bounded JSON data export and explicit selected-project restore with preview of key count/size and overwrite confirmation. Never include runtime data in public share/QR or existing source backup. Validate keys, string values, byte limits and unexpected fields. Preserve unsaved current data on parse/quota/conflict failure. Restore resets preview only after successful write; existing code/history unaffected.",
@@ -997,7 +997,7 @@
         }
       },
       {
-        "id": "30",
+        "id": 30,
         "title": "Match revision guidance to available demo capabilities",
         "description": "Prevent template-only users following unsupported revision examples or trying to revise custom notes apps that need AI.",
         "details": "Classify selected build capability using existing template validation, not claimed mode label alone. Supported templates show real supported suggestions; custom/notes explain play and save remain available but changes need AI. Actual AI configuration remains able to revise custom builds. No renderer/version format change or production gate changes.",
@@ -1025,7 +1025,7 @@
         }
       },
       {
-        "id": "31",
+        "id": 31,
         "title": "Guide recovery when a generated preview reports a runtime error",
         "description": "Show a child-readable preview problem and an explicit repair or previous-version path without automatically making paid calls.",
         "details": "Bounded exact frame/session generic runtime error categories only; do not collect DOM, form values, storage or raw diagnostic text. Reset between versions, ignore stale/spoofed messages. Explicit repair prepares a generic prompt for user review, never auto-generates. Existing history restore remains available. Error-free does not imply app correctness.",
@@ -1054,7 +1054,7 @@
         }
       },
       {
-        "id": "32",
+        "id": 32,
         "title": "Enable bounded local AI replies inside created demo apps",
         "description": "Let local AI-created apps use an optional text-only AI SDK and a ready-to-play idea buddy example, without exposing provider keys or enabling paid public demo calls.",
         "details": "Local-only same-origin endpoint with server-only fixedmodel/key, max1000 input and256 outputtokens, request abort/timeouts, shared existing20-call generationbudget and concurrency. Per-preview explicit enable and max3replies; reset/revoke on project change. SDK bound to exactframe/session, no arbitrary parent fetch. Publicproduction/template mode disabled. Text rendered as text, no HTML execution. No automatic generation or AIcalls until enable+apprequest. Preserve existing production gates.",
@@ -1085,7 +1085,7 @@
         }
       },
       {
-        "id": "33",
+        "id": 33,
         "title": "Honor accepted HTML size when revising escaped JSON source",
         "description": "Fix demo revision requests rejecting valid saved HTML because JSON escaping exceeds an unrelated ingress limit.",
         "details": "Keep decoded HTML80k and prompt2000 bounds. Derive finite raw JSON envelope budget for worst-case escaping, validate fields before provider reservation. Never truncate source.",
@@ -1112,7 +1112,7 @@
         }
       },
       {
-        "id": "34",
+        "id": 34,
         "title": "Keep large-play usable on short mobile screens",
         "description": "Prevent optional app-AI and recovery panels squeezing the play iframe to near-zero height on landscape phones.",
         "details": "Allow expanded preview to scroll with a meaningful minimum iframe height. Keep back/restart and status controls reachable, no horizontal overflow. Preserve same iframe when toggling large play.",
@@ -1139,7 +1139,7 @@
         }
       },
       {
-        "id": "35",
+        "id": 35,
         "title": "Preserve unsent ideas across workshop navigation and reload",
         "description": "Keep bounded per-tab drafts for new ideas and each project so clicking a shelf card or reloading does not silently discard typed work.",
         "details": "Session-only draft map with existing2000char bound and bounded project count. Save/restore on navigation, retain on cancel/failure, clear only successful submitted draft. Handle storage failures honestly. No prompts in share/backups.",
@@ -1166,7 +1166,7 @@
         }
       },
       {
-        "id": "36",
+        "id": 36,
         "title": "Preserve custom features when AI revision falls back to templates",
         "description": "Do not regenerate a preset from a marker inside modified HTML when the provider fails.",
         "details": "Guard mutable template wrapper with exact canonical source recognition. Unknown or modified source returns unchanged original with honest message. Frozen shared renderer stays unchanged.",
@@ -1193,7 +1193,7 @@
         }
       },
       {
-        "id": "37",
+        "id": 37,
         "title": "Return keyboard focus after closing saved app data",
         "description": "Fix observed Saved app data Escape closure leaving focus on BODY. Restore invoking button for normal close and successful restore without stealing focus on unrelated project teardown.",
         "details": "UI worker observed real browser keyboard behavior at390x400. Own DemoDataBackup and focused browser check; no paid calls.",
@@ -1220,7 +1220,7 @@
         }
       },
       {
-        "id": "38",
+        "id": 38,
         "title": "Upgrade game generation to GPT-6 Sol",
         "description": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
         "details": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
@@ -1236,7 +1236,7 @@
         }
       },
       {
-        "id": "39",
+        "id": 39,
         "title": "Retry saving after transient browser storage failure",
         "description": "Explicitly retry retained in-tab shelf with baseline conflict protection; never lose drafts or overwrite external changes.",
         "details": "Explicitly retry retained in-tab shelf with baseline conflict protection; never lose drafts or overwrite external changes.",
@@ -1251,7 +1251,7 @@
         }
       },
       {
-        "id": "40",
+        "id": 40,
         "title": "Confirm replacement of unfinished ideas",
         "description": "Suggestion chips and manual Samantha idea insertion require confirmation before replacing a different nonempty draft.",
         "details": "Suggestion chips and manual Samantha idea insertion require confirmation before replacing a different nonempty draft.",
@@ -1266,7 +1266,7 @@
         }
       },
       {
-        "id": "41",
+        "id": 41,
         "title": "Local control panel entry without login",
         "description": "Make the actual control panel accessible for local development without needing user Google login; preserve public authentication and clearly label local demo capabilities.",
         "details": "Make the actual control panel accessible for local development without needing user Google login; preserve public authentication and clearly label local demo capabilities.",
@@ -1281,7 +1281,7 @@
         }
       },
       {
-        "id": "42",
+        "id": 42,
         "title": "Open local studio from external links",
         "description": "Allow top-level document navigation from an external link to the local development studio without account sign-in; retain local host and mode validation and unchanged API gates.",
         "details": "QA found external navigation to root used mutation-origin checks and could show account UI. Scope is read-only local document navigation only.",
@@ -1296,7 +1296,7 @@
         }
       },
       {
-        "id": "43",
+        "id": 43,
         "title": "Verify saved-data browser input delivery",
         "description": "Investigate CI39912845376 saved-data test retaining Unsaved changes after Save click; preserve all persistence assertions and capture actual input events.",
         "details": "Separate from the verified live model upgrade. No blind retries, synthetic clicks, weakened assertions or provider calls.",
@@ -1311,7 +1311,7 @@
         }
       },
       {
-        "id": "44",
+        "id": 44,
         "title": "V2 Docker deployment and local routing",
         "description": "Single-machine Compose with Nginx, trusted build/deploy controller, durable app volumes and deployment scripts.",
         "details": "",
@@ -1327,7 +1327,7 @@
         }
       },
       {
-        "id": "45",
+        "id": 45,
         "title": "V2 multifile app generation and deployment",
         "description": "Open-ended source generation, dependencies, immutable versions, builds and per-app persistent backend.",
         "details": "",
@@ -1342,7 +1342,7 @@
         }
       },
       {
-        "id": "46",
+        "id": 46,
         "title": "V2 responsive HeroUI studio",
         "description": "HeroUI3 with VibeBoard theme; project conversation files preview and voice on desktop/mobile.",
         "details": "",
@@ -1357,7 +1357,7 @@
         }
       },
       {
-        "id": "47",
+        "id": 47,
         "title": "V2 local account login and sessions",
         "description": "Simple username/password initial account and persistent authenticated sessions across devices.",
         "details": "",
@@ -1372,7 +1372,7 @@
         }
       },
       {
-        "id": "48",
+        "id": 48,
         "title": "V2 family landing page and theme",
         "description": "HeroUI landing for adults and children, founder story and accurately described alternatives/features.",
         "details": "",
@@ -1384,7 +1384,7 @@
         "updatedAt": "2026-10-23T09:35:57.485Z"
       },
       {
-        "id": "49",
+        "id": 49,
         "title": "V2 integrated Docker browser acceptance",
         "description": "Test real source generation build deploy data persistence through UI and document single-server handoff.",
         "details": "",
@@ -1399,7 +1399,7 @@
         "updatedAt": "2026-10-23T09:48:19.438Z"
       },
       {
-        "id": "50",
+        "id": 50,
         "title": "Family BYOK providers and model selection",
         "description": "Per-account encrypted OpenAI and Anthropic keys, account model discovery and ElevenLabs credentials.",
         "details": "",
@@ -1414,7 +1414,7 @@
         }
       },
       {
-        "id": "51",
+        "id": 51,
         "title": "Project source ZIP download",
         "description": "Download current source without node_modules, build outputs, credentials or runtime data.",
         "details": "",
@@ -1429,7 +1429,7 @@
         }
       },
       {
-        "id": "52",
+        "id": 52,
         "title": "Invite-only email OTP accounts",
         "description": "One verified email per family with shared projects across devices; implement after core deployment.",
         "details": "",
@@ -1440,11 +1440,12 @@
         "subtasks": [],
         "updatedAt": "2026-10-23T09:43:03.029Z",
         "metadata": {
-          "verification": "Invite-only OTP request/verify implemented, durable expiry/resend/attempt limits and singleuse tests pass. Two real SQLite account/session route tests isolate projects, jobs, sources, env, providers anddownloads. Chrome verifies honest uninvitederror and passwordfallback. Realemaildelivery blocked: no RESEND_API_KEY or STUDIO_MAIL_FROM configured. Userquestionpending; noemail sent."
+          "verification": "Invite-only OTP request/verify implemented, durable expiry/resend/attempt limits and singleuse tests pass. Two real SQLite account/session route tests isolate projects, jobs, sources, env, providers anddownloads. Chrome verifies honest uninvitederror and passwordfallback. Realemaildelivery blocked: no RESEND_API_KEY or STUDIO_MAIL_FROM configured. Userquestionpending; noemail sent.",
+          "publicSignupVerification": "Fresh public installations cannot bypass invitations through password setup: service and route reject registration, session reports inviteOnly=true and setupRequired=false. Existing password accounts remain usable. Regression and full V2 suites pass (24 V2 plus7 controller tests). Rebuilt Docker confirms setup403 and correct session flags. Real email delivery still requires configured sender and key."
         }
       },
       {
-        "id": "53",
+        "id": 53,
         "title": "Public runtime origin isolation",
         "description": "Separate generated application origin from studio and account/provider APIs before public rollout.",
         "details": "",
@@ -1466,7 +1467,9 @@
       "completedCount": 44,
       "tags": [
         "master"
-      ]
+      ],
+      "created": "2026-10-23T09:53:22.007Z",
+      "description": "Tasks for master context"
     }
   }
 }

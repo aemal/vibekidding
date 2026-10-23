@@ -356,7 +356,9 @@ export function V2Studio() {
     return (
       <div className="v2-root" data-theme={theme}>
         <StudioAuth
+          key={session.inviteOnly ? "invited" : "local"}
           setupRequired={session.setupRequired}
+          inviteOnly={session.inviteOnly}
           onAuthenticated={() => void loadSession()}
         />
       </div>

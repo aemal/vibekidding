@@ -1,6 +1,7 @@
 import { newSession, sameOriginMutation, sessionCookie, setupAccount } from "@/lib/v2-auth/session";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
+  if (process.env.VIBEKIDDING_PUBLIC_MODE === "1") return Response.json({ error: "This studio is invite-only. Use your invited email to sign in." }, { status: 403 });
   if (!sameOriginMutation(request)) return Response.json({ error: "Invalid request origin." }, { status: 403 });
   try {
     const body = await request.json();

@@ -37,6 +37,7 @@ export function needsSetup() {
 }
 
 export async function setupAccount(username: string, password: string): Promise<StudioUser> {
+  if (process.env.VIBEKIDDING_PUBLIC_MODE === "1") throw new Error("This studio is invite-only. Use your invited email to sign in.");
   username = username.trim().toLowerCase();
   if (!/^[a-z0-9][a-z0-9_-]{2,31}$/.test(username)) throw new Error("Use 3–32 letters, numbers, underscores or hyphens for your username.");
   if (password.length < 8 || password.length > 256) throw new Error("Use a password between 8 and 256 characters.");
