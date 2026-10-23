@@ -958,17 +958,40 @@
             "boundary": "browser-local only; no cloud or production database acceptance; release pending"
           }
         }
+      },
+      {
+        "id": 29,
+        "title": "Export and restore browser-local app data",
+        "description": "Let families explicitly back up a projects saved notes or other bounded runtime data separately from source backups and public sharing.",
+        "details": "Versioned bounded JSON data export and explicit selected-project restore with preview of key count/size and overwrite confirmation. Never include runtime data in public share/QR or existing source backup. Validate keys, string values, byte limits and unexpected fields. Preserve unsaved current data on parse/quota/conflict failure. Restore resets preview only after successful write; existing code/history unaffected.",
+        "testStrategy": "Unit schema/limits/prototype/quota/conflict checks; browser real notes export, restore to fresh project, reopen; original namespace unchanged; corrupt/oversized input no mutation; cancel no mutation; public links exclude data.",
+        "status": "in-progress",
+        "dependencies": [
+          "28"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T03:06:23.297Z",
+        "metadata": {
+          "verification": {
+            "unitTests": 276,
+            "browserChecks": 45,
+            "checks": "lint, types, production build pass",
+            "artifact": "data-backup-2026-10-23T03-11-02-178Z/report.json",
+            "boundary": "local browser evidence; no cloud sync; release pending"
+          }
+        }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T02:58:48.452Z",
-      "taskCount": 28,
+      "lastModified": "2026-10-23T03:06:23.298Z",
+      "taskCount": 29,
       "completedCount": 19,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T03:03:37.539Z",
+      "created": "2026-10-23T03:13:51.018Z",
       "description": "Tasks for master context"
     }
   }
