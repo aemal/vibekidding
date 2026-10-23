@@ -42,7 +42,7 @@ export function SharedProjectPlayer() {
     return () => { live = false; window.removeEventListener("hashchange", onHashChange); };
   }, [reviewAttempt]);
 
-  useEffect(() => { if (playing) heading.current?.focus(); }, [playing]);
+  useEffect(() => { if (playing) heading.current?.focus({ preventScroll: true }); }, [playing]);
   function cancel() {
     decodeEpoch.current++;
     // Playback-only cancellation is local state. Leave browser/router history alone.

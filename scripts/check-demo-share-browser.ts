@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
-import { chromium, expect as baseExpect, type BrowserContext, type Page } from "@playwright/test";
+import { chromium, expect as baseExpect, type BrowserContext, type Frame, type Page } from "@playwright/test";
 import { createShareUrl, decodeShareFragment } from "../src/lib/demo-share";
 import { templateProject } from "../src/lib/demo-server/template";
 import type { Project } from "../src/components/demo/project-backup";
@@ -30,6 +30,14 @@ const steps: { name: string; status: string; error?: string }[] = [];
 const violations: string[] = [];
 const pageErrors: string[] = [];
 const navigations: string[] = [];
+const interactions: unknown[] = [];
+const frameLifecycle: unknown[] = [];
+const frameIds = new WeakMap<object, number>();
+let nextFrameId = 0;
+function frameId(frame: object) {
+  if (!frameIds.has(frame)) frameIds.set(frame, ++nextFrameId);
+  return frameIds.get(frame)!;
+}
 const artifacts = new Map<string, Buffer | string>();
 let activeStep = "startup";
 async function step(name: string, action: () => Promise<void>) {
@@ -50,6 +58,12 @@ async function guard(context: BrowserContext, reader: boolean) {
   context.on("page", page => {
     page.setDefaultTimeout(15_000); page.on("pageerror", error => pageErrors.push(error.message));
     page.on("framenavigated", frame => { if (frame === page.mainFrame()) navigations.push(`${reader ? "reader" : "source"}: ${frame.url().split("#")[0]} hash-length=${new URL(frame.url()).hash.length}`); });
+    const recordFrame = (event: string, frame: Frame) => {
+      if (frame !== page.mainFrame() && frameLifecycle.length < 200) frameLifecycle.push({ event, frame: frameId(frame), at: Date.now(), reader });
+    };
+    page.on("frameattached", frame => recordFrame("frameattached", frame));
+    page.on("framenavigated", frame => recordFrame("framenavigated", frame));
+    page.on("framedetached", frame => recordFrame("framedetached", frame));
   });
 }
 async function seed(context: BrowserContext) {
@@ -67,6 +81,9 @@ async function pending(page: Page, title: string) {
 }
 async function playCounter(page: Page) {
   await page.getByRole("button", { name: "Play shared project", exact: true }).click();
+  // The reader moves focus after entering play. Finish that lifecycle action before
+  // dispatching a pointer gesture inside its cross-origin iframe.
+  await expect(page.locator("#playing-project-title")).toBeFocused();
   await expect(page.locator("iframe")).toHaveAttribute("sandbox", "allow-scripts");
   await expect(page.locator("iframe")).toHaveAttribute("referrerpolicy", "no-referrer");
   const handle = await page.locator("iframe").elementHandle();
@@ -77,8 +94,33 @@ async function playCounter(page: Page) {
   // A visible fixture button alone does not prove its inline handler has run.
   // Keep the real pointer click and Count: 1 assertion; no retry or synthetic click.
   await expect.poll(() => counter.evaluate(element => typeof (element as HTMLButtonElement).onclick)).toBe("function");
+  // Observe only this synthetic fixture, without changing its click handler.
+  await frame.evaluate(`(() => {
+    window.counterPointerEpoch = ${interactions.length};
+    window.counterPointerEvents = [];
+    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) {
+      document.addEventListener(type, event => {
+        if (window.counterPointerEvents.length < 25) window.counterPointerEvents.push({ type, target: event.target.id, x: event.clientX, y: event.clientY, at: Date.now() });
+      }, { capture: true });
+    }
+  })()`);
+  const beforePointer = {
+    iframe: await page.locator("iframe").boundingBox(),
+    parent: await page.evaluate(() => ({ scrollX, scrollY, active: document.activeElement?.tagName })),
+  };
   await counter.click();
-  await expect(page.frameLocator("iframe").getByRole("button", { name: "Count: 1", exact: true })).toBeVisible();
+  try { await expect(page.frameLocator("iframe").getByRole("button", { name: "Count: 1", exact: true })).toBeVisible(); }
+  finally {
+    interactions.push({
+      frame: frameId(frame),
+      expectedEpoch: interactions.length,
+      beforePointer,
+      iframe: await page.locator("iframe").boundingBox().catch(() => null),
+      parent: await page.evaluate(() => ({ scrollX, scrollY, active: document.activeElement?.tagName })),
+      iframeConnected: await handle!.evaluate(element => element.isConnected).catch(() => false),
+      fixture: await frame.evaluate(`({ epoch: window.counterPointerEpoch, events: window.counterPointerEvents, ready: document.readyState, text: document.getElementById('count')?.textContent })`).catch(() => ({ detached: true })),
+    });
+  }
 }
 async function main() {
   const browser = await chromium.launch({ channel: process.env.STUDIO_TEST_BROWSER || "chrome", headless: true });
@@ -240,7 +282,7 @@ async function main() {
     await browser.close();
     await mkdir(output, { recursive: true });
     for (const [name, data] of artifacts) await writeFile(path.join(output, name), data);
-    await writeFile(path.join(output, "report.json"), JSON.stringify({ timestamp: new Date().toISOString(), base: base.href, passed: !failure, activeStep, steps, violations, pageErrors, navigations, evidence: "Local browser acceptance with synthetic source shelf and real share helper/UI. No generation or voice sessions. Unexpected network requests blocked and recorded. Not production acceptance.", failure: failure ? String(failure) : undefined }, null, 2));
+    await writeFile(path.join(output, "report.json"), JSON.stringify({ timestamp: new Date().toISOString(), base: base.href, passed: !failure, activeStep, steps, violations, pageErrors, navigations, interactions, frameLifecycle, evidence: "Local browser acceptance with synthetic source shelf and real share helper/UI. No generation or voice sessions. Unexpected network requests blocked and recorded. Not production acceptance.", failure: failure ? String(failure) : undefined }, null, 2));
   }
   console.log(`Evidence: ${output}`);
   if (failure) throw failure;
