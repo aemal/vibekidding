@@ -4,7 +4,7 @@ import {build} from "esbuild";
 import {chromium} from "@playwright/test";
 async function main(){
  const admin=process.argv.includes("--admin"), parent=process.argv.includes("--parent"), play=process.argv.includes("--play");
- const result=await build({stdin:{contents:`import React from "react";import {createRoot} from "react-dom/client";import Studio from "./src/app/${admin ? "admin/" : parent ? "parents/" : play ? "play/" : ""}page";createRoot(document.getElementById("root")).render(<Studio/>);`,resolveDir:process.cwd(),loader:"tsx"},bundle:true,write:false,jsx:"automatic",loader:{".css":"empty"},define:{"process.env":"{}","process.env.NODE_ENV":'"production"'},plugins:[{name:"synthetic-auth",setup(b){
+ const result=await build({stdin:{contents:`import React from "react";import {createRoot} from "react-dom/client";import Studio from "./src/${admin ? "app/admin/page" : parent ? "app/parents/page" : play ? "app/play/page" : "components/Studio"}";createRoot(document.getElementById("root")).render(<Studio/>);`,resolveDir:process.cwd(),loader:"tsx"},bundle:true,write:false,jsx:"automatic",loader:{".css":"empty"},define:{"process.env":"{}","process.env.NODE_ENV":'"production"'},plugins:[{name:"synthetic-auth",setup(b){
   b.onResolve({filter:/^@\/lib\/studio\/browser$/},()=>({path:"auth",namespace:"fixture"}));
   b.onResolve({filter:/^next\/link$/},()=>({path:"link",namespace:"fixture"}));
   b.onLoad({filter:/.*/,namespace:"fixture"},args=>({resolveDir:process.cwd(),loader:"jsx",contents:args.path==="link"?'import React from "react";export default function Link(p){return <a {...p}/>;}':play?`
