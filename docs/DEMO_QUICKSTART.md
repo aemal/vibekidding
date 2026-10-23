@@ -32,13 +32,13 @@ npm run dev:demo
 
 Open [the template workshop](http://127.0.0.1:3217/demo). This command selects template mode and needs no AI key or database. Keep the terminal running; Ctrl-C stops that server. If the address already works, use the existing server instead of starting another on the same port.
 
-For actual local OpenAI generation, keep a working `OPENAI_API_KEY` server-side in the ignored `.env.local`, then run:
+For actual local OpenAI generation, keep a working `OPENAI_API_KEY` server-side in the ignored `.env` or `.env.local` (the latter takes precedence), then run:
 
 ```sh
 npm run dev:demo-ai
 ```
 
-Open [the AI workshop](http://127.0.0.1:3219/demo). This script selects OpenAI, disables public-template mode, binds to loopback, and uses `.next-demo-ai` separately from `.next`. Do not run a build against the same output directory as an active development server. Restart the relevant server after changing environment settings. Never paste keys into the browser, prompts, screenshots or shared files.
+Open [the AI workshop](http://127.0.0.1:3219/demo). Game creation and revisions use GPT-6 Sol with medium reasoning and a bounded 6,000-token completion budget (including reasoning). Short optional in-app AI replies retain their separate lightweight model. This script selects OpenAI, disables public-template mode, binds to loopback, and uses `.next-demo-ai` separately from `.next`. Do not run a build against the same output directory as an active development server. Restart the relevant server after changing environment settings. Never paste keys into the browser, prompts, screenshots or shared files.
 
 Read the workshop status: **AI mode configured** describes configuration, not a guarantee that a request will succeed. Provider failures can fall back to labeled templates. Customized HTML is kept unchanged when a preset cannot safely revise it. **Template build** means preset code, not an AI-generated result.
 

@@ -1218,13 +1218,85 @@
             "manual": "CUA local AI workshop Escape returned enabled Saved app data button focus; no provider calls."
           }
         }
+      },
+      {
+        "id": "38",
+        "title": "Upgrade game generation to GPT-6 Sol",
+        "description": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
+        "details": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:03:57.936Z",
+        "metadata": {
+          "verification": "Native Google Chrome computer use: actual GPT-6 Sol generation of Moon Rabbit carrot game, score3/3 win, replay reset, actual revision of title and win text, reload retained2versions, revised win verified. Two live game calls using effective key verified equal to user .env; stale .env.local override removed.29focused tests, targeted lint and TypeScript pass. PR21 pending merge. Short app-AI reply workload intentionally unchanged."
+        }
+      },
+      {
+        "id": "39",
+        "title": "Retry saving after transient browser storage failure",
+        "description": "Explicitly retry retained in-tab shelf with baseline conflict protection; never lose drafts or overwrite external changes.",
+        "details": "Explicitly retry retained in-tab shelf with baseline conflict protection; never lose drafts or overwrite external changes.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:11:10.983Z",
+        "metadata": {
+          "verification": "PR18 merged as619adad. Five actual Chrome UI flows with synthetic quota failure prove retained work, repeated failure, keyboard retry, reload persistence and stale-baseline conflict refusal. Eleven backup tests and both CI correctness jobs passed; zero provider calls."
+        }
+      },
+      {
+        "id": "40",
+        "title": "Confirm replacement of unfinished ideas",
+        "description": "Suggestion chips and manual Samantha idea insertion require confirmation before replacing a different nonempty draft.",
+        "details": "Suggestion chips and manual Samantha idea insertion require confirmation before replacing a different nonempty draft.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:21:28.304Z",
+        "metadata": {
+          "verification": "PR19 merged as86c0e18. Six focused browser checks and ten creative-template flows pass; combined six checks rerun passed. Native Google Chrome confirmation Keep my idea preserved the typed Moon Rabbit draft. Samantha insertion test uses synthetic callback, no live voice claim. GitHub correctness39909634197 passed."
+        }
+      },
+      {
+        "id": "41",
+        "title": "Local control panel entry without login",
+        "description": "Make the actual control panel accessible for local development without needing user Google login; preserve public authentication and clearly label local demo capabilities.",
+        "details": "Make the actual control panel accessible for local development without needing user Google login; preserve public authentication and clearly label local demo capabilities.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:21:33.767Z",
+        "metadata": {
+          "verification": "PR20 merged as85b08a0. User confirmed game-building studio scope. Native Google Chrome root127.0.0.1:3219 shows no-sign-in studio and retained real Sol game with2versions. Six browser checks cover root reload/shared shelf/mobile/account/nonloopback; four account browser regressions pass. Two unit tests plus combined319tests pass. GitHub correctness39910018771 passed. Public authentication retained."
+        }
+      },
+      {
+        "id": "42",
+        "title": "Open local studio from external links",
+        "description": "Allow top-level document navigation from an external link to the local development studio without account sign-in; retain local host and mode validation and unchanged API gates.",
+        "details": "QA found external navigation to root used mutation-origin checks and could show account UI. Scope is read-only local document navigation only.",
+        "testStrategy": "Real browser external-origin link click reaches local workshop; production, forwarded-host and API cross-site rejection remain verified. No provider calls.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:33:08.046Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T04:41:23.259Z",
-      "taskCount": 37,
-      "completedCount": 29,
+      "lastModified": "2026-10-23T06:33:08.046Z",
+      "taskCount": 42,
+      "completedCount": 32,
       "tags": [
         "master"
       ]

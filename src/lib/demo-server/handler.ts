@@ -30,7 +30,7 @@ export function createDemoHandlers(options: {
       return response({
         enabled: true, localOnly: !isPublic, publicTemplateOnly: isPublic, provider, mode: aiAvailable ? "ai" : "template",
         aiConfigured, providerVerified: !isPublic && providerVerified && !providerUnavailable,
-        message: isPublic ? "Public template-only demo. No AI provider is called and projects are not stored on the server." : aiAvailable ? "AI credentials are configured but availability is checked only when generating. A labeled template is used on failure." : "Offline templates are available. AI is not available in this demo process.",
+        message: isPublic ? "Public template-only demo. No AI provider is called and projects are not stored on the server." : aiAvailable ? `${provider === "openai" ? "GPT-6 Sol" : "AI"} is configured; availability is checked when generating. A labeled template is used on failure.` : "Offline templates are available. AI is not available in this demo process.",
         limits: DEMO_LIMITS, providerCallsRemaining: isPublic ? 0 : usage.remainingProviderCalls(),
       });
     },
