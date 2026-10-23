@@ -8,7 +8,7 @@ function denied(request:Request,env:DemoEnvironment){return env.NODE_ENV==='prod
 export function createAppAiHandlers(options:{environment?:()=>DemoEnvironment;usage?:DemoUsage;fetcher?:typeof fetch}={}){
  const environment=options.environment??(()=>process.env),usage=options.usage??sharedDemoUsage();
  return{
-  async GET(request:Request){const env=environment(),error=denied(request,env),configured=!error&&appAiConfigured(env);return response({enabled:!!configured&&usage.remainingProviderCalls()>0,configured:!!configured,localOnly:true,limits:APP_AI_LIMITS,providerCallsRemaining:error?0:usage.remainingProviderCalls(),...(error?{error}:{})},error?403:200)},
+  async GET(request:Request){const env=environment(),error=denied(request,env),configured=!error&&appAiConfigured(env);return response({enabled:!!configured&&usage.remainingProviderCalls()>0,configured:!!configured,localOnly:true,limits:APP_AI_LIMITS,providerCallsRemaining:error?0:usage.remainingProviderCalls(),...(error?{error}:{})})},
   async POST(request:Request){
    const env=environment(),error=denied(request,env);if(error)return response({error},403);
    if(request.headers.get('content-type')?.split(';')[0].trim().toLowerCase()!=='application/json')return response({error:'Send application/json.'},415);

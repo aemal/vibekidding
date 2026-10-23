@@ -13,7 +13,7 @@ function setup(extra:Parameters<typeof createAppAiHandlers>[0]={}){return create
 test('public, production, missing opt-in and cross-origin deny before provider or reservation',async()=>{
  for(const environment of [{...env,NODE_ENV:'production'},{...env,VIBEKIDDING_PUBLIC_TEMPLATE_DEMO:'1'},{...env,VIBEKIDDING_DEMO_APP_AI_ENABLED:'0'},{...env,VIBEKIDDING_DEMO_ENABLED:'0'},{...env,VIBEKIDDING_DEMO_PROVIDER:'template'},{...env,VIBEKIDDING_DEMO_PROVIDER:'anthropic',ANTHROPIC_API_KEY:'synthetic-anthropic'}]){
   const usage=new DemoUsage();let calls=0;const h=setup({environment:()=>environment,usage,fetcher:async()=>{calls++;return success()}});
-  assert.equal((await h.POST(req({prompt:'idea'}))).status,403);const readiness=await h.GET(req());assert.equal(readiness.status,403);assert.equal((await readiness.json()).configured,false);assert.equal(calls,0);assert.equal(usage.remainingProviderCalls(),20);
+  assert.equal((await h.POST(req({prompt:'idea'}))).status,403);const readiness=await h.GET(req());assert.equal(readiness.status,200);const state=await readiness.json();assert.equal(state.enabled,false);assert.equal(state.configured,false);assert.equal(calls,0);assert.equal(usage.remainingProviderCalls(),20);
  }
  assert.equal((await setup().POST(req({prompt:'idea'},undefined,'https://evil.test'))).status,403);
 });
