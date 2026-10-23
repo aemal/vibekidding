@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": "1",
+        "id": 1,
         "title": "Track rollout and acceptance criteria",
         "status": "done",
         "description": "Create a local Task Master backlog with explicit local versus live acceptance.",
@@ -13,7 +13,7 @@
         "subtasks": []
       },
       {
-        "id": "2",
+        "id": 2,
         "title": "Reliable notification retries",
         "status": "done",
         "description": "Lease queue jobs, freeze payloads, bound retries and expose an authenticated worker endpoint. Verify expiry, duplicate and access controls locally.",
@@ -24,7 +24,7 @@
         "subtasks": []
       },
       {
-        "id": "3",
+        "id": 3,
         "title": "Live identity and parent approval",
         "status": "blocked",
         "description": "Configure Supabase and apply reviewed migrations. Verify Google, OTP, consent gates and separate accounts.",
@@ -86,7 +86,7 @@
         ]
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Safety provider acceptance",
         "status": "blocked",
         "description": "Configure TypeSafe. Evaluate multilingual attacks, false positives and provider failure paths with reviewed fixtures and live results.",
@@ -128,7 +128,7 @@
         ]
       },
       {
-        "id": "5",
+        "id": 5,
         "title": "Live voice relay and accounting",
         "status": "in-progress",
         "description": "Server-owned duration-limited relay, private agent, authenticated usage reconciliation and replay tests. Keep voice disabled until verified.",
@@ -180,7 +180,7 @@
         ]
       },
       {
-        "id": "6",
+        "id": 6,
         "title": "Provider cost reconciliation",
         "status": "in-progress",
         "description": "Resolve ambiguous OpenAI and TypeSafe reservations using verified provider records. Never automatically refund uncertain billed requests.",
@@ -232,7 +232,7 @@
         ]
       },
       {
-        "id": "7",
+        "id": 7,
         "title": "Email delivery confirmation",
         "status": "blocked",
         "description": "Signed provider webhooks, bounce reporting and deployed schedule. Distinguish provider acceptance from delivery.",
@@ -274,7 +274,7 @@
         ]
       },
       {
-        "id": "8",
+        "id": 8,
         "title": "Generated-app AI and storage bridge",
         "status": "in-progress",
         "description": "Isolated origin, authenticated viewers, approved operations and per-viewer/app budgets.",
@@ -356,7 +356,7 @@
         ]
       },
       {
-        "id": "9",
+        "id": 9,
         "title": "Production database and multiplayer verification",
         "status": "blocked",
         "description": "Real concurrent Postgres tests, two-device multiplayer and publishing-review race tests.",
@@ -418,7 +418,7 @@
         ]
       },
       {
-        "id": "10",
+        "id": 10,
         "title": "Production readiness",
         "status": "in-progress",
         "description": "Consent eligibility, privacy retention/deletion, dependency review, deployment and end-to-end acceptance.",
@@ -510,7 +510,7 @@
         ]
       },
       {
-        "id": "11",
+        "id": 11,
         "title": "Demo milestone: backend generation",
         "description": "Worker 1: implement the scoped demo generation backend and tests.",
         "details": "Ownership: src/app/api/demo/** and src/lib/demo-server/** plus assigned tests. Support the demo contract agreed with the coordinator and UX worker. Keep provider credentials server-side. Clearly distinguish fixture/local demonstration from live provider generation; no production identity, voice, email, or storage acceptance is implied.",
@@ -522,7 +522,7 @@
         "updatedAt": "2026-10-23T00:41:29.982Z"
       },
       {
-        "id": "12",
+        "id": 12,
         "title": "Demo milestone: interactive demo UX",
         "description": "Worker 2: implement the scoped demo UI and connect it to the agreed backend contract.",
         "details": "Ownership: src/app/demo/** and src/components/demo/**. Provide an understandable creation flow, visible generation state, playable preview and useful recoverable errors. Label fixture/demo behavior honestly. Coordinate API contract with backend worker.",
@@ -534,7 +534,7 @@
         "updatedAt": "2026-10-23T00:41:29.987Z"
       },
       {
-        "id": "13",
+        "id": 13,
         "title": "Demo milestone: browser acceptance",
         "description": "Coordinator: verify the integrated demo in a real browser with reproducible evidence.",
         "details": "Verify the actual local app after backend and UX integration. Record route, viewport, generation source, successful creation and preview, error handling and any unresolved defects. Do not count mocks or build-only checks as live browser or provider acceptance.",
@@ -575,7 +575,7 @@
         }
       },
       {
-        "id": "14",
+        "id": 14,
         "title": "Demo milestone: PR integration",
         "description": "Coordinator: integrate the demo work into a reviewable pull request with accurate validation and scope.",
         "details": "Review combined changes, resolve integration conflicts, run required checks, preserve existing backlog and report remaining live-provider or deployment gates. Use user-authorized PR workflow; no production deployment is implied.",
@@ -614,7 +614,7 @@
         }
       },
       {
-        "id": "15",
+        "id": 15,
         "title": "Demo milestone: service setup and live-provider functional demo",
         "description": "Coordinator: configure the required services and verify a functional demo against the intended live provider.",
         "details": "Keep credentials in approved local secret storage, outside task data and committed files. Identify setup prerequisites and authorized provider calls before execution. Verify actual generation and preview using the integrated demo. Record provider/model and observed result without prompts containing child data or secret values. This milestone does not establish production identity, consent, voice, email, database, or deployment acceptance for tasks 3-10.",
@@ -661,7 +661,7 @@
         "updatedAt": "2026-10-23T01:09:55.088Z"
       },
       {
-        "id": "16",
+        "id": 16,
         "title": "Expand playable offline project variety",
         "description": "Provide several distinct project types for a useful demo while live providers are unavailable.",
         "details": "Add deterministic self-contained templates for learning, creative play and games with explicit supported edit controls. Preserve existing generated projects when a requested offline edit is unsupported; label all templates honestly.",
@@ -675,7 +675,7 @@
         "updatedAt": "2026-10-23T00:45:13.078Z"
       },
       {
-        "id": "17",
+        "id": 17,
         "title": "Portable project backups and demo usability",
         "description": "Let families export/import project backups and duplicate creations while keeping browser-local storage clear.",
         "details": "Validate bounded backup files, keep imported project code sandboxed, confirm overwrite/destructive actions and handle invalid files clearly. Make hosted template-demo labeling accurate.",
@@ -689,7 +689,7 @@
         "updatedAt": "2026-10-23T00:45:13.082Z"
       },
       {
-        "id": "18",
+        "id": 18,
         "title": "Optional browser voice dictation for demo prompts",
         "description": "Add explicit browser-native dictation with language selection and typing fallback; stage transcript for user review without auto-building.",
         "details": "No paid API or app audio upload. Explain browser speech service processing; cap sessions and cancel on context changes. Real microphone acceptance remains separate.",
@@ -703,7 +703,7 @@
         "updatedAt": "2026-10-23T00:58:59.095Z"
       },
       {
-        "id": "19",
+        "id": 19,
         "title": "Fix demo multi-tab saving and starter revisions",
         "description": "Prevent stale tabs from silently replacing saved projects and make all advertised starters support template revisions without fake unchanged history entries.",
         "details": "Verified two-tab overwrite and unchanged starter HTML during PR2 postmerge review. Preserve unsaved work on conflict; provide recoverable action. Regression browser tests required.",
@@ -719,7 +719,7 @@
         "updatedAt": "2026-10-23T00:58:59.100Z"
       },
       {
-        "id": "20",
+        "id": 20,
         "title": "Large play view for demo creations",
         "description": "Give kids a bigger play and drawing area with a clear return to workshop and Escape support, keeping project edits/history intact.",
         "details": "",
@@ -741,7 +741,7 @@
         }
       },
       {
-        "id": "21",
+        "id": 21,
         "title": "Same-device two-player tic-tac-toe demo",
         "description": "Add playable turn-based tic-tac-toe template for two people sharing one device, with accessible board, winner/draw/reset and template themes.",
         "details": "This is a useful offline demo feature, not acceptance of the separate Supabase realtime multiplayer task.",
@@ -761,16 +761,57 @@
           }
         },
         "updatedAt": "2026-10-23T01:09:09.406Z"
+      },
+      {
+        "id": 22,
+        "title": "Optional local Samantha voice ideation demo",
+        "description": "Add dedicated zero-tool ElevenLabs agent conversation for local supervised ideation, with explicit start/stop and manual transfer of an idea into the project prompt.",
+        "details": "Separate from production StudioVoice. Server-only dedicated config, local admission, one-use signed session where supported, provider60s/daily3/concurrency1 caps, no business tools or callbacks. Public template demo does not enable provider voice. Live speech acceptance remains distinct from setup and mocked tests.",
+        "testStrategy": "Config/route/lifecycle tests, disabled public UI, readback of dedicated agent settings, authorized provider connectivity check; no fabricated microphone acceptance.",
+        "status": "in-progress",
+        "dependencies": [
+          "15",
+          "18"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T01:15:38.033Z",
+        "metadata": {
+          "verification": {
+            "unitTests": 230,
+            "providerReadback": "Dedicated agent verified: 60s, daily3, concurrency1, no tools/hooks",
+            "liveSession": "Actual signed route200, text prompt, 2 replies and 6 audio events, provider closed1000 at60.629s without client force",
+            "microphone": "Not used or verified",
+            "public": "Voice disabled; pending PR4 deployment regression"
+          }
+        }
+      },
+      {
+        "id": 23,
+        "title": "Portable playable project links without login",
+        "description": "Share a snapshot of current project HTML and title in a compressed URL; recipient explicitly chooses Play without Google, database or provider calls.",
+        "details": "Versioned bounded fragment codec, current build only, clear copy/manual fallback, separate demo/play reader, no execution before Play. Initial scope excludes Save copy, cloud publishing, live sync and multiplayer. Oversize projects retain HTML/backup export.",
+        "testStrategy": "Codec bounds/malformed cases, six templates fit, browser sender and fresh recipient, confirmation/cancel, no paid API calls, mobile play, deployed acceptance.",
+        "status": "pending",
+        "dependencies": [
+          17,
+          20
+        ],
+        "priority": "high",
+        "subtasks": []
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T01:09:55.088Z",
-      "taskCount": 21,
+      "lastModified": "2026-10-23T01:15:38.033Z",
+      "taskCount": 22,
       "completedCount": 13,
       "tags": [
         "master"
-      ]
+      ],
+      "created": "2026-10-23T01:31:52.289Z",
+      "description": "Tasks for master context",
+      "updated": "2026-10-23T01:32:43.456Z"
     }
   }
 }

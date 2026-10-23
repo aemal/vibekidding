@@ -7,6 +7,7 @@ import { GeneratedPreview } from "@/components/GeneratedPreview";
 import { sandboxDocument } from "@/lib/studio/sandbox";
 import { starters } from "./starters";
 import { BrowserDictation } from "./BrowserDictation";
+import { DemoSamanthaVoice } from "./DemoSamanthaVoice";
 
 import { copyProject, MAX_BACKUP_BYTES, MAX_HTML, MAX_PROJECTS, MAX_VERSIONS, parseBackup, persistProjects, ProjectStorageConflictError, serializeBackup, validProjects, type Project, type Version } from "./project-backup";
 
@@ -41,6 +42,7 @@ export function DemoWorkspace() {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [readinessError, setReadinessError] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [voiceInputMode, setVoiceInputMode] = useState<"dictation" | "samantha">("dictation");
   const [speechLanguage, setSpeechLanguage] = useState("en-US");
   const [dictationContext, setDictationContext] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -301,11 +303,13 @@ export function DemoWorkspace() {
             <label htmlFor="demo-idea">{selected ? "My next change" : "My idea"}</label>
             <textarea ref={promptRef} id="demo-idea" placeholder={selected ? "Make it feel like a magical forest…" : "A game where a panda collects stars…"} value={prompt} maxLength={promptLimit} onChange={e => setPrompt(e.target.value)} disabled={locked || !loaded} />
             {!selected && <div className="demo-prompt-suggestions" role="group" aria-label="Idea suggestions">{promptSuggestions.map(idea => <button key={idea.label} type="button" disabled={locked || !loaded} onClick={() => { setPrompt(idea.prompt); promptRef.current?.focus(); }}>{idea.label}</button>)}</div>}
-            <div className="demo-dictation-area">
+            <div className="demo-voice-mode" role="group" aria-label="Optional voice mode"><button type="button" aria-pressed={voiceInputMode === "dictation"} onClick={() => setVoiceInputMode("dictation")}>Dictate text</button><button type="button" aria-pressed={voiceInputMode === "samantha"} onClick={() => setVoiceInputMode("samantha")}>Talk with Samantha</button></div>
+            <div className="demo-dictation-area" hidden={voiceInputMode !== "dictation"}>
               <label htmlFor="demo-speech-language">Dictation language<select id="demo-speech-language" value={speechLanguage} disabled={locked || !loaded} onChange={e => setSpeechLanguage(e.target.value)}>{speechLanguages.map(language => <option key={language.value} value={language.value}>{language.label}</option>)}</select></label>
-              <BrowserDictation disabled={locked || !loaded || !!dialog || expandedPlay} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { setPrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
+              <BrowserDictation disabled={locked || !loaded || !!dialog || expandedPlay || voiceInputMode !== "dictation"} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { setPrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
               <p className="demo-fine">Review and edit the words above, then use the build button. Dictation never starts a build. Language availability depends on your browser and speech service.{readiness?.mode === "template" ? " Template instructions currently work best in English; dictation does not translate them." : ""}</p>
             </div>
+            <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || !!dialog || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={text => { setPrompt(text.slice(0, promptLimit)); promptRef.current?.focus(); }} /></div>
             <div className="demo-input-foot"><span>No personal details, just imagination.</span><span>{prompt.length}/{promptLimit}</span></div>
             <button className="demo-primary" type="submit" disabled={locked || !loaded || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
             {busy && <button type="button" className="demo-text-button demo-cancel" onClick={() => requestRef.current?.abort()}>Cancel build</button>}
