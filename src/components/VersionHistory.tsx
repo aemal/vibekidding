@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { History, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Version } from "@/types";
 import { useUser } from "@/lib/UserContext";
@@ -22,26 +22,23 @@ export default function VersionHistory({
   const [restoringId, setRestoringId] = useState<string | null>(null);
   const [confirmRestoreId, setConfirmRestoreId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchVersions();
-    }
-  }, [isOpen, projectId]);
-
-  const fetchVersions = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/projects/${projectId}/versions`);
-      if (response.ok) {
+  const fetchVersions = useCallback((signal?: AbortSignal) => {
+    return fetch(`/api/projects/${projectId}/versions`, { signal })
+      .then(async response => {
+        if (!response.ok) return;
         const data = await response.json();
-        setVersions(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch versions:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        if (!signal?.aborted) setVersions(data);
+      })
+      .catch(error => { if (!signal?.aborted) console.error("Failed to fetch versions:", error); })
+      .finally(() => { if (!signal?.aborted) setIsLoading(false); });
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const controller = new AbortController();
+    void fetchVersions(controller.signal);
+    return () => controller.abort();
+  }, [isOpen, fetchVersions]);
 
   const handleRestoreConfirm = async (versionId: string) => {
     setConfirmRestoreId(null);
@@ -88,7 +85,7 @@ export default function VersionHistory({
     <div className="mt-4 md:mt-6">
       {/* Toggle button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => { if (!isOpen) setIsLoading(true); setIsOpen(!isOpen); }}
         className="w-full flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 hover:border-blue-300 transition-colors"
       >
         <div className="flex items-center gap-2">

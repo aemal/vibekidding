@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useHydrated } from "@/lib/useHydrated";
 import { createPortal } from "react-dom";
 import { AlertTriangle, X } from "lucide-react";
 
@@ -44,13 +45,8 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const styles = variantStyles[confirmVariant];
-
-  // Ensure we're mounted on client
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Handle escape key
   useEffect(() => {

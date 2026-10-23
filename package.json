@@ -2,37 +2,71 @@
   "name": "vibekidding",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.22 <23"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:studio": "tsx --test tests/studio.test.ts tests/parent-guard.test.ts tests/mail-queue.test.ts tests/mail-webhook.test.ts tests/guard-evaluation.test.ts tests/supervised-mutations.test.ts tests/privacy-maintenance.test.ts tests/safety-revision.test.ts tests/database-boundaries.test.ts tests/identity-changes.test.ts tests/request-body.test.ts tests/prisma-config.test.ts tests/mail-provider.test.ts tests/model-pricing.test.ts tests/settlement.test.ts tests/voice-policy.test.ts tests/voice-watchdog.test.ts tests/voice-admission.test.ts tests/voice-database-watchdog.test.ts tests/billing-import.test.ts tests/deletion-request.test.ts tests/setup-cli.test.ts tests/app-capability-policy.test.ts tests/published-project.test.ts tests/parent-control.test.ts tests/voice-output-gate.test.ts tests/billing-confirmation.test.ts tests/published-storage.test.ts tests/app-storage-dispatcher.test.ts",
+    "typecheck": "tsc --noEmit",
+    "setup:release": "tsx scripts/check-studio-setup.ts --strict",
+    "setup:check": "tsx scripts/check-studio-setup.ts",
+    "guard:evaluate": "tsx scripts/evaluate-guard.ts",
+    "test:preview-browser": "tsx --tsconfig scripts/browser-tsconfig.json scripts/check-preview-browser.ts",
+    "test:postgres-concurrency": "tsx scripts/check-postgres-concurrency.ts",
+    "test:parent-browser": "tsx scripts/check-parent-expiry-browser.ts",
+    "billing:import": "tsx scripts/import-provider-billing.ts",
+    "setup:database": "tsx scripts/check-studio-database.ts",
+    "test:account-browser": "tsx scripts/check-studio-account-browser.ts && tsx scripts/check-studio-account-browser.ts --admin && tsx scripts/check-studio-account-browser.ts --parent && tsx scripts/check-studio-account-browser.ts --play",
+    "test:publication-browser": "tsx scripts/check-publication-browser.ts",
+    "test:storage-bridge-browser": "tsx scripts/check-storage-bridge-browser.ts",
+    "test:runtime-shell-browser": "tsx scripts/check-runtime-shell-browser.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
+    "@elevenlabs/react": "^1.18.0",
+    "@next/env": "^16.4.2",
     "@prisma/adapter-better-sqlite3": "^7.2.0",
-    "@prisma/client": "6.19.1",
+    "@prisma/client": "6.19.3",
+    "@supabase/supabase-js": "^2.118.0",
     "better-sqlite3": "^12.5.0",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.562.0",
-    "next": "16.1.1",
+    "next": "^16.4.2",
     "openai": "^6.15.0",
-    "prisma": "6.19.1",
+    "prisma": "6.19.3",
+    "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "svix": "^2.8.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
+    "esbuild": "0.28.2",
     "eslint": "^9",
-    "eslint-config-next": "16.1.1",
+    "eslint-config-next": "^16.4.2",
+    "pg": "^8.23.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@prisma/config@6.19.3": {
+      "deepmerge-ts": "8.0.2"
+    }
   }
 }

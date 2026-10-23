@@ -1,0 +1,31 @@
+# Continuous repository checks
+
+`.github/workflows/studio-checks.yml` defines pull-request, push and manual checks with read-only repository permission and pinned action revisions. It is local source only: no push, GitHub run, branch protection or deployment has been performed.
+
+The correctness job installs from the lockfile on Node >=22.22 within major 22, runs embedded SQL/unit tests, builds and type-checks the app, installs PostgreSQL and Playwright Chromium, and runs the isolated concurrency and preview-browser checks. A dummy loopback database URL supports Prisma generation; application/provider secrets are neither supplied nor needed. The child-safety gate stays closed. Browser fixtures select Chromium in CI; local runs default to installed Chrome.
+
+A separate dependency-audit job fails on high-severity advisories. Five high audit entries remain at the time of writing; an otherwise passing build must not be described as an all-green workflow. Repository owners still need to configure required checks after a real run. CI does not deploy or apply migrations to Supabase.
+
+Local validation: Node 22.23.3 is installed and pinned in `.nvmrc`; package engines match CI's supported range. All 66 embedded/unit checks, ten separate-connection PostgreSQL scenarios, production build, TypeScript and installed-Chrome preview isolation passed on this runtime. Bundled Chromium 156.0.8078.4 now also passes preview isolation and parent history clearing against a separate local production server. Targeted lint, TypeScript and workflow YAML validation pass after this addition. Hosted Linux execution remains unverified. Existing development processes are not automatically upgraded by `nvm use`; restart them from a shell using the pinned runtime when needed.
+
+The workflow now starts the built app on loopback port 3218, waits up to 30 readiness attempts, checks parent history clearing after expiry and server rejection, and stops that server on exit. The parent fixture mocks account responses and aborts other API traffic. This verifies UI privacy behavior, not real OTP, consent or Supabase integration. The local production fixture was stopped afterward; the user's development server was left running.
+
+References: https://github.com/actions/checkout , https://github.com/actions/setup-node and https://playwright.dev/docs/ci-intro .
+
+Full-project lint cleanup (2026-10-20): legacy hook ordering, portal hydration, editor prop reset and internal navigation findings were repaired without disabling rules. The workflow now runs `npm run lint -- --max-warnings=0`. Local full lint, typecheck and production build pass. This does not establish a hosted CI run or clear the separately tracked dependency advisories.
+
+## Strict local release prerequisite check
+
+Run `npm run setup:release` before considering deployment. It uses production env-file precedence and exits 2 if any configuration or required review item is unresolved. `npm run --silent setup:release -- --json` emits a sanitized structured report with no configuration values. Unknown flags exit 1. The original `setup:check` remains informational and exits successfully after displaying its findings.
+
+This check makes no provider calls and cannot approve launch. Consent and voice acceptance remain explicit review blockers even when environment flags or credentials are present. Passing configuration checks must never substitute for live provider, guardian, deployment or privacy acceptance. The current checkout intentionally fails strict mode with nine missing/review items.
+
+Account-switch privacy fixture: `npm run test:account-browser` bundles the actual Studio component into an isolated loopback page with a synthetic auth/API adapter. It starts a delayed generation, changes account, releases the old response and confirms the private preview, prompt and project list do not return, then checks sign-out. External requests are blocked. Use `STUDIO_TEST_BROWSER=chromium` for the bundled CI browser; Chrome is the local default. This verifies client state cleanup and stale-result rejection, not live Supabase authentication or provider cancellation. The fixture uses directly pinned esbuild 0.28.2 (already present transitively); it does not change production bundling.
+
+The account browser command also runs an Admin component fixture (`--admin`). A delayed privileged refresh is held while authentication changes and subsequent admin access is rejected, then released. The test verifies family email data and admin controls stay cleared. Admin now resets its private state on auth changes, rejects stale loads/catalog results and clears the panel on action/load failures. Synthetic adapter only; this does not prove live role-change propagation or server authorization.
+
+The account command now also runs Parent controls (`--parent`). With a family history refresh held in flight, a synthetic account change clears history, rules and code state. Releasing the old response must not restore it. Parent controls invalidates pending operations on authentication changes, expiry and unmount; reload sequencing prevents older refreshes replacing newer ones. This complements the separate expiry/403 fixture. These fixtures do not claim real OTP or cross-tab provider behavior.
+
+Multiplayer account isolation is included as `--play`: the actual game component receives a synthetic room, starts a delayed move, then switches accounts before releasing the move and an old realtime callback. The fixture requires the board, QR/invite state and room code to remain cleared. Authentication changes invalidate actions and room subscriptions; stale QR generation and refresh callbacks are also ignored. A failed action clears the room view. This is local client behavior, not real two-device Supabase realtime acceptance.
+
+The Play account fixture additionally injects a rejected room read and a stalled read that ignores cancellation. A controlled browser clock verifies only one refresh remains in flight, the ten-second deadline clears the board/invite, and late read/realtime callbacks cannot restore cleared state. The actual component passes in bundled Chromium; TypeScript, full zero-warning lint and production build also pass. This is synthetic transport evidence, not two-device or deployed Supabase acceptance.

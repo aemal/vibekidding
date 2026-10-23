@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, Check, Save, RotateCcw, Code2 } from "lucide-react";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 
 interface EditableCodeViewProps {
   code: string;
@@ -21,11 +21,12 @@ export default function EditableCodeView({
   const [hasChanges, setHasChanges] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Sync editedCode when code prop changes
-  useEffect(() => {
+  const [previousCode, setPreviousCode] = useState(code);
+  if (previousCode !== code) {
+    setPreviousCode(code);
     setEditedCode(code);
     setHasChanges(false);
-  }, [code]);
+  }
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(isEditable ? editedCode : code);
@@ -164,4 +165,5 @@ export default function EditableCodeView({
     </div>
   );
 }
+
 

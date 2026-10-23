@@ -1,0 +1,21 @@
+# Supervised mutations and publishing review
+
+Migration 006 closes the gap between a successful API precheck and the later database mutation. Apply migrations 001 through 006 in order to the reviewed Supabase project. No live migration was performed during implementation.
+
+Project creation, fixed-schema record writes and room creation now acquire the account lock and recheck approval, verified email, consent and supervision expiry. Wall time is checked after acquiring the lock, so waiting for a lock cannot authorize an already expired session. The original implementation functions were renamed and execution revoked even from service_role; only the checked security-definer wrappers invoke them.
+
+Room actions lock the acting account, host and existing guest in sorted UUID order. Both families must have active supervised sessions. If membership changes while the locks are acquired, the caller must refresh and retry. Membership, room expiry, turn order and board validity remain checked. The authenticated read/realtime policy also hides a room if either family's eligibility or supervision is no longer valid. The UI clears an unavailable room on its next refresh, at most the polling interval plus network time; it cannot recall already rendered content or guarantee an instantaneous disconnect.
+
+Publishing now uses a single transactional RPC that locks the owner then the project, verifies current approval/email verification/consent, requires a requested review and nonempty HTML, and compares the exact reviewed HTML. The publish/unpublish action writes an audit entry. Admin identity is established by the server before calling this service-only procedure. Public project lookup joins the project and currently eligible owner in a single database snapshot; revoking consent or email verification hides the publication on subsequent requests. Existing open iframe content cannot be recalled.
+
+Local embedded PostgreSQL tests apply the complete migration chain and verify expired sessions, paused peers, RLS visibility, unavailable unchecked routines, stale publication reviews, revoked approval/consent and audit entries. These do not substitute for concurrent real PostgreSQL connections, Supabase Realtime acceptance or two-device testing. Those remain Task Master item 9.
+
+## In-flight generation invalidation
+
+Migration 008 adds a monotonically increasing safety revision to each family profile. Changes to approval, verified-email state, consent, session expiry/pause or family rules increment it, even if a later update restores the previous settings. Direct attempts to reset the revision are ignored. Credit updates do not increment it.
+
+Generation passes its initial profile revision to the guarded save transaction. The transaction locks the profile, checks supervision against wall time, compares the revision and rules, then checks the original project content before saving. A pause/resume or change/restore therefore invalidates an older result. The prior SQL signature is removed to prevent omission of the revision. Deploy migration 008 and the route update together; an older route will fail closed after the migration.
+
+This prevents stale results from being saved or returned as a project. It does not cancel provider requests already in flight, erase guardian-only safety history, or refund real provider costs. Previously delivered content cannot be recalled. Live concurrent provider/session testing remains outstanding; local fixtures cover pause/resume, rule restoration, stale content, expiry and denied browser access.
+
+Migration 009 extends the revision check to paid reservations. OpenAI generation uses the initial request revision; TypeSafe uses the revision of the rules submitted for classification. Under the profile lock, the new reservation procedure checks current wall-clock supervision and the expected revision before the existing atomic credit/cap logic. The unchecked helper is not executable by service or browser roles. Credit updates leave the safety revision unchanged. Deploy both server call-site updates with migration 009; the old reservation signature is no longer available. This blocks stale requests at reservation time, not provider calls already sent or a pause occurring after the transaction commits.

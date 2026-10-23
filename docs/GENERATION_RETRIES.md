@@ -1,0 +1,11 @@
+# Build request retries
+
+Migration 013 claims each client-generated build request UUID before the paid safety classifier or generator can run. The service-only transaction checks current supervision, safety revision and project ownership. The UUID is unique, so overlapping or later retries of the same request are rejected before any further paid checks. This is request admission, not a cached-response or automatic-resume mechanism.
+
+Claims store identifiers, revision and timestamp only, not prompts or generated content. They persist with the project/account (cascade on deletion). A failed request remains claimed: the client must deliberately start a new request with a new UUID. An uncertain provider charge is still held for reconciliation; a retry never implies an automatic refund. Requests with different UUIDs remain separate intentional builds and are subject to existing balance/daily caps.
+
+Deploy migration 013 with the generation route update. Local tests cover duplicate IDs, wrong project ownership and stale revisions. The actual PostgreSQL concurrency runner additionally proves that overlapping claims admit only one request. No live provider retry or billing acceptance has been performed.
+
+Before claiming a request or invoking paid safety checks, the route now verifies the account model grant, bounded numeric pricing, a valid review timestamp no older than thirty days (and not in the future), and catalog availability. Invalid choices are not charged for a preliminary safety evaluation. Model choices also omit invalid/stale pricing. The atomic database reservation still rechecks grants before generation spending; this preflight does not cancel provider work already in flight or eliminate every revocation race.
+
+Migration 018 tightens settlement replay behavior: only identical charge and token evidence may replay successfully. Conflicting settled values are rejected without rewriting balances or usage. Null/negative charges, negative tokens and partially missing token pairs are rejected before mutation. Paired unknown token counts remain valid for administrator-reviewed provider reconciliation, which cannot invent counts. This does not add automatic provider billing import.

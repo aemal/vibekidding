@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useHydrated } from "@/lib/useHydrated";
 import { createPortal } from "react-dom";
 import { X, Globe, Mic, Bot, Search } from "lucide-react";
 
@@ -111,23 +112,11 @@ const claudeStrongLanguages = [
 ];
 
 export default function LanguagesModal({ isOpen, onClose }: LanguagesModalProps) {
+  const mounted = useHydrated();
+  return isOpen && mounted ? <OpenLanguagesModal onClose={onClose} /> : null;
+}
+function OpenLanguagesModal({onClose}: Pick<LanguagesModalProps, "onClose">) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [mounted, setMounted] = useState(false);
-
-  // Handle client-side mounting for portal
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
-
-  // Reset search when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setSearchTerm("");
-    }
-  }, [isOpen]);
-
-  if (!isOpen || !mounted) return null;
 
   const filteredLanguages = whisperLanguages.filter((lang) =>
     lang.name.toLowerCase().includes(searchTerm.toLowerCase())

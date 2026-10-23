@@ -1,0 +1,81 @@
+name: Studio checks
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: studio-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  correctness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # Synthetic URL for Prisma generation only. No application database is contacted.
+      DATABASE_URL: postgresql://fixture:fixture@127.0.0.1:1/unused
+      STUDIO_CHILD_SAFETY_APPROVED: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
+      STUDIO_TEST_BROWSER: chromium
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '>=22.22 <23'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint -- --max-warnings=0
+      - run: npm run test:studio
+      - run: npm run build
+      - run: npm run typecheck
+      - name: Install isolated test prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+          echo "$(pg_config --bindir)" >> "$GITHUB_PATH"
+          npx playwright install --with-deps chromium
+      - run: npm run test:postgres-concurrency
+      - run: npm run test:preview-browser
+      - run: npm run test:runtime-shell-browser
+      - run: npm run test:storage-bridge-browser
+      - run: npm run test:publication-browser
+      - run: npm run test:account-browser
+      - name: Check parent history clearing in the production UI
+        env:
+          STUDIO_TEST_URL: http://127.0.0.1:3218
+        run: |
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3218 > /tmp/studio-parent-ui.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 30); do
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat /tmp/studio-parent-ui.log
+              exit 1
+            fi
+            if curl --fail --silent http://127.0.0.1:3218/parents > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            cat /tmp/studio-parent-ui.log
+            exit 1
+          fi
+          npm run test:parent-browser
+  dependency-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '>=22.22 <23'
+      # Deliberately fail on known high findings; do not hide them behind a passing build.
+      - run: npm audit --audit-level=high

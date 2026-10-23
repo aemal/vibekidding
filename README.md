@@ -1,6 +1,8 @@
+> **Studio upgrade (local, not deployed):** See [setup, verification and launch blockers](docs/STUDIO_SETUP.md). The new studio is at `/`; `/v1` preserves the former dashboard as an archive with legacy APIs disabled. The original documentation below describes the prior app.
+
 # 🎮 VibeKidding
 
-**The Vibe Coding Playground for Kids!** — A magical voice-powered platform where children speak their ideas and watch them come to life! ✨
+**The Vibe Coding Playground for Kids!** - A magical voice-powered platform where children speak their ideas and watch them come to life! ✨
 
 🌐 **Live Demo**: [vibekidding.aemalsayer.com](https://vibekidding.aemalsayer.com)
 
@@ -13,7 +15,7 @@
 
 ### 👨‍💻 About This Project
 
-This project was built by **[Aemal Sayer](https://linkedin.com/in/aemal)** for his 7 years old son during Christmas break 2025 — in just a few hours using vibe coding! 🎄
+This project was built by **[Aemal Sayer](https://linkedin.com/in/aemal)** for his 7 years old son during Christmas break 2025 - in just a few hours using vibe coding! 🎄
 
 **Want more Vibe Coding, n8n tips & tricks?**
 - 🔗 Follow Aemal on **[LinkedIn](https://linkedin.com/in/aemal)**
@@ -30,19 +32,19 @@ This project was built by **[Aemal Sayer](https://linkedin.com/in/aemal)** for h
 - **⭐ Starred Languages**: Languages with excellent AI support are highlighted for best results
 
 ### 🎤 Voice & Keyboard Input
-- **🎤 Voice Mode**: Kids speak their ideas naturally — just click and talk!
-- **⌨️ Typing Mode**: Type your ideas if you prefer — great for detailed instructions
+- **🎤 Voice Mode**: Kids speak their ideas naturally - just click and talk!
+- **⌨️ Typing Mode**: Type your ideas if you prefer - great for detailed instructions
 - **🔀 Easy Toggle**: Switch between voice and typing modes instantly
 
 ### 🤖 AI-Powered Generation
 - **Claude Sonnet 4.5**: State-of-the-art AI generates kid-friendly web pages
-- **Context-Aware Updates**: Build on your existing creations — the AI remembers what you've made
+- **Context-Aware Updates**: Build on your existing creations - the AI remembers what you've made
 - **Auto-Naming**: First creations automatically get fun titles based on your request
 
 ### 🎮 3D Game Support
 - **Three.js via CDN**: Create 3D games and experiences without any setup
 - **Colorful Objects**: Drag-to-rotate camera controls with fun animations
-- **No Installation**: Everything loads automatically — just ask for 3D!
+- **No Installation**: Everything loads automatically - just ask for 3D!
 
 ### 👀 Live Preview & Code View
 - **Instant Preview**: See your creations come to life in real-time
@@ -145,7 +147,7 @@ When kids ask for 3D content, the AI automatically uses Three.js via CDN:
 - 3D games with colorful objects
 - Drag-to-rotate camera controls
 - Fun animations (spinning, bouncing, floating)
-- No installation needed — everything loads from CDN!
+- No installation needed - everything loads from CDN!
 
 ---
 
@@ -248,7 +250,7 @@ Languages are configured in:
 
 ## 📝 License
 
-MIT License — Feel free to use this for teaching kids to code!
+MIT License - Feel free to use this for teaching kids to code!
 
 ---
 
