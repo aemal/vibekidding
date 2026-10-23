@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Check, Copy, Download, History, LoaderCircle, Maximize2, Pencil, Plus, RotateCcw, Share2, Sparkles, Trash2, Upload, X } from "lucide-react";
 import { DemoProjectPreview } from "./DemoProjectPreview";
 import { DemoDataBackup } from "./DemoDataBackup";
+import { revisionGuidance } from "@/lib/demo-revision-guidance";
 import { notesStarter } from "@/lib/demo-notes-starter";
 import { deleteProjectData } from "@/lib/demo-project-storage";
 import { sandboxDocument } from "@/lib/studio/sandbox";
@@ -110,6 +111,7 @@ export function DemoWorkspace() {
   const generationEpoch = useRef(0);
   const selected = projects.find(p => p.id === selectedId);
   const current = selected?.versions.at(-1);
+  const revision = revisionGuidance(readiness?.mode, current?.html);
   const promptLimit = Math.min(2000, Math.max(1, readiness?.limits?.promptCharacters || 2000));
 
   useEffect(() => {
@@ -371,7 +373,7 @@ export function DemoWorkspace() {
     setError(message);
   }
   async function generate() {
-    if (!prompt.trim() || busyRef.current || readiness?.enabled === false) return;
+    if (!prompt.trim() || busyRef.current || readiness?.enabled === false || revision.blocked) return;
     if (!selected && projects.length >= MAX_PROJECTS) { setError("Your shelf is full! Export and delete a project to make room."); return; }
     busyRef.current = true; setBusy(true); setError(""); setMessage("");
     const controller = new AbortController(); requestRef.current = controller;
@@ -488,26 +490,26 @@ export function DemoWorkspace() {
       <div className="demo-workspace">
         <section className="demo-panel demo-composer" aria-labelledby="idea-heading">
           <div className="demo-section-heading"><span className="demo-step">01 / IMAGINE</span>{selected && <button className="demo-text-button" onClick={newProject} disabled={locked}><Plus size={15} /> New idea</button>}</div>
-          <h2 id="idea-heading">{selected ? "What shall we change?" : "What’s your big little idea?"}</h2>
-          <p>{selected ? (readiness?.mode === "template" ? "Try a named color or a space, ocean or garden theme. Memory, addition and collector games also support easier or harder challenges." : "Try a new color, add a character, or dream up a new twist.") : "A game, an adventure, a tiny tool. Start with whatever makes you curious."}</p>
+          <h2 id="idea-heading">{selected ? revision.blocked ? "Keep exploring your project" : "What shall we change?" : "What’s your big little idea?"}</h2>
+          <p>{selected ? revision.description : "A game, an adventure, a tiny tool. Start with whatever makes you curious."}</p>
           <div className="demo-readiness" role="status"><strong>{readiness ? !readiness.enabled ? "Prompt builds are unavailable" : readiness.mode === "template" ? (readiness.publicTemplateOnly ? "Templates ready · no AI calls" : "Offline templates ready") : "AI mode configured" : readinessError ? "Build service status unavailable" : "Checking the workshop…"}</strong><span>{readiness?.message || (readinessError ? "You can still use the ready-to-play starters below." : readiness ? "Ready-to-play starters also work without AI." : "Ready-to-play starters are available below.")}</span></div>
           <form onSubmit={e => { e.preventDefault(); void generate(); }}>
             <label htmlFor="demo-idea">{selected ? "My next change" : "My idea"}</label>
-            <textarea ref={promptRef} id="demo-idea" placeholder={selected ? "Make it feel like a magical forest…" : "A game where a panda collects stars…"} value={prompt} maxLength={promptLimit} onChange={e => setPrompt(e.target.value)} disabled={locked || !loaded} />
+            <textarea ref={promptRef} id="demo-idea" placeholder={selected ? revision.placeholder : "A game where a panda collects stars…"} value={prompt} maxLength={promptLimit} onChange={e => setPrompt(e.target.value)} disabled={locked || !loaded || revision.blocked} />
             {!selected && <div className="demo-prompt-suggestions" role="group" aria-label="Idea suggestions">{promptSuggestions.map(idea => <button key={idea.label} type="button" disabled={locked || !loaded} onClick={() => { setPrompt(idea.prompt); promptRef.current?.focus(); }}>{idea.label}</button>)}</div>}
             <div className="demo-voice-mode" role="group" aria-label="Optional voice mode"><button type="button" aria-pressed={voiceInputMode === "dictation"} onClick={() => setVoiceInputMode("dictation")}>Dictate text</button><button type="button" aria-pressed={voiceInputMode === "samantha"} onClick={() => setVoiceInputMode("samantha")}>Talk with Samantha</button></div>
             <div className="demo-dictation-area" hidden={voiceInputMode !== "dictation"}>
               <label htmlFor="demo-speech-language">Dictation language<select id="demo-speech-language" value={speechLanguage} disabled={locked || !loaded} onChange={e => setSpeechLanguage(e.target.value)}>{speechLanguages.map(language => <option key={language.value} value={language.value}>{language.label}</option>)}</select></label>
-              <BrowserDictation disabled={locked || !loaded || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "dictation"} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { setPrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
+              <BrowserDictation disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "dictation"} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { setPrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
               <p className="demo-fine">Review and edit the words above, then use the build button. Dictation never starts a build. Language availability depends on your browser and speech service.{readiness?.mode === "template" ? " Template instructions currently work best in English; dictation does not translate them." : ""}</p>
             </div>
-            <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={text => { setPrompt(text.slice(0, promptLimit)); promptRef.current?.focus(); }} /></div>
+            <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={text => { setPrompt(text.slice(0, promptLimit)); promptRef.current?.focus(); }} /></div>
             <div className="demo-input-foot"><span>No personal details, just imagination.</span><span>{prompt.length}/{promptLimit}</span></div>
-            <button className="demo-primary" type="submit" disabled={locked || !loaded || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
+            <button className="demo-primary" type="submit" disabled={locked || !loaded || revision.blocked || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : revision.blocked ? "Changes need AI mode" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
             {busy && <button type="button" className="demo-text-button demo-cancel" onClick={() => cancelGeneration()}>Cancel build</button>}
           </form>
-          <p className="demo-fine">{readiness?.mode === "template" ? "Templates support memory match, drawing, addition quizzes, preset branching stories, collector games, two-player tic-tac-toe on the same device, a music garden with no autoplay, and checklists whose checkmarks last only for the preview visit. Changes use supported themes and colors; custom code changes need AI. " : "Builds are labeled AI or template when ready. "}Nothing is published from this demo.</p>
-          <div className="demo-small-spark"><span>✧</span><p>{readiness?.mode === "template" ? "Try “blue ocean” or “easy memory game.”" : "Try “make it blue” or “add a score.”"}<br />Small changes can make a big difference.</p></div>
+          <p className="demo-fine">{revision.blocked ? "Play, notes, and saved app data controls remain available for this project. " : readiness?.mode === "template" ? "Templates support memory match, drawing, addition quizzes, preset branching stories, collector games, two-player tic-tac-toe on the same device, a music garden with no autoplay, and checklists whose checkmarks last only for the preview visit. Changes use supported themes and colors; custom code changes need AI. " : "Builds are labeled AI or template when ready. "}Nothing is published from this demo.</p>
+          <div className="demo-small-spark"><span>✧</span><p>{revision.blocked ? "Choose New idea to start a template project." : readiness?.mode === "template" ? "Try “blue ocean” or “easy memory game.”" : "Try “make it blue” or “add a score.”"}<br />Small changes can make a big difference.</p></div>
         </section>
         <dialog ref={playDialogRef} open className={`demo-panel demo-preview-panel demo-play-dialog${expandedPlay ? " is-expanded" : ""}`} aria-labelledby="preview-heading" aria-modal={expandedPlay ? true : undefined} aria-busy={busy} onCancel={e => { e.preventDefault(); closeLargePlay(); }}>
           <div className="demo-preview-toolbar"><div><span className="demo-step">02 / PLAY & EXPLORE</span><h2 id="preview-heading">{selected?.title || "A little space for big possibilities"}</h2></div>{current && <div className="demo-play-toolbar-actions"><span className={`demo-mode ${current.mode}`}>{versionLabel(current.mode)}</span><button ref={playToggleRef} type="button" className="demo-secondary" disabled={locked} onClick={expandedPlay ? closeLargePlay : openLargePlay}>{expandedPlay ? <ArrowLeft size={15} /> : <Maximize2 size={15} />}{expandedPlay ? "Back to workshop" : "Play large"}</button></div>}</div>
