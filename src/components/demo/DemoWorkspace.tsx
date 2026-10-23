@@ -67,6 +67,8 @@ export function DemoWorkspace() {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [readinessError, setReadinessError] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [pendingIdea, setPendingIdea] = useState<{ text: string; projectId: string | null; previous: string } | null>(null);
+  const ideaDialog = useRef<HTMLDialogElement>(null);
   const [draftNotice, setDraftNotice] = useState("");
   const drafts = useRef(emptyDrafts());
   const draftProjectIds = useRef<string[]>([]);
@@ -387,7 +389,38 @@ export function DemoWorkspace() {
     setPrompt(text);
     persistDrafts();
   }
+  useEffect(() => {
+    if (pendingIdea) ideaDialog.current?.showModal();
+    else ideaDialog.current?.close();
+  }, [pendingIdea]);
+  function closeIdeaChoice() {
+    ideaDialog.current?.close();
+    setPendingIdea(null);
+    promptRef.current?.focus();
+  }
+  function insertIdea(text: string) {
+    if (locked || !loaded) return;
+    const next = text.slice(0, promptLimit);
+    const previous = draftText(drafts.current);
+    if (previous.trim() && previous !== next) {
+      setPendingIdea({ text: next, projectId: drafts.current.activeProjectId, previous });
+      return;
+    }
+    updatePrompt(next);
+    promptRef.current?.focus();
+  }
+  function confirmIdeaChoice() {
+    if (!pendingIdea || locked) return;
+    if (pendingIdea.projectId !== drafts.current.activeProjectId || pendingIdea.previous !== draftText(drafts.current)) {
+      closeIdeaChoice();
+      setError("Your idea changed while this suggestion was open. Choose the suggestion again if you still want to use it.");
+      return;
+    }
+    updatePrompt(pendingIdea.text);
+    closeIdeaChoice();
+  }
   function switchDraft(projectId: string | null, submitted = false) {
+    setPendingIdea(null);
     if (submitted) drafts.current = writeDraft(drafts.current, "", draftProjectIds.current);
     drafts.current = selectDraft(drafts.current, projectId, draftProjectIds.current);
     setPrompt(draftText(drafts.current));
@@ -574,14 +607,14 @@ export function DemoWorkspace() {
           <form onSubmit={e => { e.preventDefault(); void generate(); }}>
             <label htmlFor="demo-idea">{selected ? "My next change" : "My idea"}</label>
             <textarea ref={promptRef} id="demo-idea" placeholder={selected ? revision.placeholder : "A game where a panda collects stars…"} value={prompt} maxLength={promptLimit} onChange={e => updatePrompt(e.target.value)} disabled={locked || !loaded || revision.blocked} />
-            {!selected && <div className="demo-prompt-suggestions" role="group" aria-label="Idea suggestions">{promptSuggestions.map(idea => <button key={idea.label} type="button" disabled={locked || !loaded} onClick={() => { updatePrompt(idea.prompt); promptRef.current?.focus(); }}>{idea.label}</button>)}</div>}
+            {!selected && <div className="demo-prompt-suggestions" role="group" aria-label="Idea suggestions">{promptSuggestions.map(idea => <button key={idea.label} type="button" disabled={locked || !loaded} onClick={() => insertIdea(idea.prompt)}>{idea.label}</button>)}</div>}
             <div className="demo-voice-mode" role="group" aria-label="Optional voice mode"><button type="button" aria-pressed={voiceInputMode === "dictation"} onClick={() => setVoiceInputMode("dictation")}>Dictate text</button><button type="button" aria-pressed={voiceInputMode === "samantha"} onClick={() => setVoiceInputMode("samantha")}>Talk with Samantha</button></div>
             <div className="demo-dictation-area" hidden={voiceInputMode !== "dictation"}>
               <label htmlFor="demo-speech-language">Dictation language<select id="demo-speech-language" value={speechLanguage} disabled={locked || !loaded} onChange={e => setSpeechLanguage(e.target.value)}>{speechLanguages.map(language => <option key={language.value} value={language.value}>{language.label}</option>)}</select></label>
-              <BrowserDictation disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "dictation"} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { updatePrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
+              <BrowserDictation disabled={locked || !loaded || revision.blocked || !!pendingIdea || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "dictation"} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { updatePrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
               <p className="demo-fine">Review and edit the words above, then use the build button. Dictation never starts a build. Language availability depends on your browser and speech service.{readiness?.mode === "template" ? " Template instructions currently work best in English; dictation does not translate them." : ""}</p>
             </div>
-            <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={text => { updatePrompt(text.slice(0, promptLimit)); promptRef.current?.focus(); }} /></div>
+            <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || revision.blocked || !!pendingIdea || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={insertIdea} /></div>
             <p className="demo-fine">Unsent ideas stay with each project in this tab, including reloads when browser storage is available. Drafts are not included in project backups or shared links.</p>
             <div className="demo-input-foot"><span>No personal details, just imagination.</span><span>{prompt.length}/{promptLimit}</span></div>
             <button className="demo-primary" type="submit" disabled={locked || !loaded || revision.blocked || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : revision.blocked ? "Changes need AI mode" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
@@ -605,6 +638,13 @@ export function DemoWorkspace() {
       <footer className="demo-footer"><span>✦ Made for curious minds.</span><Link href="/"><ArrowLeft size={14} /> About VibeKidding</Link><span>Imagine freely. Build together.</span></footer>
     </main>
     {selected && dataProject === selected.id && <DemoDataBackup key={selected.id} projectId={selected.id} title={selected.title} onClose={() => setDataProject(null)} onRestored={() => { setDataProject(null); setReplay(value => value + 1); setError(""); setMessage("Saved app data replaced in this browser. The preview has restarted with the restored data."); }} />}
+    <dialog ref={ideaDialog} className="demo-dialog demo-copy-dialog" aria-labelledby="demo-idea-choice-title" onCancel={event => { event.preventDefault(); closeIdeaChoice(); }}>
+      <h2 id="demo-idea-choice-title">Replace your idea?</h2>
+      <p>You already have an unfinished idea. Use this suggestion instead, or keep your own words.</p>
+      <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{pendingIdea?.text}</p>
+      <p className="demo-fine">This only changes the idea box. It does not start a build.</p>
+      <div className="demo-dialog-actions"><button type="button" onClick={closeIdeaChoice}>Keep my idea</button><button type="button" className="demo-primary" disabled={locked} onClick={confirmIdeaChoice}>Use this idea</button></div>
+    </dialog>
     <dialog ref={copyDialogRef} className="demo-dialog demo-copy-dialog" aria-labelledby="demo-copy-title" onCancel={event => { event.preventDefault(); dismissCopy(); }}><div className="demo-section-heading"><h2 id="demo-copy-title">Make an independent copy</h2><button type="button" className="demo-icon-button" aria-label="Close copy confirmation" onClick={dismissCopy}><X size={18} /></button></div>{copyRequest?.status === "loading" && <p role="status">Reading the shared snapshot. Nothing has been saved or played.</p>}{copyRequest?.status === "error" && <p role="alert">{copyRequest.message}</p>}{copyRequest?.status === "ready" && <><p className="demo-copy-project-title">{copyRequest.build.title}</p><p>This adds a new project to your browser’s shelf. You can change your copy without changing the sender’s project. It includes the shared build, not the sender’s history, saved notes, or play progress.</p><p className="demo-fine">Check with your grown-up before opening shared code. Nothing saves or plays until you confirm. Saving opens your copy in the sandboxed preview; it does not request AI generation.</p></>}{copyError && <p role="alert">{copyError}</p>}<div className="demo-dialog-actions"><button type="button" onClick={dismissCopy}>Cancel</button>{copyRequest?.status === "ready" && <button type="button" className="demo-primary" disabled={!loaded || locked} onClick={confirmSharedCopy}>Save independent copy</button>}</div></dialog>
     <dialog ref={shareDialogRef} className="demo-dialog demo-share-dialog" aria-labelledby="demo-share-title" onCancel={e => { e.preventDefault(); closeShare(); }}><div className="demo-section-heading"><h2 id="demo-share-title">Share a playable snapshot</h2><button type="button" className="demo-icon-button" aria-label="Close sharing" onClick={closeShare}><X size={18} /></button></div><p><strong>{shareSnapshot?.title}</strong></p><p>The link recreates this version’s title and code. It leaves out your prompt history, other versions, conversation notes, and saved app data such as Remembering notes. Anyone with the link can play and copy what’s in this version, including any personal text inside it.</p><p className="demo-fine">Template links carry compact project settings; other links carry compressed HTML. Both are created in this browser without uploading the project to a server. This is a snapshot, not a live update or a published listing. Links have an 8,000-character size limit. Larger projects can use HTML or backup exports.</p>{hostedShareOrigin && <fieldset className="demo-share-origin"><legend>Where should the link open?</legend><label><input type="radio" name="demo-share-origin" checked={shareOrigin === currentShareOrigin} disabled={shareBusy} onChange={() => selectShareOrigin(currentShareOrigin)} /> Current site</label><label><input type="radio" name="demo-share-origin" checked={shareOrigin === hostedShareOrigin} disabled={shareBusy} onChange={() => selectShareOrigin(hostedShareOrigin)} /> Hosted play page</label></fieldset>}<p className="demo-share-destination">Link opens at <strong>{shareOrigin}</strong></p>{localShare && <p className="demo-alert">This link points to this device’s local demo. {hostedShareOrigin ? "Choose Hosted play page to make a link for family on other devices." : "To share with friends on other devices, open the hosted demo and create the link there."}</p>}{shareError && <p className="demo-alert" role="alert">{shareError}</p>}{shareUrl && <label>Playable link<textarea ref={shareLinkRef} readOnly rows={3} value={shareUrl} onFocus={e => e.target.select()} /></label>}<p role="status" aria-live="polite">{shareNotice}</p>{shareOpen && shareUrl && <ShareQRCode key={shareUrl} url={shareUrl} onExportHtml={() => { closeShare(); exportHtml(); }} />}<div className="demo-dialog-actions"><button type="button" onClick={closeShare}>Close</button>{shareUrl ? <button type="button" className="demo-primary" onClick={() => void copyShare()}><Copy size={15} /> Copy link</button> : <button type="button" className="demo-primary" disabled={shareBusy || !shareSnapshot} onClick={() => void prepareShare()}>{shareBusy ? "Preparing link…" : "Create playable link"}</button>}</div>{shareError && <div className="demo-share-fallback"><button type="button" className="demo-secondary" onClick={() => { closeShare(); exportHtml(); }}>Export HTML instead</button><button type="button" className="demo-secondary" onClick={() => { closeShare(); exportBackup(); }}>Export backup instead</button></div>}</dialog>
     <dialog ref={modalRef} className="demo-dialog" onCancel={() => setDialog(null)} onClose={() => setDialog(null)} aria-labelledby="demo-dialog-title"><form onSubmit={e => { e.preventDefault(); confirmDialog(); }}><div className="demo-section-heading"><h2 id="demo-dialog-title">{dialog === "delete" ? "Say goodbye to this project?" : "Give it a new name"}</h2><button type="button" className="demo-icon-button" aria-label="Close dialog" onClick={() => setDialog(null)}><X size={18} /></button></div>{dialog === "delete" ? <p>“{selected?.title}” and its version history and saved app data will be removed from this browser. Export the project first if you want to keep its code. Use Saved app data to back up notes separately; project exports do not include them.</p> : <label>Project name<input autoFocus value={name} onChange={e => setName(e.target.value)} maxLength={70} required /></label>}<div className="demo-dialog-actions"><button type="button" onClick={() => setDialog(null)}>Keep exploring</button><button className={dialog === "delete" ? "demo-danger" : "demo-primary"} disabled={dialog === "rename" && !name.trim()} type="submit">{dialog === "delete" ? "Delete project" : "Save name"}</button></div></form></dialog>
