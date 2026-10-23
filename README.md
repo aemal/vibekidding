@@ -21,7 +21,7 @@ For optional **local-only AI**, set `VIBEKIDDING_DEMO_ENABLED=1` and `VIBEKIDDIN
 
 ## Share a playable creation
 
-Choose **Share playable link**, then create and copy a link to the current version. The recipient sees a confirmation before playing. Links contain either frozen template settings or the current title and HTML, not prompt history or conversation notes; anyone with the link can inspect and copy that snapshot. They are not cloud saves, live updates, or revocable publications. The recipient's shelf is unchanged.
+Choose **Share playable link**, then create and copy a link to the current version. The recipient sees a confirmation before playing. Links contain either frozen template settings or the current title and HTML, not prompt history or conversation notes; anyone with the link can inspect and copy that snapshot. They are not cloud saves, live updates, or revocable publications. The recipient's shelf is unchanged during playback. **Save a copy in workshop** opens a confirmation before adding an independent project. The copy is labeled Shared copy, includes only the shared version, and can be revised without changing the sender's project. Browser storage failures are reported; export a backup to preserve an unsaved copy.
 
 Unmodified template builds use short, versioned links and offer **Show QR code**. QR images are generated locally; another device opens its own copy, not a multiplayer session. Renamed or custom HTML uses the original compressed format with copy/export options instead of an unreadably dense QR code. Existing links remain supported.
 

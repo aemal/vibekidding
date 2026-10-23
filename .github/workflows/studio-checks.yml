@@ -96,6 +96,7 @@ jobs:
           npm run test:demo-share-browser
           npm run test:demo-creative-browser
           npm run test:demo-qr-browser
+          npm run test:demo-remix-browser
       - name: Preserve synthetic browser failure evidence
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

@@ -128,3 +128,18 @@ test("consecutive writes succeed when each uses the returned committed baseline"
   assert.equal(storage.getItem("shelf"), "[]");
   assert.equal(storage.writes, 3);
 });
+
+test("shared provenance survives backup, duplicate and persistence alongside legacy modes", () => {
+  const original = project();
+  original.versions.push({ id: "shared-version", html: "<h1>Shared snapshot</h1>", prompt: "Imported shared snapshot", createdAt: original.updatedAt, mode: "shared" });
+  const decoded = parseBackup(serializeBackup(original));
+  assert.deepEqual(decoded, original);
+  assert.deepEqual(decoded.versions.map(version => version.mode), ["template", "ai", "shared"]);
+  const copy = copyProject(decoded);
+  assert.equal(copy.versions[2].mode, "shared");
+  assert.notEqual(copy.versions[2].id, original.versions[2].id);
+  let saved: string | null = null;
+  persistProjects({ getItem: () => saved, setItem: (_key, value) => { saved = value; } }, "shelf", null, [copy]);
+  assert.equal(validProjects(JSON.parse(saved!)), true);
+  assert.equal(JSON.parse(saved!)[0].versions[2].mode, "shared");
+});

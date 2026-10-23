@@ -1,4 +1,4 @@
-export type Version = { id: string; html: string; prompt: string; createdAt: number; mode: "ai" | "template" };
+export type Version = { id: string; html: string; prompt: string; createdAt: number; mode: "ai" | "template" | "shared" };
 export type Project = { id: string; title: string; emoji: string; updatedAt: number; versions: Version[] };
 export const MAX_PROJECTS = 24;
 export const MAX_VERSIONS = 20;
@@ -12,7 +12,7 @@ function validProject(value: unknown): value is Project {
   if (!record(value) || !text(value.id, 128) || !text(value.title, 70) || !text(value.emoji, 32) || !timestamp(value.updatedAt) || !Array.isArray(value.versions) || !value.versions.length || value.versions.length > MAX_VERSIONS) return false;
   const ids = new Set<string>();
   return value.versions.every(v => {
-    if (!record(v) || !text(v.id, 128) || ids.has(v.id) || !text(v.html, MAX_HTML) || !text(v.prompt, 4000, true) || !timestamp(v.createdAt) || (v.mode !== "ai" && v.mode !== "template")) return false;
+    if (!record(v) || !text(v.id, 128) || ids.has(v.id) || !text(v.html, MAX_HTML) || !text(v.prompt, 4000, true) || !timestamp(v.createdAt) || (v.mode !== "ai" && v.mode !== "template" && v.mode !== "shared")) return false;
     ids.add(v.id);
     return true;
   });
