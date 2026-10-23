@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "test:studio": "tsx --test tests/studio.test.ts tests/parent-guard.test.ts tests/mail-queue.test.ts tests/mail-webhook.test.ts tests/guard-evaluation.test.ts tests/supervised-mutations.test.ts tests/privacy-maintenance.test.ts tests/safety-revision.test.ts tests/database-boundaries.test.ts tests/identity-changes.test.ts tests/request-body.test.ts tests/prisma-config.test.ts tests/mail-provider.test.ts tests/model-pricing.test.ts tests/settlement.test.ts tests/voice-policy.test.ts tests/voice-watchdog.test.ts tests/voice-admission.test.ts tests/voice-database-watchdog.test.ts tests/billing-import.test.ts tests/deletion-request.test.ts tests/setup-cli.test.ts tests/app-capability-policy.test.ts tests/published-project.test.ts tests/parent-control.test.ts tests/voice-output-gate.test.ts tests/billing-confirmation.test.ts tests/published-storage.test.ts tests/app-storage-dispatcher.test.ts tests/demo-server.test.ts tests/provider-lazy-init.test.ts tests/demo-server-templates.test.ts tests/demo-backup.test.ts tests/demo-dictation.test.ts tests/demo-server-starters.test.ts tests/demo-voice.test.ts tests/demo-share.test.ts tests/demo-server-creative-tools.test.ts tests/demo-share-compact.test.ts tests/demo-shared-copy.test.ts tests/demo-generation-cancel.test.ts",
+    "test:studio": "tsx --test tests/studio.test.ts tests/parent-guard.test.ts tests/mail-queue.test.ts tests/mail-webhook.test.ts tests/guard-evaluation.test.ts tests/supervised-mutations.test.ts tests/privacy-maintenance.test.ts tests/safety-revision.test.ts tests/database-boundaries.test.ts tests/identity-changes.test.ts tests/request-body.test.ts tests/prisma-config.test.ts tests/mail-provider.test.ts tests/model-pricing.test.ts tests/settlement.test.ts tests/voice-policy.test.ts tests/voice-watchdog.test.ts tests/voice-admission.test.ts tests/voice-database-watchdog.test.ts tests/billing-import.test.ts tests/deletion-request.test.ts tests/setup-cli.test.ts tests/app-capability-policy.test.ts tests/published-project.test.ts tests/parent-control.test.ts tests/voice-output-gate.test.ts tests/billing-confirmation.test.ts tests/published-storage.test.ts tests/app-storage-dispatcher.test.ts tests/demo-server.test.ts tests/provider-lazy-init.test.ts tests/demo-server-templates.test.ts tests/demo-backup.test.ts tests/demo-dictation.test.ts tests/demo-server-starters.test.ts tests/demo-voice.test.ts tests/demo-share.test.ts tests/demo-server-creative-tools.test.ts tests/demo-share-compact.test.ts tests/demo-shared-copy.test.ts tests/demo-generation-cancel.test.ts tests/demo-project-storage.test.ts",
     "typecheck": "tsc --noEmit",
     "setup:release": "tsx scripts/check-studio-setup.ts --strict",
     "setup:check": "tsx scripts/check-studio-setup.ts",
@@ -34,7 +34,8 @@
     "test:demo-qr-browser": "tsx scripts/check-demo-qr-browser.ts",
     "test:demo-remix-browser": "tsx scripts/check-demo-remix-browser.ts",
     "test:demo-cancel-browser": "tsx scripts/check-demo-cancel-browser.ts",
-    "test:demo-cancel-http": "tsx scripts/check-demo-cancel-http.ts"
+    "test:demo-cancel-http": "tsx scripts/check-demo-cancel-http.ts",
+    "test:demo-project-data-browser": "tsx scripts/check-demo-project-data-browser.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

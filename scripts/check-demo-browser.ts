@@ -399,7 +399,7 @@ async function main() {
       assert.ok((await saved(page)).some(item => item.id === generatedId));
       await page.getByRole("button", { name: `Delete ${renamed}`, exact: true }).click();
       await page.getByRole("button", { name: "Delete project", exact: true }).click();
-      await expect(page.locator(".demo-feedback")).toContainText("Project deleted from this browser");
+      await expect(page.locator(".demo-feedback")).toContainText("Project and its saved app data deleted from this browser");
       await page.reload({ waitUntil: "domcontentloaded" });
       await expect(page.getByLabel("My idea", { exact: true })).toBeEnabled();
       assert.equal((await saved(page)).length, before.length - 1);
