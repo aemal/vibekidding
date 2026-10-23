@@ -1,4 +1,4 @@
-type Kind = "collector" | "memory" | "drawing" | "math" | "story";
+type Kind = "collector" | "memory" | "drawing" | "math" | "story" | "tictactoe";
 type Settings = { theme: "space" | "ocean" | "garden"; color: string; seconds: number; goal: number; kind: Kind };
 const marker = /<!--vibekidding-demo-template:([^\n]*?)-->/;
 const colors: Record<string, string> = { purple: "#8b5cf6", pink: "#ec4899", blue: "#2563eb", green: "#16a34a", red: "#dc2626", orange: "#ea580c", yellow: "#ca8a04" };
@@ -10,7 +10,7 @@ function previousSettings(html?: string): Settings | undefined {
     const parsed = JSON.parse(value);
     if (!["space", "ocean", "garden"].includes(parsed.theme) || !Object.values(colors).includes(parsed.color) ||
       ![15, 30, 60].includes(parsed.seconds) || ![5, 10, 20].includes(parsed.goal)) return;
-    if (parsed.kind !== undefined && !["collector", "memory", "drawing", "math", "story"].includes(parsed.kind)) return;
+    if (parsed.kind !== undefined && !["collector", "memory", "drawing", "math", "story", "tictactoe"].includes(parsed.kind)) return;
     // Earlier collector projects did not have a kind field.
     return { theme: parsed.theme, color: parsed.color, seconds: parsed.seconds, goal: parsed.goal, kind: parsed.kind ?? "collector" };
   } catch { return; }
@@ -23,7 +23,8 @@ export function templateProject(prompt: string, html?: string) {
     message: "AI is unavailable. Your existing project is unchanged. Offline templates cannot revise custom HTML.",
   };
   const settings: Settings = previous ?? { theme: "space", color: colors.purple, seconds: 30, goal: 10, kind: "collector" };
-  if (/\b(memory|matching|match pairs|pairs game)\b/i.test(prompt)) settings.kind = "memory";
+  if (/\b(tic[ -]?tac[ -]?toe|noughts and crosses)\b/i.test(prompt)) settings.kind = "tictactoe";
+  else if (/\b(memory|matching|match pairs|pairs game)\b/i.test(prompt)) settings.kind = "memory";
   else if (/\b(draw|drawing|paint|painting|sketch|canvas|art pad)\b/i.test(prompt)) settings.kind = "drawing";
   else if (/\b(math|maths|arithmetic|addition|subtract|multiplication|quiz)\b/i.test(prompt)) settings.kind = "math";
   else if (/\b(story|stories|adventure|choose.your.own)\b/i.test(prompt)) settings.kind = "story";
@@ -45,15 +46,15 @@ export function templateProject(prompt: string, html?: string) {
 <!--vibekidding-demo-template:${JSON.stringify(settings)}-->
 <h1>${theme.title}</h1><p>Collect ${settings.goal} ${theme.target} in ${settings.seconds} seconds! Click or tap the target, or focus it and press Enter.</p>
 <button id="start">Start game</button><p id="status" role="status" aria-live="polite">Ready to play?</p><div id="field"><button id="target" aria-label="Collect target" hidden>${theme.target}</button></div><small>Offline template demo</small>
-<script>const start=document.getElementById('start'),target=document.getElementById('target'),field=document.getElementById('field'),status=document.getElementById('status');let score=0,left=${settings.seconds},timer=null,playing=false;const goal=${settings.goal};function move(){target.style.left=Math.random()*Math.max(0,field.clientWidth-74)+'px';target.style.top=Math.random()*Math.max(0,field.clientHeight-74)+'px'}function update(){status.textContent='Collected '+score+' / '+goal+' · '+left+' seconds'}function end(won){playing=false;clearInterval(timer);target.hidden=true;start.textContent='Play again';status.textContent=won?'You did it! Great collecting!':'Time is up! You collected '+score+'. Try again!';start.focus()}start.onclick=()=>{clearInterval(timer);score=0;left=${settings.seconds};playing=true;target.hidden=false;start.textContent='Restart';update();move();target.focus();timer=setInterval(()=>{left--;update();if(left<=0)end(false)},1000)};target.onclick=()=>{if(!playing)return;score++;update();if(score>=goal)end(true);else move()};</script></body></html>`,
+<script>const start=document.getElementById('start'),target=document.getElementById('target'),field=document.getElementById('field'),status=document.getElementById('status');let score=0,left=${settings.seconds},timer=null,playing=false;const goal=${settings.goal};function move(){target.style.left=Math.random()*Math.max(0,field.clientWidth-74)+'px';target.style.top=Math.random()*Math.max(0,field.clientHeight-74)+'px'}function keepInBounds(){const width=target.offsetWidth||70,height=target.offsetHeight||70;target.style.left=Math.max(0,Math.min(parseFloat(target.style.left)||0,Math.max(0,field.clientWidth-width)))+'px';target.style.top=Math.max(0,Math.min(parseFloat(target.style.top)||0,Math.max(0,field.clientHeight-height)))+'px'}if(typeof ResizeObserver==='function')new ResizeObserver(keepInBounds).observe(field);window.addEventListener('resize',keepInBounds);function update(){status.textContent='Collected '+score+' / '+goal+' · '+left+' seconds'}function end(won){playing=false;clearInterval(timer);target.hidden=true;start.textContent='Play again';status.textContent=won?'You did it! Great collecting!':'Time is up! You collected '+score+'. Try again!';start.focus()}start.onclick=()=>{clearInterval(timer);score=0;left=${settings.seconds};playing=true;target.hidden=false;start.textContent='Restart';update();move();target.focus();timer=setInterval(()=>{left--;update();if(left<=0)end(false)},1000)};target.onclick=()=>{if(!playing)return;score++;update();if(score>=goal)end(true);else move()};</script></body></html>`,
   };
 }
 
 function templateMessage(kind: Kind) {
-  const difficulty = kind === "drawing" || kind === "story"
+  const difficulty = kind === "drawing" || kind === "story" || kind === "tictactoe"
     ? "Difficulty changes do not affect this template."
     : "Easier/slower or harder/faster changes the challenge.";
-  return `Offline template demo, not AI generation. Supports collector, memory match, drawing, arithmetic quiz and story templates; space, ocean or garden themes; named colors. Arithmetic uses addition only; stories use preset branches. ${difficulty} Other instructions are not applied; custom code changes require AI.`;
+  return `Offline template demo, not AI generation. Supports collector, memory match, drawing, arithmetic quiz, story and tic-tac-toe templates; space, ocean or garden themes; named colors. Arithmetic uses addition only; stories use preset branches. Tic-tac-toe is two-player on the same device, not online or realtime multiplayer. ${difficulty} Other instructions are not applied; custom code changes require AI.`;
 }
 
 function specializedProject(settings: Settings) {
@@ -63,7 +64,7 @@ function specializedProject(settings: Settings) {
     garden: { name: "Garden", background: "#14352a", icons: ["🌼", "🦋", "🐞", "🌻", "🐝", "🌱", "🍄", "🌷"], place: "secret garden", helper: "friendly butterfly", treasure: "rainbow flower" },
   };
   const theme = themes[settings.theme];
-  const suffixes = { collector: "Collector", memory: "Memory Match", drawing: "Art Studio", math: "Number Quest", story: "Story Adventure" };
+  const suffixes = { collector: "Collector", memory: "Memory Match", drawing: "Art Studio", math: "Number Quest", story: "Story Adventure", tictactoe: "Tic-Tac-Toe" };
   const title = `${theme.name} ${suffixes[settings.kind]}`;
   let body = "";
   let script = "";
@@ -74,6 +75,9 @@ function specializedProject(settings: Settings) {
   } else if (settings.kind === "drawing") {
     body = `<p>Draw your own ${theme.name.toLowerCase()} world. Drag to paint. On the canvas, arrow keys move the pen and Space switches drawing on or off.</p><div class="toolbar"><label>Brush color <input id="color" type="color" value="${settings.color}"></label><label>Brush size <input id="size" type="range" min="2" max="30" value="8"></label><button id="clear">Clear drawing</button></div><canvas id="canvas" width="640" height="360" tabindex="0" aria-label="Drawing canvas. Use pointer or arrow keys and Space."></canvas><p id="status" role="status" aria-live="polite">Ready to draw. Your drawing stays in this preview.</p>`;
     script = `const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d'),color=document.getElementById('color'),size=document.getElementById('size'),status=document.getElementById('status');let down=false,last={x:320,y:180},keyboardDrawing=false;function reset(){ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);status.textContent='Canvas cleared. Ready to draw.'}function point(event){const r=canvas.getBoundingClientRect();return{x:(event.clientX-r.left)*canvas.width/r.width,y:(event.clientY-r.top)*canvas.height/r.height}}function stroke(from,to){ctx.strokeStyle=color.value;ctx.fillStyle=color.value;ctx.lineWidth=Number(size.value);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.stroke();ctx.beginPath();ctx.arc(to.x,to.y,Number(size.value)/2,0,Math.PI*2);ctx.fill()}canvas.onpointerdown=event=>{if(event.button!==0)return;event.preventDefault();canvas.focus();down=true;last=point(event);canvas.setPointerCapture(event.pointerId);stroke(last,last);status.textContent='Drawing...'};canvas.onpointermove=event=>{if(!down)return;const next=point(event);stroke(last,next);last=next};function stop(){down=false;status.textContent='Drawing ready. Keep painting or clear to start again.'}canvas.onpointerup=stop;canvas.onpointercancel=stop;canvas.onlostpointercapture=()=>{down=false};canvas.onkeydown=event=>{if(event.code==='Space'){event.preventDefault();keyboardDrawing=!keyboardDrawing;status.textContent=keyboardDrawing?'Keyboard pen down. Arrow keys draw.':'Keyboard pen up. Arrow keys move.';if(keyboardDrawing)stroke(last,last);return}const moves={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]};const move=moves[event.key];if(!move)return;event.preventDefault();const next={x:Math.max(0,Math.min(canvas.width,last.x+move[0])),y:Math.max(0,Math.min(canvas.height,last.y+move[1]))};if(keyboardDrawing)stroke(last,next);last=next};document.getElementById('clear').onclick=reset;reset();`;
+  } else if (settings.kind === "tictactoe") {
+    body = `<p>Two players, one device. Take turns placing X and O. Get three in a row to win. This is shared-device play, not online or realtime multiplayer.</p><p id="status" role="status" aria-live="polite"></p><div id="tic-board" role="group" aria-label="Tic-tac-toe board" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(100%,360px);margin:24px auto"></div><button id="restart">Restart game</button><p>Tap a square, or use Tab and Enter to choose it. X starts each new game.</p>`;
+    script = `const board=document.getElementById('tic-board'),status=document.getElementById('status');const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let cells=[],turn='X',over=false,buttons=[];function begin(){cells=Array(9).fill('');turn='X';over=false;buttons=[];board.replaceChildren();status.textContent='Player X: your turn.';for(let i=0;i<9;i++){const button=document.createElement('button');button.style.fontSize='40px';button.style.aspectRatio='1';button.style.padding='8px';const label='Row '+(Math.floor(i/3)+1)+', column '+(i%3+1);button.setAttribute('aria-label',label+': empty');button.onclick=()=>{if(over||cells[i])return;cells[i]=turn;button.textContent=turn;button.setAttribute('aria-label',label+': '+turn);button.disabled=true;const won=lines.some(line=>line.every(index=>cells[index]===turn));if(won||cells.every(Boolean)){over=true;buttons.forEach(cell=>cell.disabled=true);status.textContent=won?'Player '+turn+' wins!':'Draw! Great game.';document.getElementById('restart').focus()}else{turn=turn==='X'?'O':'X';status.textContent='Player '+turn+': your turn.';const next=buttons.find(cell=>!cell.disabled);if(next)next.focus()}};buttons.push(button);board.append(button)}}document.getElementById('restart').onclick=()=>{begin();buttons[0].focus()};begin();`;
   } else if (settings.kind === "math") {
     const maximum = settings.goal === 5 ? 5 : settings.goal === 20 ? 20 : 10;
     body = `<p>Complete five addition challenges. Choose an answer and learn as you go. Numbers go up to ${maximum}.</p><button id="restart">New quiz</button><p id="question" class="question"></p><div id="answers" class="toolbar" aria-label="Answer choices"></div><p id="feedback" role="status" aria-live="polite"></p><p id="progress"></p><button id="next" hidden>Next question</button>`;

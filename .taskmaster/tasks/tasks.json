@@ -580,13 +580,38 @@
         "description": "Coordinator: integrate the demo work into a reviewable pull request with accurate validation and scope.",
         "details": "Review combined changes, resolve integration conflicts, run required checks, preserve existing backlog and report remaining live-provider or deployment gates. Use user-authorized PR workflow; no production deployment is implied.",
         "testStrategy": "Confirm PR diff, required checks and browser acceptance evidence; link the actual PR and avoid claiming merge/deployment unless verified.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "13"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T00:45:16.065Z"
+        "updatedAt": "2026-10-23T00:52:54.645Z",
+        "metadata": {
+          "integration20261023": {
+            "foundationPR": "https://github.com/aemal/vibekidding/pull/1",
+            "foundationMerged": true,
+            "workshopPR": "https://github.com/aemal/vibekidding/pull/2",
+            "localUnitTests": 200,
+            "localBrowserChecks": 14,
+            "previewBrowser": "Authenticated Chrome created Ocean Memory Match on Vercel preview, no application login",
+            "liveAI": false
+          },
+          "deployment20261023": {
+            "pr1Merged": true,
+            "pr2Merged": true,
+            "productionURL": "https://vibekidding.vercel.app/demo",
+            "browserAcceptance": "Public IAB created Garden Story Adventure without login; authenticated Chrome preview created and played memory card",
+            "mode": "template-only",
+            "unitTests": 200,
+            "browserChecks": 14,
+            "knownFollowups": [
+              "multi-tab stale save",
+              "starter revisions"
+            ],
+            "liveAI": false
+          }
+        }
       },
       {
         "id": "15",
@@ -594,7 +619,7 @@
         "description": "Coordinator: configure the required services and verify a functional demo against the intended live provider.",
         "details": "Keep credentials in approved local secret storage, outside task data and committed files. Identify setup prerequisites and authorized provider calls before execution. Verify actual generation and preview using the integrated demo. Record provider/model and observed result without prompts containing child data or secret values. This milestone does not establish production identity, consent, voice, email, database, or deployment acceptance for tasks 3-10.",
         "testStrategy": "Verify required service connectivity and one authorized end-to-end live generation with playable preview; report exact observed outcome, failure/retry behavior and remaining setup blockers.",
-        "status": "blocked",
+        "status": "done",
         "dependencies": [
           "11",
           "12"
@@ -609,9 +634,31 @@
             "anthropicGeneration": "HTTP 400 insufficient credit",
             "vercelKeys": "Existing project development keys match local values",
             "liveGenerationVerified": false
+          },
+          "providerRecovery20261023": {
+            "source": "User-designated Walid Samantha project local configuration",
+            "modelsStatus": 200,
+            "modelAvailable": "gpt-4.1-mini",
+            "completionStatus": 200,
+            "validReply": true,
+            "promptTokens": 12,
+            "completionTokens": 1,
+            "configured": "Ignored local server env only",
+            "fullProjectGeneration": "pending"
+          },
+          "liveAcceptance20261023": {
+            "model": "gpt-4.1-mini",
+            "url": "http://127.0.0.1:3219/demo",
+            "generation": "App created original Cheerful Dino Jump Game labeled AI build",
+            "interaction": "Restart resets score; Jump control used; score visible",
+            "revision": "Second real AI request changed visible heading to Purple Dino Adventure and dinosaur accessible label to purple; history2 persisted",
+            "largePlay": "Actual AI preview expanded with score preserved",
+            "googleLogin": "not required",
+            "publicSite": "template-only",
+            "microphoneAccepted": false
           }
         },
-        "updatedAt": "2026-10-23T00:45:19.090Z"
+        "updatedAt": "2026-10-23T01:09:55.088Z"
       },
       {
         "id": "16",
@@ -640,13 +687,87 @@
         "priority": "high",
         "subtasks": [],
         "updatedAt": "2026-10-23T00:45:13.082Z"
+      },
+      {
+        "id": "18",
+        "title": "Optional browser voice dictation for demo prompts",
+        "description": "Add explicit browser-native dictation with language selection and typing fallback; stage transcript for user review without auto-building.",
+        "details": "No paid API or app audio upload. Explain browser speech service processing; cap sessions and cancel on context changes. Real microphone acceptance remains separate.",
+        "testStrategy": "Lifecycle/error unit checks and browser UI fallback tests; never label mocked speech as live microphone acceptance.",
+        "status": "done",
+        "dependencies": [
+          "12"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:58:59.095Z"
+      },
+      {
+        "id": "19",
+        "title": "Fix demo multi-tab saving and starter revisions",
+        "description": "Prevent stale tabs from silently replacing saved projects and make all advertised starters support template revisions without fake unchanged history entries.",
+        "details": "Verified two-tab overwrite and unchanged starter HTML during PR2 postmerge review. Preserve unsaved work on conflict; provide recoverable action. Regression browser tests required.",
+        "testStrategy": "Two tabs create independently without silent loss; every starter color/theme revision changes HTML; unsupported no-op does not add history.",
+        "status": "done",
+        "dependencies": [
+          "12",
+          "16",
+          "17"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T00:58:59.100Z"
+      },
+      {
+        "id": "20",
+        "title": "Large play view for demo creations",
+        "description": "Give kids a bigger play and drawing area with a clear return to workshop and Escape support, keeping project edits/history intact.",
+        "details": "",
+        "testStrategy": "Browser open/close/keyboard/mobile check; verify project state and history unchanged.",
+        "status": "done",
+        "dependencies": [
+          "12"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T01:09:09.403Z",
+        "metadata": {
+          "verification": {
+            "report": "tests/demo-browser-artifacts/2026-10-23T01-05-27-866Z/report.json",
+            "checks": 23,
+            "largePlay": "same iframe, score preservation, Escape, Back, mobile controls passed",
+            "resize": "collector target stays inside field and remains clickable without score reset"
+          }
+        }
+      },
+      {
+        "id": "21",
+        "title": "Same-device two-player tic-tac-toe demo",
+        "description": "Add playable turn-based tic-tac-toe template for two people sharing one device, with accessible board, winner/draw/reset and template themes.",
+        "details": "This is a useful offline demo feature, not acceptance of the separate Supabase realtime multiplayer task.",
+        "testStrategy": "Win/draw/occupied-cell/turn/reset unit and real browser interactions; responsive controls.",
+        "status": "done",
+        "dependencies": [
+          "16"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "metadata": {
+          "verification": {
+            "report": "tests/demo-browser-artifacts/2026-10-23T01-05-27-866Z/report.json",
+            "realEndpoint": "sixth chip creates playable same-device game; X wins and all cells disable",
+            "standaloneBrowser": "row,column,diagonal wins,draw,occupied,reset,keyboard passed",
+            "realtimeMultiplayer": false
+          }
+        },
+        "updatedAt": "2026-10-23T01:09:09.406Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T00:45:19.090Z",
-      "taskCount": 17,
-      "completedCount": 7,
+      "lastModified": "2026-10-23T01:09:55.088Z",
+      "taskCount": 21,
+      "completedCount": 13,
       "tags": [
         "master"
       ]

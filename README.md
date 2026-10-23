@@ -15,7 +15,7 @@ Open http://127.0.0.1:3217/demo. This command explicitly uses template mode; no 
 
 For a hosted or production-build template demo, set `VIBEKIDDING_PUBLIC_TEMPLATE_DEMO=1` in the deployment environment. That mode never calls an AI provider, even when provider credentials exist. The full account-based studio is separate and retains its configuration requirements. See [studio setup](docs/STUDIO_SETUP.md).
 
-For optional **local-only AI**, set `VIBEKIDDING_DEMO_ENABLED=1` and `VIBEKIDDING_DEMO_PROVIDER=openai` or `anthropic`, with a working server-side provider key, then run Next development bound to `127.0.0.1`. Public template mode takes precedence. Provider errors fall back to labeled templates. Current provider account acceptance is not complete.
+For optional **local-only AI**, set `VIBEKIDDING_DEMO_ENABLED=1` and `VIBEKIDDING_DEMO_PROVIDER=openai` or `anthropic`, with a working server-side provider key, then run Next development bound to `127.0.0.1`. For the OpenAI mode, `npm run dev:demo-ai` opens http://127.0.0.1:3219/demo and uses a separate generated build directory. Public template mode takes precedence. Provider errors fall back to labeled templates. The local OpenAI configuration has passed real app generation and revision of a playable dinosaur game. The hosted demo remains template-only.
 
 ## Verify
 

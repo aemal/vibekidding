@@ -43,3 +43,15 @@ export function copyProject(project: Project, title = project.title): Project {
   const clean = cleanProject(project);
   return { ...clean, id: crypto.randomUUID(), title: title.slice(0, 70), versions: clean.versions.map(v => ({ ...v, id: crypto.randomUUID() })) };
 }
+
+export class ProjectStorageConflictError extends Error {
+  constructor() { super("Another tab changed the saved shelf."); this.name = "ProjectStorageConflictError"; }
+}
+/** Optimistic baseline check: a stale tab never replaces a newer saved shelf. */
+export function persistProjects(storage: Pick<Storage, "getItem" | "setItem">, key: string, baseline: string | null, projects: Project[]): string {
+  if (storage.getItem(key) !== baseline) throw new ProjectStorageConflictError();
+  const serialized = JSON.stringify(projects);
+  storage.setItem(key, serialized);
+  if (storage.getItem(key) !== serialized) throw new ProjectStorageConflictError();
+  return serialized;
+}
