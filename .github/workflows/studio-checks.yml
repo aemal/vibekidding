@@ -124,6 +124,7 @@ jobs:
             exit 1
           fi
           npm run test:demo-revision-guidance-browser
+          npm run test:demo-preview-recovery-browser
       - name: Preserve synthetic browser failure evidence
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
