@@ -1,0 +1,75 @@
+import assert from 'node:assert/strict';
+import { chromium } from '@playwright/test';
+import { templateProject } from '../src/lib/demo-server/template';
+
+async function main(){
+ const browser=await chromium.launch({channel:process.env.STUDIO_TEST_BROWSER || 'chrome',headless:true});
+ try{
+  const page=await browser.newPage({viewport:{width:390,height:844}});
+  const errors:string[]=[],requests:string[]=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/*',r=>{requests.push(r.request().url());return r.abort()});
+  await page.setContent(templateProject('musical garden piano').html);
+  assert.equal(await page.evaluate('audio'),null);
+  await page.getByRole('button',{name:'Play C4',exact:true}).click();
+  await page.waitForFunction("audio && audio.state==='running' && voice !== null");
+  assert.equal(await page.evaluate('voice.frequency.value'),Math.fround(261.63));
+  await page.waitForFunction('voice === null',undefined,{timeout:1500});
+  assert.equal(await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
+  await page.getByRole('button',{name:'Play D4',exact:true}).focus();
+  await page.keyboard.press('Enter');
+  await page.waitForFunction('voice !== null');
+  assert.equal(await page.evaluate('voice.frequency.value'),Math.fround(293.66));
+  await page.getByRole('button',{name:'Mute sound',exact:true}).click();
+  assert.equal(await page.evaluate('voice'),null);
+  await page.getByRole('button',{name:'Play E4',exact:true}).click();
+  assert.match(await page.locator('#status').innerText(),/muted/);
+  assert.equal(await page.evaluate('voice'),null);
+  await page.getByRole('button',{name:'Unmute sound',exact:true}).click();
+  assert.equal(await page.evaluate('voice'),null);
+  await page.evaluate('audio.close()');
+  await page.goto('about:blank');
+  await page.setContent(templateProject('musical garden piano').html.replace('<script>','<script>window.AudioContext=undefined;window.webkitAudioContext=undefined;'));
+  await page.getByRole('button',{name:'Play C4',exact:true}).click();
+  assert.match(await page.locator('#status').innerText(),/unavailable/);
+  await page.close();
+  const list=await browser.newPage({viewport:{width:390,height:844}});
+  list.on('pageerror',e=>errors.push(e.message));
+  await list.route('**/*',r=>{requests.push(r.request().url());return r.abort()});
+  const html=templateProject('garden daily checklist').html;
+  await list.setContent('<iframe sandbox="allow-scripts" style="width:100%;height:800px;border:0"></iframe>');
+  await list.locator('iframe').evaluate((element,source)=>{(element as HTMLIFrameElement).srcdoc=source},html);
+  const preview=list.frameLocator('iframe');
+  const frame=list.frames().find(frame=>frame!==list.mainFrame())!;
+  await preview.getByRole('checkbox').first().waitFor();
+  assert.equal(await preview.getByRole('checkbox').count(),3);
+  await preview.getByRole('checkbox').first().focus();await list.keyboard.press('Space');
+  assert.equal(await preview.locator('#progress').innerText(),'1 / 3 completed');
+  const literal='<img src=x onerror=alert(1)>';
+  await preview.locator('#item').fill(literal);await preview.locator('#item').press('Enter');
+  assert.equal(await preview.getByRole('checkbox',{name:literal,exact:true}).count(),1);
+  assert.equal(await preview.locator('#items img').count(),0);
+  await preview.getByRole('button',{name:'Remove '+literal,exact:true}).click();
+  assert.equal(await preview.getByRole('checkbox').count(),3);
+  await preview.locator('#item').fill('x'.repeat(80));assert.equal((await preview.locator('#item').inputValue()).length,60);
+  await preview.locator('#add').click();
+  for(let i=0;i<8;i++){await preview.locator('#item').fill('Task '+i);await preview.locator('#add').click()}
+  assert.equal(await preview.getByRole('checkbox').count(),12);
+  assert.equal(await preview.locator('#add').isDisabled(),true);
+  await frame.evaluate("document.getElementById('item').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}))");
+  assert.equal(await preview.getByRole('checkbox').count(),12);
+  assert.equal(await frame.evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
+  await preview.getByRole('button',{name:'Reset checklist',exact:true}).click();
+  assert.equal(await preview.locator('#progress').innerText(),'0 / 3 completed');
+  assert.equal(await preview.locator('#add').isEnabled(),true);
+  await frame.evaluate("document.getElementById('item').value='x'.repeat(61);document.getElementById('item').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true,cancelable:true}))");
+  assert.equal(await preview.getByRole('checkbox').count(),3);
+  await preview.getByRole('checkbox').first().check();
+  await list.locator('iframe').evaluate((element,source)=>{(element as HTMLIFrameElement).srcdoc=source},html);
+  await preview.getByRole('checkbox').first().waitFor();
+  assert.equal(await preview.locator('#progress').innerText(),'0 / 3 completed');
+  assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
+  console.log(JSON.stringify({passed:true,music:'real WebAudio activation, keyboard, bounded tone, mute and unsupported fallback',checklist:'keyboard, add/remove/reset, literal markup, limits and mobile layout',networkRequests:0,runtimeErrors:0,audibleOutputVerified:false}));
+ }finally{await browser.close()}
+}
+main().catch(error=>{console.error(error);process.exitCode=1});

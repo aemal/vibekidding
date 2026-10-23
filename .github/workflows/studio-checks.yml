@@ -38,6 +38,7 @@ jobs:
           echo "$(pg_config --bindir)" >> "$GITHUB_PATH"
           npx playwright install --with-deps chromium
       - run: npm run test:postgres-concurrency
+      - run: npm run test:creative-templates-browser
       - run: npm run test:preview-browser
       - run: npm run test:runtime-shell-browser
       - run: npm run test:storage-bridge-browser
@@ -93,6 +94,8 @@ jobs:
           fi
           npm run test:demo-browser
           npm run test:demo-share-browser
+          npm run test:demo-creative-browser
+          npm run test:demo-qr-browser
       - name: Preserve synthetic browser failure evidence
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

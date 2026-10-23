@@ -1,3 +1,5 @@
+import { compactTokenForBuildV1, renderCompactTemplateV1 } from "./demo-server/template-v1";
+
 /** Portable snapshots only. No storage, network, provider, or DOM dependencies. */
 export type SharedBuild = Readonly<{ title: string; html: string }>;
 export type ShareErrorCode = "unsupported" | "too-large" | "invalid-link" | "invalid-payload" | "unsupported-version";
@@ -10,7 +12,7 @@ const messages: Record<ShareErrorCode, string> = {
   "too-large": "This project or link is too large to share this way. Try a smaller project or export the HTML instead.",
   "invalid-link": "This play link is incomplete or invalid. Ask for a new link.",
   "invalid-payload": "This play link does not contain a valid project. Ask for a new link.",
-  "unsupported-version": "This play-link version is not supported. Ask for a version 1 link.",
+  "unsupported-version": "This play-link version is not supported. Ask for a supported play link.",
 };
 export class DemoShareError extends Error {
   constructor(public readonly code: ShareErrorCode) { super(messages[code]); this.name = "DemoShareError"; }
@@ -79,7 +81,17 @@ export async function encodeShareFragment(build: SharedBuild): Promise<string> {
 export async function decodeShareFragment(fragment: string): Promise<SharedBuild> {
   if (typeof fragment !== "string") return fail("invalid-link");
   if (fragment.length > MAX_SHARE_URL_CHARACTERS) return fail("too-large");
-  if (!fragment.startsWith("#v1=")) return fail(/^#v\d+=/.test(fragment) ? "unsupported-version" : "invalid-link");
+  if (fragment.startsWith("#t1=")) {
+    if (fragment.length > 110) return fail("too-large");
+    const encoded = fragment.slice(4);
+    const separator = encoded.indexOf(".");
+    if (separator < 0) return fail("invalid-link");
+    if (encoded.slice(0, separator) !== "1") return fail("unsupported-version");
+    const generated = renderCompactTemplateV1(encoded.slice(separator + 1));
+    if (!generated) return fail("invalid-payload");
+    return Object.freeze({ title: generated.title, html: generated.html });
+  }
+  if (!fragment.startsWith("#v1=")) return fail(/^#[vt]\d+=/.test(fragment) ? "unsupported-version" : "invalid-link");
   const encoded = fragment.slice(4);
   if (!encoded || !/^[A-Za-z0-9_-]+$/.test(encoded) || encoded.length % 4 === 1) return fail("invalid-link");
   const unzip = decompressor();
@@ -107,7 +119,9 @@ export async function createShareUrl(origin: string, build: SharedBuild): Promis
   let parsed: URL;
   try { parsed = new URL(origin); } catch { return fail("invalid-link"); }
   if (!["https:", "http:"].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash || parsed.pathname !== "/" || parsed.origin === "null") return fail("invalid-link");
-  const fragment = await encodeShareFragment(build);
+  const clean = checkedBuild(build);
+  const token = compactTokenForBuildV1(clean);
+  const fragment = token ? "#t1=1." + token : await encodeShareFragment(clean);
   const url = parsed.origin + "/demo/play" + fragment;
   if (url.length > MAX_SHARE_URL_CHARACTERS) return fail("too-large");
   return url;

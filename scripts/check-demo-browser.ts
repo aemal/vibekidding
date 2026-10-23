@@ -31,6 +31,41 @@ const developmentMessages: string[] = [];
 // during a dev-server test can itself cause a reload.
 const artifacts = new Map<string, Buffer | string>();
 let activeStep = "startup";
+const pointerDiagnostics: unknown[] = [];
+async function observePointerFrame(page: Page) {
+  const frame = await (await page.locator('iframe.demo-frame').elementHandle())?.contentFrame();
+  assert.ok(frame);
+  await frame.waitForLoadState('load');
+  const lifecycle: unknown[] = [];
+  page.on('framenavigated', changed => { if (changed === frame && lifecycle.length < 20) lifecycle.push({ event: 'navigated', at: Date.now() }); });
+  page.on('framedetached', changed => { if (changed === frame && lifecycle.length < 20) lifecycle.push({ event: 'detached', at: Date.now() }); });
+  await page.evaluate(() => {
+    const events: unknown[] = [];
+    (window as unknown as { __parentPointer: unknown[] }).__parentPointer = events;
+    for (const type of ['pointerdown', 'pointerup', 'click']) document.addEventListener(type, event => {
+      if (events.length >= 20) return;
+      const e = event as MouseEvent;
+      const target = event.target as HTMLElement;
+      events.push({ type, tag: target.tagName, id: target.id, x: e.clientX, y: e.clientY });
+    }, true);
+  });
+  await frame.evaluate(() => {
+    const state = { epoch: performance.timeOrigin, events: [] as unknown[] };
+    (window as unknown as { __pointerEvidence: typeof state }).__pointerEvidence = state;
+    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'keydown']) {
+      document.addEventListener(type, event => {
+        if (state.events.length >= 40) return;
+        const target = event.target as HTMLElement;
+        const pointer = event as MouseEvent;
+        state.events.push({ type, id: target.id, label: target.getAttribute('aria-label'), text: target.textContent?.slice(0, 70), x: pointer.clientX, y: pointer.clientY, at: performance.now() });
+      }, true);
+    }
+  });
+  return async (label: string) => {
+    pointerDiagnostics.push({ label, lifecycle: [...lifecycle], frameDetached: frame.isDetached(), parent: await page.evaluate(() => ({ x: scrollX, y: scrollY, active: document.activeElement?.tagName, events: (window as unknown as { __parentPointer: unknown[] }).__parentPointer })), box: await page.locator('iframe.demo-frame').boundingBox(), child: await frame.evaluate(() => ({ evidence: (window as unknown as { __pointerEvidence: unknown }).__pointerEvidence, ready: document.readyState, x: scrollX, y: scrollY, active: document.activeElement?.outerHTML.slice(0, 200), status: document.querySelector('#status')?.textContent, cells: Array.from(document.querySelectorAll('#tic-board button')).map(b => b.textContent) })).catch(error => ({ error: String(error) })) });
+  };
+}
+
 
 async function saved(page: Page): Promise<SavedProject[]> {
   return page.evaluate(key => JSON.parse(localStorage.getItem(key) || "[]"), storageKey);
@@ -114,7 +149,7 @@ async function main() {
     });
     await step("starter creation and playable isolated preview", async () => {
       await page.getByRole("button", { name: /Space explorer.*Make this mine/ }).click();
-      await expect(page.locator("#preview-heading")).toHaveText("Space explorer");
+      await expect(page.locator("#preview-heading")).toHaveText("Star Collector");
       const preview = page.frameLocator("iframe.demo-frame");
       await preview.getByRole("button", { name: "Start game", exact: true }).click();
       await preview.getByRole("button", { name: "Collect target", exact: true }).press("Enter");
@@ -464,7 +499,7 @@ async function main() {
         await stale.getByRole("button", { name: /Animal match.*Make this mine/ }).click();
         await expect(stale.locator(".demo-alert")).toContainText("Another tab changed your saved shelf");
         await expect(stale.locator(".demo-alert")).toContainText("not saved");
-        await expect(stale.locator("#preview-heading")).toHaveText("Animal match");
+        await expect(stale.locator("#preview-heading")).toHaveText("Ocean Memory Match");
         await expect(stale.locator(".demo-feedback")).not.toContainText("saved in this browser");
         assert.deepEqual(await saved(stale), originalShelf);
         // Preserve the unsaved creation through the actual backup download.
@@ -474,13 +509,13 @@ async function main() {
         const downloadedPath = await download.path();
         assert.ok(downloadedPath);
         const backup = await readFile(downloadedPath);
-        assert.equal(JSON.parse(backup.toString("utf8")).project.title, "Animal match");
+        assert.equal(JSON.parse(backup.toString("utf8")).project.title, "Ocean Memory Match");
         artifacts.set("conflict-recovery.vibekidding.json", backup);
         let warned = false;
         stale.once("dialog", dialog => { warned = /unsaved|not saved|backup/i.test(dialog.message()); void dialog.dismiss(); });
         await stale.getByRole("button", { name: "Reload saved shelf", exact: true }).click();
         assert.equal(warned, true);
-        await expect(stale.locator("#preview-heading")).toHaveText("Animal match");
+        await expect(stale.locator("#preview-heading")).toHaveText("Ocean Memory Match");
         assert.deepEqual(await saved(stale), originalShelf);
         stale.once("dialog", dialog => { void dialog.accept(); });
         await stale.getByRole("button", { name: "Reload saved shelf", exact: true }).click();
@@ -492,7 +527,7 @@ async function main() {
         const recovered = await saved(stale);
         assert.equal(recovered.length, 2);
         assert.deepEqual(recovered.find(item => item.id === originalShelf[0].id), originalShelf[0]);
-        assert.ok(recovered.some(item => item.title === "Animal match"));
+        assert.ok(recovered.some(item => item.title === "Ocean Memory Match"));
         await first.reload({ waitUntil: "domcontentloaded" });
         await expect(first.getByLabel("My idea", { exact: true })).toBeEnabled();
         assert.deepEqual(await saved(first), recovered);
@@ -512,13 +547,24 @@ async function main() {
         const preview = ticPage.frameLocator("iframe.demo-frame");
         const cells = preview.locator("#tic-board button");
         await expect(cells).toHaveCount(9);
+        const record = await observePointerFrame(ticPage);
+        await record("before first move");
         // X takes the top row while O takes two cells in the second row.
         await cells.nth(0).press("Enter");
-        for (const index of [3, 1, 4, 2]) await cells.nth(index).click();
+        await record("after Enter cell 0");
+        await expect(cells.nth(0)).toHaveText("X");
+        for (const [index, player] of [[3, "O"], [1, "X"], [4, "O"], [2, "X"]] as const) {
+          await cells.nth(index).click();
+          await record(`after pointer cell ${index}`);
+          await expect(cells.nth(index)).toHaveText(player);
+        }
         await expect(preview.locator("#status")).toContainText("Player X wins");
         await expect(preview.locator("#tic-board button:disabled")).toHaveCount(9);
         assert.equal((await saved(ticPage))[0].versions.length, 1, "Playing must not append project history");
         artifacts.set("06-tic-tac-toe-win.png", await ticPage.screenshot({ fullPage: true, caret: "initial" }));
+      } catch (error) {
+        artifacts.set("tic-failure.png", await ticPage.screenshot({ fullPage: true }));
+        throw error;
       } finally { await ticContext.close(); }
     });
     await step("no uncaught browser runtime errors", async () => { assert.deepEqual(pageErrors, []); });
@@ -537,7 +583,7 @@ async function main() {
     await writeFile(path.join(output, "report.json"), JSON.stringify({
       timestamp: new Date().toISOString(), url: new URL("/demo", base).href,
       evidence: "Real installed-browser interactions against loopback app and real demo endpoint. No API fixtures or request mocking. Dictation fallback simulates missing browser APIs only; no microphone activation, speech capture or recognition acceptance. No deployed-service acceptance.",
-      passed: !failure, activeStep, passiveVoiceOnly, voicePosts, capabilities, buildModes, steps, pageErrors, consoleErrors, failedRequests, navigations, developmentMessages,
+      passed: !failure, activeStep, passiveVoiceOnly, voicePosts, capabilities, buildModes, steps, pointerDiagnostics, pageErrors, consoleErrors, failedRequests, navigations, developmentMessages,
       failure: failure instanceof Error ? failure.message : failure ? String(failure) : undefined,
     }, null, 2));
   }
