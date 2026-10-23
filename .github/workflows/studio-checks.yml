@@ -101,6 +101,28 @@ jobs:
           npm run test:demo-cancel-browser
           npm run test:demo-project-data-browser
           npm run test:demo-data-backup-browser
+          # Isolate the next suite from cumulative per-process demo admission limits.
+          # Public template mode remains enabled; paid-provider limits are unchanged.
+          kill "$app_pid"
+          wait "$app_pid" || true
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3217 > /tmp/studio-demo-guidance-ui.log 2>&1 &
+          app_pid=$!
+          ready=false
+          for attempt in $(seq 1 30); do
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat /tmp/studio-demo-guidance-ui.log
+              exit 1
+            fi
+            if curl --fail --silent http://127.0.0.1:3217/api/demo/generate > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            cat /tmp/studio-demo-guidance-ui.log
+            exit 1
+          fi
           npm run test:demo-revision-guidance-browser
       - name: Preserve synthetic browser failure evidence
         if: failure()
