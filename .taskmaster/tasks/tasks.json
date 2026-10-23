@@ -916,32 +916,59 @@
         "description": "Make the existing Cancel build action abort server-side generation and response reading, suppress late results, preserve budget reservations and leave subsequent builds usable.",
         "details": "Pass request signal to provider; combine deadlines; distinguish cancellation from provider outages; release concurrency; UI epoch/signal guards before save. No retry or budget refund for potentially dispatched paid calls.",
         "testStrategy": "Deterministic pre-dispatch/inflight/body-read/ignored-abort tests and real local delayed-provider request abort; browser Cancel produces no late shelf changes; following build succeeds.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "11",
           "19"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T02:29:06.776Z",
+        "updatedAt": "2026-10-23T02:58:48.452Z",
         "metadata": {
           "verification": {
-            "local": "261 unit,lint,types,build;6 cancellation UI+25 workshop+8 QR checks",
-            "transport": "Real isolated NextDEV Request.signal abort closed real loopback fake-provider socket;next synthetic call succeeded;reservation retained",
-            "limits": "No real provider billing reversal; productionproxy cancellation unverified; early pointer failures preserved,20focus-ready mobile cycles passed without rootcauseclaim"
+            "pr": "https://github.com/aemal/vibekidding/pull/9",
+            "merged": true,
+            "unitTests": 261,
+            "browser": "6 cancel, 25 workshop, 8 QR; native Next HTTP abort to fake provider passed",
+            "ci": "both correctness runs passed at 8242fd4; existing dependency audit fails",
+            "boundary": "No live provider billing cancellation claim"
+          }
+        }
+      },
+      {
+        "id": 28,
+        "title": "Browser-local project data for a remembering notes demo",
+        "description": "Make a practical child-created tool retain its own small data across reopening, using a demo-only parent storage adapter and a remembering notes starter. No account or cloud database required.",
+        "details": "Fixed bounded per-project browser namespace, opaque sandbox maintained, typed read/write SDK, no access to arbitrary parent storage. New copies/duplicates isolated. Explicit saving feedback and unavailable-storage fallback. Shared/exported snapshots do not include personal app data and remain usable in memory without the SDK. Keep production authenticated runtime and frozen template renderer unchanged.",
+        "testStrategy": "Unit namespace/size/error tests; real browser save notes,reload,reopen; duplicate and sharedcopy isolation; quota failure truthful; existing iframe restrictions unchanged; exported/shared standalone memory fallback. Local browser evidence only, not cloud/per-user DB acceptance.",
+        "status": "in-progress",
+        "dependencies": [
+          "19",
+          "26"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T02:42:53.164Z",
+        "metadata": {
+          "verification": {
+            "unitTests": 269,
+            "browserChecks": 68,
+            "checks": "production build, lint and types passed",
+            "liveAI": "Robot notebook generated, form submit failed, AI revised to button handler, actual Save then page reload/reopen restored fictional note",
+            "boundary": "browser-local only; no cloud or production database acceptance; release pending"
           }
         }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T02:38:24.261Z",
-      "taskCount": 27,
-      "completedCount": 18,
+      "lastModified": "2026-10-23T02:58:48.452Z",
+      "taskCount": 28,
+      "completedCount": 19,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T02:38:27.029Z",
+      "created": "2026-10-23T03:03:37.539Z",
       "description": "Tasks for master context"
     }
   }
