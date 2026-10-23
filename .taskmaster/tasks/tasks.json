@@ -1278,12 +1278,24 @@
         "metadata": {
           "verification": "PR20 merged as85b08a0. User confirmed game-building studio scope. Native Google Chrome root127.0.0.1:3219 shows no-sign-in studio and retained real Sol game with2versions. Six browser checks cover root reload/shared shelf/mobile/account/nonloopback; four account browser regressions pass. Two unit tests plus combined319tests pass. GitHub correctness39910018771 passed. Public authentication retained."
         }
+      },
+      {
+        "id": "42",
+        "title": "Open local studio from external links",
+        "description": "Allow top-level document navigation from an external link to the local development studio without account sign-in; retain local host and mode validation and unchanged API gates.",
+        "details": "QA found external navigation to root used mutation-origin checks and could show account UI. Scope is read-only local document navigation only.",
+        "testStrategy": "Real browser external-origin link click reaches local workshop; production, forwarded-host and API cross-site rejection remain verified. No provider calls.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:33:08.046Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T06:21:33.767Z",
-      "taskCount": 41,
+      "lastModified": "2026-10-23T06:33:08.046Z",
+      "taskCount": 42,
       "completedCount": 32,
       "tags": [
         "master"
