@@ -23,18 +23,41 @@ export function completeHtml(text: string): string | undefined {
   return html;
 }
 
+// Stop waiting even if an injected transport ignores abort. Dispose late bodies.
+async function abortableResponse(pending: Promise<Response>, signal: AbortSignal): Promise<Response> {
+  let abort: () => void = () => {};
+  const stopped = new Promise<never>((_, reject) => {
+    abort = () => reject(signal.reason ?? new DOMException("Stopped", "AbortError"));
+    signal.addEventListener("abort", abort, { once: true });
+    if (signal.aborted) abort();
+  });
+  const result = pending.then(response => {
+    if (signal.aborted) {
+      void response.body?.cancel().catch(() => {});
+      throw signal.reason ?? new DOMException("Stopped", "AbortError");
+    }
+    return response;
+  });
+  try { return await Promise.race([result, stopped]); }
+  finally { signal.removeEventListener("abort", abort); }
+}
+
 // Only invoked from the Node route. No browser SDK or public environment variables.
 export async function generateWithProvider(
   provider: Exclude<DemoProvider, "template">,
   env: DemoEnvironment,
   input: { prompt: string; html?: string },
   fetcher: typeof fetch = fetch,
+  requestSignal?: AbortSignal,
 ): Promise<string> {
   if (typeof window !== "undefined") throw new Error("Demo provider is server-only.");
+  requestSignal?.throwIfAborted();
+  const deadline = AbortSignal.timeout(45000);
+  const signal = requestSignal ? AbortSignal.any([requestSignal, deadline]) : deadline;
   const content = JSON.stringify({ request: input.prompt, existingProjectHtml: input.html ?? null });
   const openai = provider === "openai";
-  const response = await fetcher(openai ? "https://api.openai.com/v1/chat/completions" : "https://api.anthropic.com/v1/messages", {
-    method: "POST", signal: AbortSignal.timeout(45000), cache: "no-store",
+  const response = await abortableResponse(fetcher(openai ? "https://api.openai.com/v1/chat/completions" : "https://api.anthropic.com/v1/messages", {
+    method: "POST", signal, cache: "no-store",
     headers: openai ? { "content-type": "application/json", authorization: `Bearer ${env.OPENAI_API_KEY}` } :
       { "content-type": "application/json", "anthropic-version": "2023-06-01", "x-api-key": env.ANTHROPIC_API_KEY! },
     body: JSON.stringify(openai ? {
@@ -44,12 +67,17 @@ export async function generateWithProvider(
       model: "claude-haiku-5-5", max_tokens: DEMO_LIMITS.outputTokens, system: instruction,
       messages: [{ role: "user", content }],
     }),
-  });
+  }), signal);
+  if (signal.aborted) {
+    void response.body?.cancel().catch(() => {});
+    signal.throwIfAborted();
+  }
   if (!response.ok) {
     void response.body?.cancel().catch(() => {});
     throw new Error("Demo provider unavailable.");
   }
-  const raw = await readBoundedText({ body: response.body, signal: AbortSignal.timeout(10000) }, 300000, 10000);
+  const raw = await readBoundedText({ body: response.body, signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) }, 300000, 10000);
+  signal.throwIfAborted();
   const data = JSON.parse(raw);
   const stopped = openai ? data.choices?.[0]?.finish_reason === "stop" : data.stop_reason === "end_turn";
   const text = openai ? data.choices?.[0]?.message?.content : data.content?.filter((block: { type: string }) => block.type === "text").map((block: { text: string }) => block.text).join("\n");

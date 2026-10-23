@@ -32,6 +32,54 @@ const errors: string[] = [];
 const decodedImages: { name: string; exactUrl: boolean; width: number; height: number; urlCharacters: number }[] = [];
 const artifacts = new Map<string, Buffer | string>();
 let activeStep = "startup";
+
+// A CI failure delivered the click to the parent IFRAME while auto-scrolling it
+// from offscreen; settle parent visibility before dispatching a child gesture.
+async function readyParentFrame(page: Page) {
+  const iframe = page.locator('iframe');
+  await iframe.scrollIntoViewIfNeeded();
+  await expect(iframe).toBeInViewport({ ratio: 0.5 });
+  const child = await (await iframe.elementHandle())?.contentFrame();
+  assert.ok(child);
+  await child.waitForLoadState('load');
+}
+
+const pointerDiagnostics: unknown[] = [];
+async function observePointerFrame(page: Page) {
+  const frame = await (await page.locator('iframe').elementHandle())?.contentFrame();
+  assert.ok(frame);
+  await frame.waitForLoadState('load');
+  const lifecycle: unknown[] = [];
+  page.on('framenavigated', changed => { if (changed === frame && lifecycle.length < 20) lifecycle.push({ event: 'navigated', at: Date.now() }); });
+  page.on('framedetached', changed => { if (changed === frame && lifecycle.length < 20) lifecycle.push({ event: 'detached', at: Date.now() }); });
+  await page.evaluate(() => {
+    const events: unknown[] = [];
+    (window as unknown as { __parentPointer: unknown[] }).__parentPointer = events;
+    for (const type of ['pointerdown', 'pointerup', 'click']) document.addEventListener(type, event => {
+      if (events.length >= 20) return;
+      const e = event as MouseEvent;
+      const target = event.target as HTMLElement;
+      events.push({ type, tag: target.tagName, id: target.id, x: e.clientX, y: e.clientY });
+    }, true);
+  });
+  await frame.evaluate(() => {
+    const state = { epoch: performance.timeOrigin, events: [] as unknown[] };
+    (window as unknown as { __pointerEvidence: typeof state }).__pointerEvidence = state;
+    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'keydown']) {
+      document.addEventListener(type, event => {
+        if (state.events.length >= 40) return;
+        const target = event.target as HTMLElement;
+        const pointer = event as MouseEvent;
+        state.events.push({ type, id: target.id, label: target.getAttribute('aria-label'), text: target.textContent?.slice(0, 70), x: pointer.clientX, y: pointer.clientY, at: performance.now() });
+      }, true);
+    }
+  });
+  return async (label: string) => {
+    pointerDiagnostics.push({ label, lifecycle: [...lifecycle], frameDetached: frame.isDetached(), parent: await page.evaluate(() => ({ x: scrollX, y: scrollY, active: document.activeElement?.tagName, events: (window as unknown as { __parentPointer: unknown[] }).__parentPointer })), box: await page.locator('iframe').boundingBox(), child: await frame.evaluate(() => ({ evidence: (window as unknown as { __pointerEvidence: unknown }).__pointerEvidence, ready: document.readyState, x: scrollX, y: scrollY, active: document.activeElement?.outerHTML.slice(0, 200), status: document.querySelector('#status')?.textContent, cells: Array.from(document.querySelectorAll('#tic-board button')).map(b => b.textContent) })).catch(error => ({ error: String(error) })) });
+  };
+}
+
+
 async function step(name: string, action: () => Promise<void>) {
   activeStep = name;
   try { await action(); steps.push({ name, status: "passed" }); console.log(`PASS ${name}`); }
@@ -116,7 +164,12 @@ async function main() {
       await page.getByRole("button", { name: "Play shared project", exact: true }).click();
       await expect(page.locator("iframe")).toHaveAttribute("sandbox", "allow-scripts");
       const frame = page.frameLocator("iframe");
+      await expect(page.locator("#playing-project-title")).toBeFocused();
+      const record = await observePointerFrame(page);
+      await record("before recipient tic pointer");
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Row 1, column 1: empty", exact: true }).click();
+      await record("after recipient tic pointer");
       await expect(frame.getByRole("button", { name: "Row 1, column 1: X", exact: true })).toBeVisible();
       assert.equal(await saved(page), null);
       artifacts.set("05-mobile-recipient.png", await page.screenshot());
@@ -135,6 +188,7 @@ async function main() {
       await page.goto(url); await consent(page, "Custom snapshot");
       await page.getByRole("button", { name: "Play shared project", exact: true }).click();
       const counter = page.frameLocator("iframe").getByRole("button", { name: "Count: 0", exact: true });
+      await readyParentFrame(page);
       await counter.click();
       await expect(page.frameLocator("iframe").getByRole("button", { name: "Count: 1", exact: true })).toBeVisible();
     });
@@ -162,12 +216,14 @@ async function main() {
     });
   } catch (error) {
     failure = error;
+    artifacts.set("failure-recipient.png", await page.screenshot({ fullPage: true }));
+    artifacts.set("failure-recipient-frames.json", JSON.stringify(await Promise.all(page.frames().slice(1).map(frame => frame.locator("body").innerText().catch(() => "Unavailable"))), null, 2));
     artifacts.set("failure-source.html", await sourcePage.content().catch(() => "Unavailable"));
     await sourcePage.screenshot({ fullPage: true, timeout: 5000 }).then(bytes => artifacts.set("failure.png", bytes)).catch(() => {});
   } finally {
     await browser.close(); await mkdir(output, { recursive: true });
     for (const [name, value] of artifacts) await writeFile(path.join(output, name), value);
-    await writeFile(path.join(output, "report.json"), JSON.stringify({ timestamp: new Date().toISOString(), base: base.href, passed: !failure, activeStep, steps, decodedImages, violations, errors, evidence: "Actual loopback UI with isolated synthetic shelves, independently decoded rendered QR pixels. No physical camera scan or production-host acceptance. No generation or voice sessions.", failure: failure ? String(failure) : undefined }, null, 2));
+    await writeFile(path.join(output, "report.json"), JSON.stringify({ timestamp: new Date().toISOString(), base: base.href, passed: !failure, activeStep, steps, pointerDiagnostics, decodedImages, violations, errors, evidence: "Actual loopback UI with isolated synthetic shelves, independently decoded rendered QR pixels. No physical camera scan or production-host acceptance. No generation or voice sessions.", failure: failure ? String(failure) : undefined }, null, 2));
   }
   console.log(`Evidence: ${output}`); if (failure) throw failure;
   console.log(`PASS ${steps.length} QR checks`);

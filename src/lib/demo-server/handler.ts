@@ -17,6 +17,7 @@ export function createDemoHandlers(options: {
   // Do not repeatedly bill or retry a broken provider during this local process.
   let providerUnavailable = false;
   let providerVerified = false;
+  const cancelled = () => response({ error: "The build was cancelled." }, 408);
   return {
     async GET(request: Request) {
       const env = environment();
@@ -39,6 +40,7 @@ export function createDemoHandlers(options: {
       if (denied) return response({ error: denied }, 403);
       if (request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !== "application/json")
         return response({ error: "Send application/json." }, 415);
+      if (request.signal.aborted) return cancelled();
       if (!usage.admit()) return response({ error: "The demo is busy or its rate limit was reached. Try again in a minute." }, 429);
       try {
         const text = await readBoundedText(request, DEMO_LIMITS.bodyBytes);
@@ -48,6 +50,7 @@ export function createDemoHandlers(options: {
           !body.prompt.trim() || body.prompt.length > DEMO_LIMITS.promptCharacters ||
           (body.html !== undefined && (typeof body.html !== "string" || Buffer.byteLength(body.html, "utf8") > DEMO_LIMITS.htmlBytes)))
           return response({ error: "Provide a prompt of 1-2000 characters and optional HTML up to 80000 bytes." }, 400);
+        if (request.signal.aborted) return cancelled();
         const input = { prompt: body.prompt.trim(), html: body.html || undefined };
         // This branch must precede provider selection/reservation: public mode is
         // non-billable even when local AI flags and real credentials are configured.
@@ -55,15 +58,19 @@ export function createDemoHandlers(options: {
         const provider = configuredProvider(env);
         if (provider !== "template" && !providerUnavailable && usage.reserveProviderCall()) {
           try {
-            const html = await generateWithProvider(provider, env, input, options.fetcher);
+            const html = await generateWithProvider(provider, env, input, options.fetcher, request.signal);
+            if (request.signal.aborted) return cancelled();
             providerVerified = true;
             return response({ html, title: projectTitle(html), mode: "ai" });
           } catch {
+            if (request.signal.aborted) return cancelled();
             providerUnavailable = true;
           }
         }
+        if (request.signal.aborted) return cancelled();
         return response(templateProject(input.prompt, input.html));
       } catch (error) {
+        if (request.signal.aborted) return cancelled();
         if (error instanceof RequestBodyError) return response({ error: error.message }, error.status);
         return response({ error: "The demo could not process this request." }, 500);
       } finally { usage.finish(); }

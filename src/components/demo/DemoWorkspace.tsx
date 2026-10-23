@@ -101,12 +101,14 @@ export function DemoWorkspace() {
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const requestRef = useRef<AbortController | null>(null);
   const busyRef = useRef(false);
+  const generationEpoch = useRef(0);
   const selected = projects.find(p => p.id === selectedId);
   const current = selected?.versions.at(-1);
   const promptLimit = Math.min(2000, Math.max(1, readiness?.limits?.promptCharacters || 2000));
 
   useEffect(() => {
     let live = true;
+    const generation = generationEpoch;
     queueMicrotask(() => {
       if (!live) return;
       try {
@@ -123,7 +125,14 @@ export function DemoWorkspace() {
       }
       setLoaded(true);
     });
-    return () => { live = false; requestRef.current?.abort(); };
+    return () => {
+      live = false;
+      generation.current++;
+      const request = requestRef.current;
+      requestRef.current = null;
+      busyRef.current = false;
+      request?.abort();
+    };
   }, []);
 
   useEffect(() => {
@@ -335,18 +344,37 @@ export function DemoWorkspace() {
     open(project);
     setMessage(saved ? "Your starter is saved in this browser. Give it a try!" : "Your starter is ready in this tab.");
   }
+  function cancelGeneration(message = "The build was cancelled. Your previous work and idea are unchanged.") {
+    const request = requestRef.current;
+    if (!request) return;
+    generationEpoch.current++;
+    requestRef.current = null;
+    busyRef.current = false;
+    request.abort();
+    setBusy(false);
+    setMessage("");
+    setError(message);
+  }
   async function generate() {
     if (!prompt.trim() || busyRef.current || readiness?.enabled === false) return;
     if (!selected && projects.length >= MAX_PROJECTS) { setError("Your shelf is full! Export and delete a project to make room."); return; }
     busyRef.current = true; setBusy(true); setError(""); setMessage("");
     const controller = new AbortController(); requestRef.current = controller;
-    const timeout = setTimeout(() => controller.abort(), 90_000);
+    const epoch = ++generationEpoch.current;
+    const ownsRequest = () => generationEpoch.current === epoch && requestRef.current === controller;
+    const canApply = () => ownsRequest() && !controller.signal.aborted;
+    const timeout = setTimeout(() => {
+      if (ownsRequest()) cancelGeneration("The build took too long and was stopped. Your previous work and idea are unchanged. Try again when you’re ready.");
+    }, 90_000);
+    controller.signal.addEventListener("abort", () => clearTimeout(timeout), { once: true });
     try {
       const response = await fetch("/api/demo/generate", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: prompt.trim().slice(0, promptLimit), ...(current ? { html: current.html } : {}) }), signal: controller.signal,
       });
+      if (!canApply()) return;
       const data = await response.json().catch(() => null);
+      if (!canApply()) return;
       if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "The workshop couldn’t build that just yet. Please try again.");
       if (typeof data?.html !== "string" || !data.html.trim() || data.html.length > MAX_HTML || typeof data?.title !== "string" || !["ai", "template"].includes(data.mode)) throw new Error("That build didn’t arrive correctly. Your previous work is safe. Please try again.");
       if (current && data.html === current.html) {
@@ -356,9 +384,11 @@ export function DemoWorkspace() {
       const saved = addVersion(data.html, data.title, data.mode, prompt.trim());
       setMessage(`${data.mode === "ai" ? "Your AI build is ready." : "Your template build is ready. This was made from a starter, not by AI."} ${saved ? "Saved in this browser." : "Kept in this tab."}${typeof data.message === "string" ? " " + data.message : ""}`);
     } catch (e) {
-      setError(controller.signal.aborted ? "The build was stopped or took too long. Your previous work is safe. Try again when you’re ready." : e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      if (!canApply()) return;
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
-      clearTimeout(timeout); requestRef.current = null; busyRef.current = false; setBusy(false);
+      clearTimeout(timeout);
+      if (ownsRequest()) { requestRef.current = null; busyRef.current = false; setBusy(false); }
     }
   }
   function restore(version: Version) {
@@ -452,7 +482,7 @@ export function DemoWorkspace() {
             <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={text => { setPrompt(text.slice(0, promptLimit)); promptRef.current?.focus(); }} /></div>
             <div className="demo-input-foot"><span>No personal details, just imagination.</span><span>{prompt.length}/{promptLimit}</span></div>
             <button className="demo-primary" type="submit" disabled={locked || !loaded || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
-            {busy && <button type="button" className="demo-text-button demo-cancel" onClick={() => requestRef.current?.abort()}>Cancel build</button>}
+            {busy && <button type="button" className="demo-text-button demo-cancel" onClick={() => cancelGeneration()}>Cancel build</button>}
           </form>
           <p className="demo-fine">{readiness?.mode === "template" ? "Templates support memory match, drawing, addition quizzes, preset branching stories, collector games, two-player tic-tac-toe on the same device, a music garden with no autoplay, and checklists whose checkmarks last only for the preview visit. Changes use supported themes and colors; custom code changes need AI. " : "Builds are labeled AI or template when ready. "}Nothing is published from this demo.</p>
           <div className="demo-small-spark"><span>✧</span><p>{readiness?.mode === "template" ? "Try “blue ocean” or “easy memory game.”" : "Try “make it blue” or “add a score.”"}<br />Small changes can make a big difference.</p></div>

@@ -23,6 +23,18 @@ const generatedModes: string[] = [];
 const audioObservations: unknown[] = [];
 let generationRequests = 0;
 let activeStep = "startup";
+
+// A CI failure delivered the click to the parent IFRAME while auto-scrolling it
+// from offscreen; settle parent visibility before dispatching a child gesture.
+async function readyParentFrame(page: Page) {
+  const iframe = page.locator('iframe.demo-frame');
+  await iframe.scrollIntoViewIfNeeded();
+  await expect(iframe).toBeInViewport({ ratio: 0.5 });
+  const child = await (await iframe.elementHandle())?.contentFrame();
+  assert.ok(child);
+  await child.waitForLoadState('load');
+}
+
 const pointerDiagnostics: unknown[] = [];
 async function observePointerFrame(page: Page) {
   const frame = await (await page.locator('iframe.demo-frame').elementHandle())?.contentFrame();
@@ -146,15 +158,19 @@ async function main() {
       const before = await shelf(page); const frame = await preview(page);
       const record = await observePointerFrame(page);
       await record("before C4");
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Play C4", exact: true }).click();
       await record("after C4");
       audioObservations.push({ after: "C4 pointer", ...await audioState(frame), status: await frame.locator("#status").innerText() });
       await expect.poll(async () => (await audioState(frame)).starts).toBe(1);
       assert.ok((await audioState(frame)).states.includes("running"));
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Mute sound", exact: true }).click();
       const muted = await audioState(frame);
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Play D4", exact: true }).click();
       assert.equal((await audioState(frame)).starts, muted.starts);
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Unmute sound", exact: true }).click();
       assert.equal((await audioState(frame)).starts, muted.starts);
       await frame.getByRole("button", { name: "Play E4", exact: true }).press("Enter");
@@ -178,11 +194,13 @@ async function main() {
       await expect(frame.locator("#progress")).toHaveText("0 / 3 completed");
       const task = "QA <img src=x onerror=alert(1)>";
       await frame.locator("#item").fill(task);
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Add item", exact: true }).click();
       await expect(frame.getByRole("checkbox", { name: task, exact: true })).toBeVisible();
       await expect(frame.locator("#items img")).toHaveCount(0);
       await frame.getByRole("checkbox", { name: task, exact: true }).check();
       await expect(frame.locator("#progress")).toHaveText("1 / 4 completed");
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: `Remove ${task}`, exact: true }).click();
       await expect(frame.locator("#items input[type=checkbox]")).toHaveCount(3);
       await expect(frame.locator("#progress")).toHaveText("0 / 3 completed");
@@ -193,6 +211,7 @@ async function main() {
       await frame.locator("#items input[type=checkbox]").first().check();
       await frame.locator("#item").fill("Temporary task"); await frame.locator("#item").press("Enter");
       await expect(frame.locator("#items input[type=checkbox]")).toHaveCount(4);
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Reset checklist", exact: true }).click();
       await expect(frame.locator("#progress")).toHaveText("0 / 3 completed");
       await frame.locator("#items input[type=checkbox]").first().check();
@@ -214,6 +233,7 @@ async function main() {
       await page.getByRole("button", { name: "Play large", exact: true }).click();
       const frame = await preview(page);
       await frame.locator("#item").fill("Mobile task");
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Add item", exact: true }).click();
       await frame.getByRole("checkbox", { name: "Mobile task", exact: true }).check();
       await expect(frame.locator("#progress")).toHaveText("1 / 4 completed");

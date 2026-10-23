@@ -826,14 +826,14 @@
         "description": "Broaden the login-free workshop beyond games with a musical garden and a simple checklist.",
         "details": "Preset local oscillator notes start only on interaction; checklist supports bounded add/toggle/remove/reset and explicitly visit-only state. Theme/color revisions and portable links should work. No claims of persistent habits or arbitrary music generation.",
         "testStrategy": "Unit routing/revision tests, actual Chrome note lifecycle and checklist interactions, sandboxed real app generation/revision, mobile layout, no provider calls for templates.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "16",
           "23"
         ],
         "priority": "medium",
         "subtasks": [],
-        "updatedAt": "2026-10-23T01:47:40.945Z",
+        "updatedAt": "2026-10-23T02:36:01.742Z",
         "metadata": {
           "localVerification": {
             "browser": "10 actual app checks on bundled Chromium, 2 real template revisions, zero page/console/prohibited requests",
@@ -841,6 +841,14 @@
             "music": "Native WebAudio gesture and note lifecycle verified; audible output not claimed",
             "limits": "Checklist state lasts preview visit; not persistent habits",
             "release": "Pending PR and CI/deployment"
+          },
+          "release": {
+            "pr": 6,
+            "mergedVia": 7,
+            "merge": "c176ec7efc4ba00e7a203dd76dd5f4056a285029",
+            "ci": "Both correctness runs on febfb81 passed; known dependency audit failure remains",
+            "publicCUA": "Music and checklist starter cards visible; Music starter opens GardenMusicStudio; C4 click updates Playing C4",
+            "limits": "No audible listening claim; checklist actual add/toggle behavior locally browser-tested only"
           }
         }
       },
@@ -850,20 +858,27 @@
         "description": "Offer short versioned links and locally rendered QR codes for exact built-in template snapshots, retaining full snapshot links for custom projects.",
         "details": "Frozen renderer version, strict settings and exact HTML/title equality before compact encoding. Existing v1 links remain supported. QR opens an independent playable copy, not realtime multiplayer. No external QR service, cloud shortener or provider calls. Dense/custom links retain copy/export fallback.",
         "testStrategy": "Canonical roundtrips/tamper rejection/version errors, old snapshot regressions, independent QR decode equals URL, real app sender/reader/mobile acceptance. Physical phone scanning remains explicitly unverified.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "23",
           "24"
         ],
         "priority": "medium",
         "subtasks": [],
-        "updatedAt": "2026-10-23T02:06:48.517Z",
+        "updatedAt": "2026-10-23T02:36:07.395Z",
         "metadata": {
           "verification": {
             "local": "248 unit tests;lint;typecheck;production build;55 sequential bundledChromium checks:QR8/share12/demo25/creative10",
             "qr": "Independent jsQR decoded rendered desktop and mobile QR pixels including complete t1 fragment; actual new Music starter tested",
             "compatibility": "1512 exact canonical settings roundtrip with frozen fingerprint; renamed/custom HTML uses v1; legacy links supported",
             "limits": "Physical phone scan and deployment not yet verified"
+          },
+          "release": {
+            "pr": 7,
+            "merge": "c176ec7efc4ba00e7a203dd76dd5f4056a285029",
+            "ci": "Both correctness runs passed febfb81",
+            "publicCUA": "Music starter creates compact t1 link, ShowQR renders image; current deployed reader decodes t1 and shows consent",
+            "limits": "Physical scan not verified; initial local/CI pointer timing failures retained, focused20 mobile cycles passed but root cause unproven"
           }
         }
       },
@@ -873,32 +888,60 @@
         "description": "Let a recipient explicitly save an independent copy of a shared snapshot to their browser shelf and open it for revisions without login, preserving existing projects and avoiding automatic execution or generation.",
         "details": "Reuse existing project backup validation and local storage persistence. Explicit user action only; independent project ID and one imported version; no prompt or conversation history; graceful storage failure and stale hash protection; no provider call until a later build action. Shared reader remains playback-only until action.",
         "testStrategy": "Unit validation plus real browser shared link -> explicit copy -> workshop shelf -> revision with template where supported; preserve existing shelf, cancel/no auto writes, storage failure, old/new link compatibility.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "23",
           "25"
         ],
         "priority": "medium",
         "subtasks": [],
-        "updatedAt": "2026-10-23T02:16:07.916Z",
+        "updatedAt": "2026-10-23T02:38:24.261Z",
         "metadata": {
           "verification": {
             "local": "255 unit;lint;typecheck;production build;47 browser checks including10 remix",
             "scenarios": "t1/v1 independent copy,confirm/cancel,shared provenance,source shelf preserved,reload,real template revision,quota/full shelf and stale links",
             "limits": "CI and deployed acceptance pending; no live provider calls in remix tests"
+          },
+          "release": {
+            "pr": 8,
+            "merge": "9c60b4c65533e31d391153845d16ad4caf07f5e5",
+            "ci": "Both correctness checks passed",
+            "publicCUA": "Recipient t1 music link -> Save a copy -> explicit confirmation -> independent shared copy saved alongside existing shelf -> make it blue ->2versions saved, original remains1version"
+          }
+        }
+      },
+      {
+        "id": 27,
+        "title": "Cancel builds through provider and prevent late saved results",
+        "description": "Make the existing Cancel build action abort server-side generation and response reading, suppress late results, preserve budget reservations and leave subsequent builds usable.",
+        "details": "Pass request signal to provider; combine deadlines; distinguish cancellation from provider outages; release concurrency; UI epoch/signal guards before save. No retry or budget refund for potentially dispatched paid calls.",
+        "testStrategy": "Deterministic pre-dispatch/inflight/body-read/ignored-abort tests and real local delayed-provider request abort; browser Cancel produces no late shelf changes; following build succeeds.",
+        "status": "in-progress",
+        "dependencies": [
+          "11",
+          "19"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T02:29:06.776Z",
+        "metadata": {
+          "verification": {
+            "local": "261 unit,lint,types,build;6 cancellation UI+25 workshop+8 QR checks",
+            "transport": "Real isolated NextDEV Request.signal abort closed real loopback fake-provider socket;next synthetic call succeeded;reservation retained",
+            "limits": "No real provider billing reversal; productionproxy cancellation unverified; early pointer failures preserved,20focus-ready mobile cycles passed without rootcauseclaim"
           }
         }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T02:16:07.916Z",
-      "taskCount": 26,
-      "completedCount": 15,
+      "lastModified": "2026-10-23T02:38:24.261Z",
+      "taskCount": 27,
+      "completedCount": 18,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T02:25:15.204Z",
+      "created": "2026-10-23T02:38:27.029Z",
       "description": "Tasks for master context"
     }
   }
