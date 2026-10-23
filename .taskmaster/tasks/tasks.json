@@ -1347,11 +1347,14 @@
         "description": "HeroUI3 with VibeBoard theme; project conversation files preview and voice on desktop/mobile.",
         "details": "",
         "testStrategy": "Browser create/revise/preview and responsive flows.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T08:15:18.651Z"
+        "updatedAt": "2026-10-23T09:48:19.435Z",
+        "metadata": {
+          "verification": "Native Chrome final Docker image c630060 at 390px: header and actions fit, embedded preview loads, saved counter and note persist. Desktop generation/source edit/deployment/sharing and provider settings verified. HeroUI/VibeBoard light and dark themes checked."
+        }
       },
       {
         "id": "47",
@@ -1386,10 +1389,14 @@
         "description": "Test real source generation build deploy data persistence through UI and document single-server handoff.",
         "details": "",
         "testStrategy": "Computer use end-to-end with real provider bounded usage; Docker restart; verification report.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
-        "subtasks": []
+        "subtasks": [],
+        "metadata": {
+          "verification": "Final Docker/native Chrome acceptance passed: live account-key GPT-6 Sol generation, npm build/deploy, SQLite persistence, manual source revision and redeploy, ZIP download, QR sharing, embedded preview, mobile390px, password login and honest OTP invitation error. Docker backup copies restore with SQLite integrity. GitHub correctness suite passes on c630060. PR29 remains unmerged due preexisting unpatched development dependency audit; real email delivery and spoken voice remain unverified."
+        },
+        "updatedAt": "2026-10-23T09:48:19.438Z"
       },
       {
         "id": "50",
@@ -1427,11 +1434,14 @@
         "description": "One verified email per family with shared projects across devices; implement after core deployment.",
         "details": "",
         "testStrategy": "OTP expiry, replay/rate limits, invitation limits and cross-account access tests.",
-        "status": "in-progress",
+        "status": "blocked",
         "dependencies": [],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T09:19:29.728Z"
+        "updatedAt": "2026-10-23T09:43:03.029Z",
+        "metadata": {
+          "verification": "Invite-only OTP request/verify implemented, durable expiry/resend/attempt limits and singleuse tests pass. Two real SQLite account/session route tests isolate projects, jobs, sources, env, providers anddownloads. Chrome verifies honest uninvitederror and passwordfallback. Realemaildelivery blocked: no RESEND_API_KEY or STUDIO_MAIL_FROM configured. Userquestionpending; noemail sent."
+        }
       },
       {
         "id": "53",
@@ -1439,18 +1449,21 @@
         "description": "Separate generated application origin from studio and account/provider APIs before public rollout.",
         "details": "",
         "testStrategy": "Cross-origin requests cannot access studio sessions or keys; preview and sharing still work.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T09:11:24.949Z"
+        "updatedAt": "2026-10-23T09:44:09.150Z",
+        "metadata": {
+          "verification": "Actual Docker/Nginx publicmode: studio apps404, matching perprojecthost200, otherprojecthost404, runtime studioAPI404, bare runtimehost404. Independent project network cannot reachappIP. Hostonlystudio cookie and crossoriginAPI checks; twoaccount routes isolate keys/data. Chrome embeddedpreview and sharing work afterCSP image rebuild. Not full hostileworkload or publicdeployment certification."
+        }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T09:35:57.487Z",
+      "lastModified": "2026-10-23T09:48:19.438Z",
       "taskCount": 53,
-      "completedCount": 41,
+      "completedCount": 44,
       "tags": [
         "master"
       ]
