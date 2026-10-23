@@ -86,7 +86,10 @@ test("AI path sends bounded server-side requests and preserves revision input", 
     calls++;
     assert.equal(url, "https://api.openai.com/v1/chat/completions");
     const body = JSON.parse(init!.body as string);
-    assert.equal(body.max_tokens, DEMO_LIMITS.outputTokens);
+    assert.equal(body.model, "gpt-6-sol");
+    assert.equal(body.max_completion_tokens, DEMO_LIMITS.outputTokens);
+    assert.equal(body.reasoning_effort, "medium");
+    assert.equal(body.max_tokens, undefined);
     assert.equal(JSON.parse(body.messages[1].content).existingProjectHtml, original);
     assert.ok(!JSON.stringify(body).includes("secret-fixture"));
     return Response.json({ choices: [{ finish_reason: "stop", message: { content: generated } }] });

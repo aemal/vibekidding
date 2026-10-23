@@ -1218,12 +1218,60 @@
             "manual": "CUA local AI workshop Escape returned enabled Saved app data button focus; no provider calls."
           }
         }
+      },
+      {
+        "id": "38",
+        "title": "Upgrade game generation to GPT-6 Sol",
+        "description": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
+        "details": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:03:57.936Z"
+      },
+      {
+        "id": "39",
+        "title": "Retry saving after transient browser storage failure",
+        "description": "Explicitly retry retained in-tab shelf with baseline conflict protection; never lose drafts or overwrite external changes.",
+        "details": "Explicitly retry retained in-tab shelf with baseline conflict protection; never lose drafts or overwrite external changes.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:03:57.940Z"
+      },
+      {
+        "id": "40",
+        "title": "Confirm replacement of unfinished ideas",
+        "description": "Suggestion chips and manual Samantha idea insertion require confirmation before replacing a different nonempty draft.",
+        "details": "Suggestion chips and manual Samantha idea insertion require confirmation before replacing a different nonempty draft.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:03:57.942Z"
+      },
+      {
+        "id": "41",
+        "title": "Local control panel entry without login",
+        "description": "Make the actual control panel accessible for local development without needing user Google login; preserve public authentication and clearly label local demo capabilities.",
+        "details": "Make the actual control panel accessible for local development without needing user Google login; preserve public authentication and clearly label local demo capabilities.",
+        "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:03:57.944Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T04:41:23.259Z",
-      "taskCount": 37,
+      "lastModified": "2026-10-23T06:03:57.944Z",
+      "taskCount": 41,
       "completedCount": 29,
       "tags": [
         "master"
