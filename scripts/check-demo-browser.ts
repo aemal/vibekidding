@@ -4,6 +4,8 @@
  * Start the server separately with VIBEKIDDING_DEMO_ENABLED=1 and template mode.
  * No requests are mocked. A fresh browser context never touches a user's shelf.
  * AI capability requires DEMO_TEST_ALLOW_AI=1; template runs make no provider calls.
+ * DEMO_TEST_PASSIVE_VOICE_ONLY=1 checks disabled voice and a built-in starter only,
+ * then exits before generation. Voice must be disabled or unconfigured.
  */
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -16,6 +18,8 @@ const base = new URL(process.env.DEMO_BASE_URL || process.env.DEMO_TEST_URL || "
 assert.ok(["127.0.0.1", "localhost", "[::1]"].includes(base.hostname), "Only loopback demo URLs are supported");
 const output = path.resolve(process.env.DEMO_TEST_OUTPUT || `tests/demo-browser-artifacts/${new Date().toISOString().replace(/[:.]/g, "-")}`);
 const storageKey = "vibekidding-demo-projects-v1";
+// Readiness + built-in starter only; safe even when the server advertises AI.
+const passiveVoiceOnly = process.env.DEMO_TEST_PASSIVE_VOICE_ONLY === "1";
 const steps: { name: string; status: "passed" | "failed"; error?: string }[] = [];
 const buildModes: string[] = [];
 const pageErrors: string[] = [];
@@ -64,6 +68,10 @@ async function main() {
   const browser = await chromium.launch({ channel: process.env.STUDIO_TEST_BROWSER || "chrome", headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
   const page = await context.newPage();
+  const voicePosts: string[] = [];
+  page.on("request", request => {
+    if (new URL(request.url()).pathname === "/api/demo/voice" && request.method() === "POST") voicePosts.push(request.url());
+  });
   page.setDefaultTimeout(15_000);
   page.on("pageerror", error => pageErrors.push(error.message));
   page.on("console", message => {
@@ -83,13 +91,26 @@ async function main() {
       assert.equal(capability.status(), 200, `Demo capability check: ${(await capability.text()).slice(0, 500)}`);
       capabilities = await capability.json();
       assert.equal(capabilities?.enabled, true);
-      assert.ok(capabilities?.mode === "template" || process.env.DEMO_TEST_ALLOW_AI === "1", "Backend advertises AI. Use a template-only server for repeatable local acceptance, or explicitly opt in with DEMO_TEST_ALLOW_AI=1.");
+      assert.ok(passiveVoiceOnly || capabilities?.mode === "template" || process.env.DEMO_TEST_ALLOW_AI === "1", "Backend advertises AI. Use a template-only server for repeatable local acceptance, or explicitly opt in with DEMO_TEST_ALLOW_AI=1.");
       const response = await page.goto(new URL("/demo", base).href, { waitUntil: "domcontentloaded" });
       assert.equal(response?.status(), 200);
       await expect(page.getByRole("heading", { level: 1 })).toContainText("workshop");
       await expect(page.getByLabel("My idea", { exact: true })).toBeEnabled();
       assert.deepEqual(await saved(page), []);
       artifacts.set("01-empty.png", await page.screenshot({ fullPage: true, caret: "initial" }));
+    });
+    await step("optional unavailable Samantha voice stays passive", async () => {
+      const response = await page.request.get(new URL("/api/demo/voice", base).href);
+      assert.equal(response.status(), 200);
+      const readiness = await response.json();
+      assert.ok(!readiness.enabled || !readiness.configured, "This regression requires unavailable voice; it never starts a session");
+      await expect(page.getByRole("button", { name: "Dictate text", exact: true })).toHaveAttribute("aria-pressed", "true");
+      await page.getByRole("button", { name: "Talk with Samantha", exact: true }).click();
+      const voice = page.getByRole("region", { name: "Samantha AI conversation" });
+      await expect(voice.getByRole("status")).toHaveText(readiness.message);
+      await expect(page.getByRole("button", { name: "Start Samantha conversation", exact: true })).toHaveCount(0);
+      await expect(page.getByLabel("My idea", { exact: true })).toBeEnabled();
+      assert.deepEqual(voicePosts, []);
     });
     await step("starter creation and playable isolated preview", async () => {
       await page.getByRole("button", { name: /Space explorer.*Make this mine/ }).click();
@@ -101,6 +122,14 @@ async function main() {
       await expect(page.locator("iframe.demo-frame")).toHaveAttribute("sandbox", "allow-scripts");
       assert.equal((await saved(page)).length, 1);
     });
+    await step("unavailable voice does not block template play or start a session", async () => {
+      assert.equal((await saved(page))[0].versions[0].mode, "template");
+      assert.deepEqual(voicePosts, []);
+      assert.deepEqual(pageErrors, []);
+      artifacts.set("07-samantha-disabled-starter.png", await page.screenshot({ fullPage: true, caret: "initial" }));
+      await page.getByRole("button", { name: "Dictate text", exact: true }).click();
+    });
+    if (passiveVoiceOnly) return;
     await step("large play preserves collector score, iframe and saved history across Back and Escape", async () => {
       const shelf = await page.evaluate(key => localStorage.getItem(key), storageKey);
       const frameNode = await page.locator("iframe.demo-frame").elementHandle();
@@ -508,7 +537,7 @@ async function main() {
     await writeFile(path.join(output, "report.json"), JSON.stringify({
       timestamp: new Date().toISOString(), url: new URL("/demo", base).href,
       evidence: "Real installed-browser interactions against loopback app and real demo endpoint. No API fixtures or request mocking. Dictation fallback simulates missing browser APIs only; no microphone activation, speech capture or recognition acceptance. No deployed-service acceptance.",
-      passed: !failure, activeStep, capabilities, buildModes, steps, pageErrors, consoleErrors, failedRequests, navigations, developmentMessages,
+      passed: !failure, activeStep, passiveVoiceOnly, voicePosts, capabilities, buildModes, steps, pageErrors, consoleErrors, failedRequests, navigations, developmentMessages,
       failure: failure instanceof Error ? failure.message : failure ? String(failure) : undefined,
     }, null, 2));
   }

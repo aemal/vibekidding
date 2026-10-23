@@ -17,6 +17,12 @@ For a hosted or production-build template demo, set `VIBEKIDDING_PUBLIC_TEMPLATE
 
 For optional **local-only AI**, set `VIBEKIDDING_DEMO_ENABLED=1` and `VIBEKIDDING_DEMO_PROVIDER=openai` or `anthropic`, with a working server-side provider key, then run Next development bound to `127.0.0.1`. For the OpenAI mode, `npm run dev:demo-ai` opens http://127.0.0.1:3219/demo and uses a separate generated build directory. Public template mode takes precedence. Provider errors fall back to labeled templates. The local OpenAI configuration has passed real app generation and revision of a playable dinosaur game. The hosted demo remains template-only.
 
+## Optional local Samantha conversation
+
+The workshop separates browser dictation from an ElevenLabs conversation. Voice is disabled in public and production mode. For a local conversation, configure `VIBEKIDDING_SAMANTHA_API_KEY` server-side in ignored `.env.local`. Review `npx tsx scripts/setup-demo-voice.ts --llm gpt-4o-mini` (dry run), then explicitly run it with `--create` to create a dedicated agent and save its ID. It never modifies existing business agents or workspace settings. After verified setup, set `VIBEKIDDING_SAMANTHA_DEMO_ENABLED=1` and use the loopback AI development server.
+
+Sessions require an explicit start and stop after 60 seconds, with provider limits of three calls daily and one concurrent conversation. Ideas move into the editor only when the user chooses them. The live provider check received two text replies and audio events and closed at 60.629 seconds; it used a synthetic text prompt, not microphone input. Actual microphone recognition and speaker playback still need a hands-on check. No claim of full production voice or billing acceptance is made.
+
 ## Verify
 
 ```sh
