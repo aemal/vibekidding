@@ -376,7 +376,8 @@ async function main() {
       assert.ok(imported.versions.every(version => !existingIds.has(version.id)));
       for (const previous of before) assert.deepEqual(after.find(item => item.id === previous.id), previous);
       await page.reload({ waitUntil: "domcontentloaded" });
-      await expect(page.getByLabel("My idea", { exact: true })).toBeEnabled();
+      await expect(page.getByLabel("My next change", { exact: true })).toBeEnabled();
+      await expect(page.locator("#preview-heading")).toHaveText(imported.title);
       assert.deepEqual(await saved(page), after);
     });
     await step("invalid backup produces actionable error without changing saved projects", async () => {
@@ -545,7 +546,8 @@ async function main() {
         assert.deepEqual(recovered.find(item => item.id === originalShelf[0].id), originalShelf[0]);
         assert.ok(recovered.some(item => item.title === "Ocean Memory Match"));
         await first.reload({ waitUntil: "domcontentloaded" });
-        await expect(first.getByLabel("My idea", { exact: true })).toBeEnabled();
+        await expect(first.getByLabel("My next change", { exact: true })).toBeEnabled();
+        await expect(first.locator("#preview-heading")).toHaveText(originalShelf[0].title);
         assert.deepEqual(await saved(first), recovered);
       } finally { await shared.close(); }
     });

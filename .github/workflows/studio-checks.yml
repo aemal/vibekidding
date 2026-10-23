@@ -126,6 +126,8 @@ jobs:
           npm run test:demo-revision-guidance-browser
           npm run test:demo-preview-recovery-browser
           npm run test:demo-app-ai-browser
+          npm run test:demo-short-screen-browser
+          npm run test:demo-drafts-browser
       - name: Preserve synthetic browser failure evidence
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

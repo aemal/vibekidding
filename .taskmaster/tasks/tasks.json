@@ -1059,13 +1059,13 @@
         "description": "Let local AI-created apps use an optional text-only AI SDK and a ready-to-play idea buddy example, without exposing provider keys or enabling paid public demo calls.",
         "details": "Local-only same-origin endpoint with server-only fixedmodel/key, max1000 input and256 outputtokens, request abort/timeouts, shared existing20-call generationbudget and concurrency. Per-preview explicit enable and max3replies; reset/revoke on project change. SDK bound to exactframe/session, no arbitrary parent fetch. Publicproduction/template mode disabled. Text rendered as text, no HTML execution. No automatic generation or AIcalls until enable+apprequest. Preserve existing production gates.",
         "testStrategy": "Server injectedprovider and sharedbudget/concurrency/abort/no-public-calls tests; browser explicitenable, bounded SDK, revoke/stale messages, honest unavailable/quota errors; one real localprovider reply acceptance with fictionalprompt only.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "28"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T03:44:00.685Z",
+        "updatedAt": "2026-10-23T04:13:16.888Z",
         "metadata": {
           "verification": {
             "unitTests": 299,
@@ -1075,19 +1075,113 @@
             "browserArtifact": "tests/demo-browser-artifacts/app-ai-2026-10-23T03-52-16-634Z/report.json",
             "liveAcceptance": "CUA local3219 Idea Buddy explicit parent enable, one actual OpenAI reply displayed, shared app-ai and generation remaining calls both19 after20, disable preserved reply. Public AI disabled.",
             "release": "PR pending"
+          },
+          "release": {
+            "pr": 14,
+            "merge": "d7ccb8c",
+            "correctness": "Both GitHub correctness checks passed at bc24d65; known dependency audit remains failed and deferred.",
+            "liveAcceptance": "CUA verified real Idea Buddy reply and generated Cheerful Robot Drawing Ideas app using vibeAI.ask; saved favorite via vibeStorage restored after reload. Local-only, public AI disabled; no microphone acceptance."
+          }
+        }
+      },
+      {
+        "id": 33,
+        "title": "Honor accepted HTML size when revising escaped JSON source",
+        "description": "Fix demo revision requests rejecting valid saved HTML because JSON escaping exceeds an unrelated ingress limit.",
+        "details": "Keep decoded HTML80k and prompt2000 bounds. Derive finite raw JSON envelope budget for worst-case escaping, validate fields before provider reservation. Never truncate source.",
+        "testStrategy": "Boundary tests for quotes, backslashes, controls and Unicode; oversized decoded HTML rejected before provider; full unit lint build and browser revision regression.",
+        "status": "in-progress",
+        "dependencies": [
+          "32"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T03:59:46.110Z",
+        "metadata": {
+          "verification": {
+            "unitTests": "317 passed combined suite; lint and production build passed",
+            "browser": "29 combined checks: drafts8, cancel6, recovery8, guidance7 on rebuilt3217; previous short-screen10 passed",
+            "manual": "CUA actual AI generated app retained unsent revision and previously saved favorite after reload; no new provider call",
+            "release": "Pending PR15; not yet marked complete"
+          }
+        }
+      },
+      {
+        "id": 34,
+        "title": "Keep large-play usable on short mobile screens",
+        "description": "Prevent optional app-AI and recovery panels squeezing the play iframe to near-zero height on landscape phones.",
+        "details": "Allow expanded preview to scroll with a meaningful minimum iframe height. Keep back/restart and status controls reachable, no horizontal overflow. Preserve same iframe when toggling large play.",
+        "testStrategy": "Real browser geometry and interactions at844x390,390x400 and390x844 including recovery state; no physical device claim.",
+        "status": "in-progress",
+        "dependencies": [
+          "32"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T03:59:46.114Z",
+        "metadata": {
+          "verification": {
+            "unitTests": "317 passed combined suite; lint and production build passed",
+            "browser": "29 combined checks: drafts8, cancel6, recovery8, guidance7 on rebuilt3217; previous short-screen10 passed",
+            "manual": "CUA actual AI generated app retained unsent revision and previously saved favorite after reload; no new provider call",
+            "release": "Pending PR15; not yet marked complete"
+          }
+        }
+      },
+      {
+        "id": 35,
+        "title": "Preserve unsent ideas across workshop navigation and reload",
+        "description": "Keep bounded per-tab drafts for new ideas and each project so clicking a shelf card or reloading does not silently discard typed work.",
+        "details": "Session-only draft map with existing2000char bound and bounded project count. Save/restore on navigation, retain on cancel/failure, clear only successful submitted draft. Handle storage failures honestly. No prompts in share/backups.",
+        "testStrategy": "Browser samecard/switch/new/reload/cancel/failure/success and bounded malformed session storage tests, no paid calls.",
+        "status": "in-progress",
+        "dependencies": [
+          "32"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T04:09:28.430Z",
+        "metadata": {
+          "verification": {
+            "unitTests": "317 passed combined suite; lint and production build passed",
+            "browser": "29 combined checks: drafts8, cancel6, recovery8, guidance7 on rebuilt3217; previous short-screen10 passed",
+            "manual": "CUA actual AI generated app retained unsent revision and previously saved favorite after reload; no new provider call",
+            "release": "Pending PR15; not yet marked complete"
+          }
+        }
+      },
+      {
+        "id": 36,
+        "title": "Preserve custom features when AI revision falls back to templates",
+        "description": "Do not regenerate a preset from a marker inside modified HTML when the provider fails.",
+        "details": "Guard mutable template wrapper with exact canonical source recognition. Unknown or modified source returns unchanged original with honest message. Frozen shared renderer stays unchanged.",
+        "testStrategy": "Canonical revisions still work; marker-bearing modified HTML survives template/providerfailure fallback; unchanged response preserves draft/history in browser. Synthetic provider only.",
+        "status": "in-progress",
+        "dependencies": [
+          "32"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T04:09:28.432Z",
+        "metadata": {
+          "verification": {
+            "unitTests": "317 passed combined suite; lint and production build passed",
+            "browser": "29 combined checks: drafts8, cancel6, recovery8, guidance7 on rebuilt3217; previous short-screen10 passed",
+            "manual": "CUA actual AI generated app retained unsent revision and previously saved favorite after reload; no new provider call",
+            "release": "Pending PR15; not yet marked complete"
           }
         }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T03:44:00.686Z",
-      "taskCount": 32,
-      "completedCount": 23,
+      "lastModified": "2026-10-23T04:13:16.888Z",
+      "taskCount": 36,
+      "completedCount": 24,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T03:55:07.206Z",
+      "created": "2026-10-23T04:15:34.864Z",
       "description": "Tasks for master context"
     }
   }
