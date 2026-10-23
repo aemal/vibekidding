@@ -768,14 +768,14 @@
         "description": "Add dedicated zero-tool ElevenLabs agent conversation for local supervised ideation, with explicit start/stop and manual transfer of an idea into the project prompt.",
         "details": "Separate from production StudioVoice. Server-only dedicated config, local admission, one-use signed session where supported, provider60s/daily3/concurrency1 caps, no business tools or callbacks. Public template demo does not enable provider voice. Live speech acceptance remains distinct from setup and mocked tests.",
         "testStrategy": "Config/route/lifecycle tests, disabled public UI, readback of dedicated agent settings, authorized provider connectivity check; no fabricated microphone acceptance.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "15",
           "18"
         ],
         "priority": "medium",
         "subtasks": [],
-        "updatedAt": "2026-10-23T01:15:38.033Z",
+        "updatedAt": "2026-10-23T01:38:42.342Z",
         "metadata": {
           "verification": {
             "unitTests": 230,
@@ -783,6 +783,16 @@
             "liveSession": "Actual signed route200, text prompt, 2 replies and 6 audio events, provider closed1000 at60.629s without client force",
             "microphone": "Not used or verified",
             "public": "Voice disabled; pending PR4 deployment regression"
+          },
+          "release": {
+            "pr": "https://github.com/aemal/vibekidding/pull/4",
+            "merge": "7f9e719c43b8ebd61aad7868c18b51deb73a4994",
+            "tests": 230,
+            "browserChecks": 25,
+            "ciCorrectness": "passed",
+            "publicFallback": "Deployed GET200 disabled and CUA confirmed no Start, workshop controls usable",
+            "microphone": "not tested",
+            "knownAudit": "existing dependency audit fails separately"
           }
         }
       },
@@ -792,26 +802,41 @@
         "description": "Share a snapshot of current project HTML and title in a compressed URL; recipient explicitly chooses Play without Google, database or provider calls.",
         "details": "Versioned bounded fragment codec, current build only, clear copy/manual fallback, separate demo/play reader, no execution before Play. Initial scope excludes Save copy, cloud publishing, live sync and multiplayer. Oversize projects retain HTML/backup export.",
         "testStrategy": "Codec bounds/malformed cases, six templates fit, browser sender and fresh recipient, confirmation/cancel, no paid API calls, mobile play, deployed acceptance.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
-          17,
-          20
+          "17",
+          "20"
         ],
         "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T01:34:49.880Z"
+      },
+      {
+        "id": 24,
+        "title": "Creative music and everyday checklist templates",
+        "description": "Broaden the login-free workshop beyond games with a musical garden and a simple checklist.",
+        "details": "Preset local oscillator notes start only on interaction; checklist supports bounded add/toggle/remove/reset and explicitly visit-only state. Theme/color revisions and portable links should work. No claims of persistent habits or arbitrary music generation.",
+        "testStrategy": "Unit routing/revision tests, actual Chrome note lifecycle and checklist interactions, sandboxed real app generation/revision, mobile layout, no provider calls for templates.",
+        "status": "pending",
+        "dependencies": [
+          16,
+          23
+        ],
+        "priority": "medium",
         "subtasks": []
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T01:15:38.033Z",
-      "taskCount": 22,
-      "completedCount": 13,
+      "lastModified": "2026-10-23T01:38:42.342Z",
+      "taskCount": 23,
+      "completedCount": 14,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T01:31:52.289Z",
+      "created": "2026-10-23T01:45:36.983Z",
       "description": "Tasks for master context",
-      "updated": "2026-10-23T01:32:43.456Z"
+      "updated": "2026-10-23T01:45:36.983Z"
     }
   }
 }

@@ -92,6 +92,7 @@ jobs:
             exit 1
           fi
           npm run test:demo-browser
+          npm run test:demo-share-browser
   dependency-audit:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
