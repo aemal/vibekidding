@@ -69,7 +69,14 @@ async function playCounter(page: Page) {
   await page.getByRole("button", { name: "Play shared project", exact: true }).click();
   await expect(page.locator("iframe")).toHaveAttribute("sandbox", "allow-scripts");
   await expect(page.locator("iframe")).toHaveAttribute("referrerpolicy", "no-referrer");
+  const handle = await page.locator("iframe").elementHandle();
+  const frame = await handle?.contentFrame();
+  assert.ok(frame);
+  await frame.waitForLoadState("load");
   const counter = page.frameLocator("iframe").getByRole("button", { name: "Count: 0", exact: true });
+  // A visible fixture button alone does not prove its inline handler has run.
+  // Keep the real pointer click and Count: 1 assertion; no retry or synthetic click.
+  await expect.poll(() => counter.evaluate(element => typeof (element as HTMLButtonElement).onclick)).toBe("function");
   await counter.click();
   await expect(page.frameLocator("iframe").getByRole("button", { name: "Count: 1", exact: true })).toBeVisible();
 }
@@ -217,6 +224,17 @@ async function main() {
     console.log("Failure navigation", page.url(), navigations);
     artifacts.set("failure.html", await page.content().catch(() => "Page unavailable"));
     artifacts.set("failure-source.html", await sourcePage.content().catch(() => "Source unavailable"));
+    // Only synthetic recipient fixture data; never dump URLs or browser credentials.
+    const frames = await Promise.all(page.frames().filter(frame => frame !== page.mainFrame()).map(async frame => {
+      try { return await frame.evaluate(() => ({
+        ready: document.readyState,
+        text: document.body?.innerText.slice(0, 2000),
+        counterText: document.getElementById("count")?.textContent,
+        counterHandler: typeof (document.getElementById("count") as HTMLButtonElement | null)?.onclick,
+        scrollX, scrollY,
+      })); } catch { return { detached: true }; }
+    }));
+    artifacts.set("failure-frames.json", JSON.stringify(frames, null, 2));
     await page.screenshot({ fullPage: true, timeout: 5000 }).then(data => artifacts.set("failure.png", data)).catch(() => {});
   } finally {
     await browser.close();

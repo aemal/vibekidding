@@ -93,6 +93,14 @@ jobs:
           fi
           npm run test:demo-browser
           npm run test:demo-share-browser
+      - name: Preserve synthetic browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: demo-browser-failure-${{ github.run_id }}-${{ github.run_attempt }}
+          path: tests/demo-browser-artifacts/
+          if-no-files-found: ignore
+          retention-days: 3
   dependency-audit:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
