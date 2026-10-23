@@ -14,6 +14,28 @@ function decode(raw:string|null):Record<string,string>{
  if(entries.length>16||entries.some(([key,value])=>!validKey(key)||typeof value!=='string'||bytes(value)>4096))throw new Error('unavailable');
  return Object.assign(Object.create(null),value.records);
 }
+/** Shared validator for explicit app-data backup operations; returns a detached record map. */
+export function validateProjectRecords(value: unknown): Record<string,string> {
+ if(!value||typeof value!=='object'||Array.isArray(value)||![null,Object.prototype].includes(Object.getPrototypeOf(value)))throw new Error('invalid');
+ const entries=Object.entries(value);
+ if(Reflect.ownKeys(value).length!==entries.length||entries.some(([key,item])=>!validKey(key)||typeof item!=='string'))throw new Error('invalid');
+ if(entries.length>DEMO_DATA_LIMITS.keys||entries.some(([,item])=>bytes(item as string)>DEMO_DATA_LIMITS.valueBytes))throw new Error('too-large');
+ const records=Object.assign(Object.create(null),value) as Record<string,string>;
+ if(bytes(JSON.stringify({version:1,records}))>DEMO_DATA_LIMITS.projectBytes)throw new Error('too-large');
+ return records;
+}
+export function snapshotDemoData(storage:Pick<Storage,'getItem'>,projectId:string):{records:Record<string,string>;baseline:string|null}{
+ try{const baseline=storage.getItem(namespace(projectId));return {records:decode(baseline),baseline}}catch{throw new Error('unavailable')}
+}
+/** Optimistic check, not a cross-tab transaction. A failed write may have committed. */
+export function replaceDemoData(storage:Pick<Storage,'getItem'|'setItem'>,projectId:string,records:unknown,expectedBaseline:string|null):void{
+ const clean=validateProjectRecords(records),encoded=JSON.stringify({version:1,records:clean});
+ if(expectedBaseline!==null&&typeof expectedBaseline!=='string')throw new Error('invalid');
+ let storageKey:string,current:string|null;
+ try{storageKey=namespace(projectId);current=storage.getItem(storageKey);decode(current)}catch{throw new Error('unavailable')}
+ if(current!==expectedBaseline)throw new Error('conflict');
+ try{storage.setItem(storageKey,encoded);if(storage.getItem(storageKey)!==encoded)throw new Error('mismatch')}catch{throw new Error('outcome-unknown')}
+}
 export type DemoProjectStore = {read(key:string):string|null;write(key:string,value:string):void};
 export function createDemoProjectStore(storage:Pick<Storage,'getItem'|'setItem'>,projectId:string):DemoProjectStore{
  const storageKey=namespace(projectId);
