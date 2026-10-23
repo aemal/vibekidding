@@ -1198,27 +1198,33 @@
         "description": "Fix observed Saved app data Escape closure leaving focus on BODY. Restore invoking button for normal close and successful restore without stealing focus on unrelated project teardown.",
         "details": "UI worker observed real browser keyboard behavior at390x400. Own DemoDataBackup and focused browser check; no paid calls.",
         "testStrategy": "Browser keyboard Escape and explicitclose return to initiating button, successful restore returns focus; project teardown does not stealfocus.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "30"
         ],
         "priority": "medium",
         "subtasks": [],
-        "updatedAt": "2026-10-23T04:20:56.751Z",
+        "updatedAt": "2026-10-23T04:41:23.259Z",
         "metadata": {
           "verification": {
             "local": "Actual production Next browser: six focus checks and nine app-data backup regressions passed. Escape, Cancel, close button, and successful restore return focus. Mobile scroll remains stable. Build/lint/types passed.",
             "boundary": "Bundled Chromium only; unrelated route-unmount not separately browser-tested; no provider calls.",
             "release": "Pending PR and merge"
+          },
+          "release": {
+            "pr": 16,
+            "merge": "9774a5f14a3a788a5d747996ff63643480c33b7b",
+            "correctness": "GitHub correctness39900899558 passed atd91ee75; duplicate still pending atmerge. Known dependency audit remains deferred.",
+            "manual": "CUA local AI workshop Escape returned enabled Saved app data button focus; no provider calls."
           }
         }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T04:32:04.795Z",
+      "lastModified": "2026-10-23T04:41:23.259Z",
       "taskCount": 37,
-      "completedCount": 28,
+      "completedCount": 29,
       "tags": [
         "master"
       ]

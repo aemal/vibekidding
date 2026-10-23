@@ -1,6 +1,6 @@
 # VibeKidding: current demo
 
-For a first session, see the [parent quickstart](docs/DEMO_QUICKSTART.md), including the public and local links and backup instructions.
+For a first session, see the [parent quickstart](docs/DEMO_QUICKSTART.md), including the public and local links and backup instructions. The [23 October demo handoff](docs/DEMO_ACCEPTANCE_2026-10-23.md) records verified journeys and remaining production work.
 
 The login-free workshop is at `/demo`. It supports playable starters, prompt-selected template variations, revisions, browser-saved projects, version history, duplication, JSON backup/import, and HTML export. Google sign-in is not required for this demo. Cancel build stops waiting immediately, preserves your idea and previous version, and signals the server to abort generation. A provider may already have incurred usage, so cancellation does not refund the reserved call budget.
 
