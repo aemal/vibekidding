@@ -348,12 +348,15 @@ export function DemoWorkspace() {
   }
 
   // Persist before claiming success. Never silently overwrite unreadable saved data.
-  function save(next: Project[]) {
+  function save(next: Project[], retry = false) {
     setProjects(next);
     draftProjectIds.current = next.map(project => project.id);
-    if (storageBlocked.current) return false;
+    if (storageBlocked.current && !retry) return false;
     try {
       storageBaseline.current = persistProjects(localStorage, STORAGE_KEY, storageBaseline.current, next);
+      storageBlocked.current = false;
+      setStorageConflict(false);
+      setStorageError("");
       return true;
     } catch (e) {
       storageBlocked.current = true;
@@ -562,7 +565,7 @@ export function DemoWorkspace() {
       <div className="demo-note"><span aria-hidden="true">🌱</span><p><strong>Better together.</strong> Keep a grown-up nearby. Projects stay in this browser. {readiness?.publicTemplateOnly ? "Prompts go to the template service; project builds make no AI provider calls." : "Prompts go to the demo service and may use AI."} Leave out names, school, and other personal details.</p></div>
       {copyRequest?.status === "dismissed" && <div className="demo-copy-notice"><span>Shared copy not saved. Your shelf is unchanged.</span><button type="button" className="demo-text-button" disabled={locked} onClick={reviewCopy}>Review copy link</button></div>}
       {draftNotice && <p className="demo-alert" role="status">{draftNotice}</p>}
-      {storageError && <div className="demo-alert" role="alert"><p>{storageError}</p>{storageConflict && <button type="button" className="demo-secondary" disabled={locked} onClick={() => { if (window.confirm("Reload the saved shelf? Unsaved changes in this tab will be lost. Export a backup of each changed project first.")) window.location.reload(); }}>Reload saved shelf</button>}</div>}
+      {storageError && <div className="demo-alert" role="alert"><p>{storageError}</p>{!storageConflict && <button type="button" className="demo-secondary" disabled={locked || !loaded} onClick={() => { if (save(projects, true)) setMessage("Your projects are now saved in this browser."); }}>Retry saving this tab</button>}{storageConflict && <button type="button" className="demo-secondary" disabled={locked} onClick={() => { if (window.confirm("Reload the saved shelf? Unsaved changes in this tab will be lost. Export a backup of each changed project first.")) window.location.reload(); }}>Reload saved shelf</button>}</div>}
       <div className="demo-feedback" aria-live="polite" role="status">{message && <p><Check size={17} />{message}</p>}</div>
       {error && <p className="demo-alert" role="alert">{error}</p>}
       <div className="demo-workspace">
