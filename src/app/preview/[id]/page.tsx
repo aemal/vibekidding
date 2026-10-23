@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -117,7 +118,7 @@ export default function FullPreview() {
           <p style={{ color: "#636e72" }}>
             This creation might have been deleted or doesn&apos;t exist.
           </p>
-          <a
+          <Link
             href="/"
             style={{
               display: "inline-block",
@@ -131,7 +132,7 @@ export default function FullPreview() {
             }}
           >
             Go Back Home
-          </a>
+          </Link>
         </div>
       </div>
     );

@@ -1,11 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+let anthropic: Anthropic | undefined;
+function getAnthropic(): Anthropic {
+  // Importing an archived route must not require live provider configuration.
+  return anthropic ??= new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 export async function generateTitle(prompt: string): Promise<string> {
-  const message = await anthropic.messages.create({
+  const message = await getAnthropic().messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 50,
     messages: [
@@ -129,7 +131,7 @@ Return the COMPLETE updated HTML file with all my existing features PLUS the new
     userMessage = `Create this for me: ${prompt}`;
   }
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropic().messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 8192,
     messages: [

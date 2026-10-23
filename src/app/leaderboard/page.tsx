@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Trophy,
@@ -57,27 +57,29 @@ function LeaderboardContent() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchLeaderboard();
+    let cancelled = false;
+    const fetchLeaderboard = async () => {
+      try {
+        const response = await fetch(`/api/leaderboard?type=${activeTab}&limit=50`);
+        if (response.ok && !cancelled) {
+          const data = await response.json();
+          if (cancelled) return;
+          if (activeTab === "games") {
+            setGames(data);
+          } else {
+            setBuilders(data);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch leaderboard:", error);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    void fetchLeaderboard();
+    return () => { cancelled = true; };
   }, [activeTab]);
 
-  const fetchLeaderboard = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/leaderboard?type=${activeTab}&limit=50`);
-      if (response.ok) {
-        const data = await response.json();
-        if (activeTab === "games") {
-          setGames(data);
-        } else {
-          setBuilders(data);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch leaderboard:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <main className="min-h-screen p-4 md:p-6 lg:p-10">
@@ -104,7 +106,7 @@ function LeaderboardContent() {
         <div className="flex justify-center">
           <div className="tab-switcher">
             <button
-              onClick={() => setActiveTab("games")}
+              onClick={() => { if (activeTab !== "games") setIsLoading(true); setActiveTab("games"); }}
               className={`tab-btn flex items-center gap-2 ${
                 activeTab === "games" ? "active" : ""
               }`}
@@ -113,7 +115,7 @@ function LeaderboardContent() {
               <span>Top Games</span>
             </button>
             <button
-              onClick={() => setActiveTab("builders")}
+              onClick={() => { if (activeTab !== "builders") setIsLoading(true); setActiveTab("builders"); }}
               className={`tab-btn flex items-center gap-2 ${
                 activeTab === "builders" ? "active" : ""
               }`}
@@ -149,6 +151,7 @@ function GamesLeaderboard({
   games: LeaderboardGame[];
   userId: string | null;
 }) {
+  const router = useRouter();
   if (games.length === 0) {
     return (
       <div className="card p-8 text-center">
@@ -215,7 +218,7 @@ function GamesLeaderboard({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  window.location.href = `/builder/${game.creator.id}`;
+                  router.push(`/builder/${game.creator.id}`);
                 }}
               >
                 by {game.creator.username}

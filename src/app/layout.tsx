@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
-import { UserProvider } from "@/lib/UserContext";
+
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${nunito.variable} antialiased`}>
-        <UserProvider>
+
           {/* Decorative blobs */}
           <div
             className="decoration-blob"
@@ -46,7 +46,7 @@ export default function RootLayout({
             }}
           />
           {children}
-        </UserProvider>
+
       </body>
     </html>
   );

@@ -22,46 +22,49 @@ export default function BuilderProfile() {
   const isOwnProfile = userId === builderId;
 
   useEffect(() => {
-    if (userId) {
-      fetchBuilderData();
-    }
+    if (!userId) return;
+    let cancelled = false;
+    const fetchBuilderData = async () => {
+      try {
+        // Fetch builder info
+        const builderResponse = await fetch(`/api/users/${builderId}`);
+        if (builderResponse.ok && !cancelled) {
+          const builderData = await builderResponse.json();
+          if (cancelled) return;
+          setBuilder(builderData);
+        }
+  
+        // Fetch builder's projects
+        const projectsResponse = await fetch(
+          `/api/users/${builderId}/projects?currentUserId=${userId}`
+        );
+        if (projectsResponse.ok && !cancelled) {
+          const projectsData = await projectsResponse.json();
+          if (cancelled) return;
+          setProjects(projectsData);
+  
+          // Calculate totals
+          const likes = projectsData.reduce(
+            (sum: number, p: ProjectSummary) => sum + p.likeCount,
+            0
+          );
+          const plays = projectsData.reduce(
+            (sum: number, p: ProjectSummary) => sum + p.playCount,
+            0
+          );
+          setTotalLikes(likes);
+          setTotalPlays(plays);
+        }
+      } catch (error) {
+        console.error("Failed to fetch builder data:", error);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    void fetchBuilderData();
+    return () => { cancelled = true; };
   }, [builderId, userId]);
 
-  const fetchBuilderData = async () => {
-    try {
-      // Fetch builder info
-      const builderResponse = await fetch(`/api/users/${builderId}`);
-      if (builderResponse.ok) {
-        const builderData = await builderResponse.json();
-        setBuilder(builderData);
-      }
-
-      // Fetch builder's projects
-      const projectsResponse = await fetch(
-        `/api/users/${builderId}/projects?currentUserId=${userId}`
-      );
-      if (projectsResponse.ok) {
-        const projectsData = await projectsResponse.json();
-        setProjects(projectsData);
-
-        // Calculate totals
-        const likes = projectsData.reduce(
-          (sum: number, p: ProjectSummary) => sum + p.likeCount,
-          0
-        );
-        const plays = projectsData.reduce(
-          (sum: number, p: ProjectSummary) => sum + p.playCount,
-          0
-        );
-        setTotalLikes(likes);
-        setTotalPlays(plays);
-      }
-    } catch (error) {
-      console.error("Failed to fetch builder data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleLike = async (projectId: string, liked: boolean) => {
     if (!userId) return;
@@ -236,5 +239,6 @@ export default function BuilderProfile() {
     </main>
   );
 }
+
 
 

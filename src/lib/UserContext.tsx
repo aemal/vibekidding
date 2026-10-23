@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { getOrCreateUser, getUserId } from "./user";
 
 interface UserContextType {
@@ -19,13 +19,17 @@ const UserContext = createContext<UserContextType>({
   refreshUser: async () => {},
 });
 
-export function UserProvider({ children }: { children: React.ReactNode }) {
+export function UserProvider({ children, archived = false }: { children: React.ReactNode; archived?: boolean }) {
+  if (archived) return <UserContext.Provider value={{userId: "archive", username: "V1 visitor", isLoading: false, gameCount: 0, refreshUser: async () => {}}}>{children}</UserContext.Provider>;
+  return <LiveUserProvider>{children}</LiveUserProvider>;
+}
+function LiveUserProvider({children}: {children: React.ReactNode}) {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [gameCount, setGameCount] = useState(0);
 
-  const fetchUserData = async (id: string) => {
+  const fetchUserData = useCallback(async (id: string) => {
     // All user data is fetched from the API (including power user handling)
     try {
       const response = await fetch(`/api/users/${id}`);
@@ -37,19 +41,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
-  };
-
-  const initUser = async () => {
-    try {
-      const id = await getOrCreateUser();
-      setUserId(id);
-      await fetchUserData(id);
-    } catch (error) {
-      console.error("Failed to initialize user:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, []);
 
   const refreshUser = async () => {
     const id = getUserId();
@@ -59,8 +51,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    initUser();
-  }, []);
+    let cancelled = false;
+    void getOrCreateUser().then(async id => {
+      if (cancelled) return;
+      setUserId(id);
+      await fetchUserData(id);
+    }).catch(error => console.error("Failed to initialize user:", error))
+      .finally(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
+  }, [fetchUserData]);
 
   return (
     <UserContext.Provider
