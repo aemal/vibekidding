@@ -31,6 +31,18 @@ const developmentMessages: string[] = [];
 // during a dev-server test can itself cause a reload.
 const artifacts = new Map<string, Buffer | string>();
 let activeStep = "startup";
+
+// A CI failure delivered the click to the parent IFRAME while auto-scrolling it
+// from offscreen; settle parent visibility before dispatching a child gesture.
+async function readyParentFrame(page: Page) {
+  const iframe = page.locator('iframe.demo-frame');
+  await iframe.scrollIntoViewIfNeeded();
+  await expect(iframe).toBeInViewport({ ratio: 0.5 });
+  const child = await (await iframe.elementHandle())?.contentFrame();
+  assert.ok(child);
+  await child.waitForLoadState('load');
+}
+
 const pointerDiagnostics: unknown[] = [];
 async function observePointerFrame(page: Page) {
   const frame = await (await page.locator('iframe.demo-frame').elementHandle())?.contentFrame();
@@ -151,6 +163,7 @@ async function main() {
       await page.getByRole("button", { name: /Space explorer.*Make this mine/ }).click();
       await expect(page.locator("#preview-heading")).toHaveText("Star Collector");
       const preview = page.frameLocator("iframe.demo-frame");
+      await readyParentFrame(page);
       await preview.getByRole("button", { name: "Start game", exact: true }).click();
       await preview.getByRole("button", { name: "Collect target", exact: true }).press("Enter");
       await expect(preview.locator("#status")).toContainText("Collected 1");
@@ -218,6 +231,7 @@ async function main() {
       assert.equal(after.match(/Collected \d+ \/ \d+/)?.[0], before.match(/Collected \d+ \/ \d+/)?.[0], "Resizing must preserve score");
       assert.ok(Number(after.match(/(\d+) seconds/)?.[1]) <= Number(before.match(/(\d+) seconds/)?.[1]), "Resizing must not reset the timer");
       // A successful pointer click additionally verifies the target is reachable.
+      await readyParentFrame(page);
       await preview.getByRole("button", { name: "Collect target", exact: true }).click();
       await expect(preview.locator("#status")).toContainText("Collected 2");
       assert.equal(await page.evaluate(key => localStorage.getItem(key), storageKey), shelf);
@@ -264,7 +278,9 @@ async function main() {
       assert.equal(projects[0].versions[0].html, generated.html);
       if (generated.mode === "template") {
         const preview = page.frameLocator("iframe.demo-frame");
+        await readyParentFrame(page);
         await preview.getByRole("button", { name: "Start game", exact: true }).click();
+        await readyParentFrame(page);
         await preview.getByRole("button", { name: "Collect target", exact: true }).click();
         await expect(preview.locator("#status")).toContainText("Collected 1");
       } else {
@@ -554,6 +570,7 @@ async function main() {
         await record("after Enter cell 0");
         await expect(cells.nth(0)).toHaveText("X");
         for (const [index, player] of [[3, "O"], [1, "X"], [4, "O"], [2, "X"]] as const) {
+          await readyParentFrame(ticPage);
           await cells.nth(index).click();
           await record(`after pointer cell ${index}`);
           await expect(cells.nth(index)).toHaveText(player);

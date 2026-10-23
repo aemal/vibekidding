@@ -32,6 +32,18 @@ const errors: string[] = [];
 const decodedImages: { name: string; exactUrl: boolean; width: number; height: number; urlCharacters: number }[] = [];
 const artifacts = new Map<string, Buffer | string>();
 let activeStep = "startup";
+
+// A CI failure delivered the click to the parent IFRAME while auto-scrolling it
+// from offscreen; settle parent visibility before dispatching a child gesture.
+async function readyParentFrame(page: Page) {
+  const iframe = page.locator('iframe');
+  await iframe.scrollIntoViewIfNeeded();
+  await expect(iframe).toBeInViewport({ ratio: 0.5 });
+  const child = await (await iframe.elementHandle())?.contentFrame();
+  assert.ok(child);
+  await child.waitForLoadState('load');
+}
+
 const pointerDiagnostics: unknown[] = [];
 async function observePointerFrame(page: Page) {
   const frame = await (await page.locator('iframe').elementHandle())?.contentFrame();
@@ -155,6 +167,7 @@ async function main() {
       await expect(page.locator("#playing-project-title")).toBeFocused();
       const record = await observePointerFrame(page);
       await record("before recipient tic pointer");
+      await readyParentFrame(page);
       await frame.getByRole("button", { name: "Row 1, column 1: empty", exact: true }).click();
       await record("after recipient tic pointer");
       await expect(frame.getByRole("button", { name: "Row 1, column 1: X", exact: true })).toBeVisible();
@@ -175,6 +188,7 @@ async function main() {
       await page.goto(url); await consent(page, "Custom snapshot");
       await page.getByRole("button", { name: "Play shared project", exact: true }).click();
       const counter = page.frameLocator("iframe").getByRole("button", { name: "Count: 0", exact: true });
+      await readyParentFrame(page);
       await counter.click();
       await expect(page.frameLocator("iframe").getByRole("button", { name: "Count: 1", exact: true })).toBeVisible();
     });
