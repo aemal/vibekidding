@@ -1301,18 +1301,21 @@
         "description": "Investigate CI39912845376 saved-data test retaining Unsaved changes after Save click; preserve all persistence assertions and capture actual input events.",
         "details": "Separate from the verified live model upgrade. No blind retries, synthetic clicks, weakened assertions or provider calls.",
         "testStrategy": "Browser input evidence and existing persistence, memory-only fallback and quota assertions; reviewed PR with CI evidence.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [],
         "priority": "medium",
         "subtasks": [],
-        "updatedAt": "2026-10-23T06:45:38.399Z"
+        "updatedAt": "2026-10-23T06:55:39.000Z",
+        "metadata": {
+          "verification": "PR26 merged55bb40f after full correctness39913441283 passed. Duplicate39913472835 still pending at merge. Eleven existing storage assertions pass in Chromium and Chrome; coordinator repeated eleven against production3217. Trusted pointer entry and exact click sequence recorded without retries or handler changes. Deliberately broken Save handler still failed original memory-only status assertion. Root cause remains inferred; no provider calls."
+        }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T06:45:38.400Z",
+      "lastModified": "2026-10-23T06:55:39.000Z",
       "taskCount": 43,
-      "completedCount": 34,
+      "completedCount": 35,
       "tags": [
         "master"
       ]
