@@ -1309,13 +1309,148 @@
         "metadata": {
           "verification": "PR26 merged55bb40f after full correctness39913441283 passed. Duplicate39913472835 still pending at merge. Eleven existing storage assertions pass in Chromium and Chrome; coordinator repeated eleven against production3217. Trusted pointer entry and exact click sequence recorded without retries or handler changes. Deliberately broken Save handler still failed original memory-only status assertion. Root cause remains inferred; no provider calls."
         }
+      },
+      {
+        "id": "44",
+        "title": "V2 Docker deployment and local routing",
+        "description": "Single-machine Compose with Nginx, trusted build/deploy controller, durable app volumes and deployment scripts.",
+        "details": "",
+        "testStrategy": "Docker startup, routing, restart persistence and backup restore.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.480Z",
+        "metadata": {
+          "verification": "Docker Desktop restarted successfully with user permission. Compose config validates; controller tests 5/5 pass, including local HTTP/WebSocket cookie forwarding. Actual Docker build failed with disk I/O errors; host under 300MB free. Awaiting exact generated-cache cleanup approval. No Docker deployment acceptance claimed.",
+          "verifiedEvidence": "Docker studio/controller/gateway healthy on3230. Real npm build/start, SQLite across revision, WebSockets through Nginx and failed-build rollback passed. Backup checksums pass; app data restored to isolated volume passes SQLite integrity and retains room. Full live-stack restore not attempted to avoid disrupting acceptance."
+        }
+      },
+      {
+        "id": "45",
+        "title": "V2 multifile app generation and deployment",
+        "description": "Open-ended source generation, dependencies, immutable versions, builds and per-app persistent backend.",
+        "details": "",
+        "testStrategy": "Generate deploy revise application; data survives version changes.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.483Z",
+        "metadata": {
+          "verification": "2026-10-23 native Chrome on Docker3230: real family-key gpt-6-sol generation creates8files; npm build and deployment succeed. Counter and note persist refresh, manual UI source revision saves new version and redeploys with data retained. ZIP current revision and share QR verified. Embedded preview pending final CSP image rebuild. Restart recovery being improved after review."
+        }
+      },
+      {
+        "id": "46",
+        "title": "V2 responsive HeroUI studio",
+        "description": "HeroUI3 with VibeBoard theme; project conversation files preview and voice on desktop/mobile.",
+        "details": "",
+        "testStrategy": "Browser create/revise/preview and responsive flows.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T08:15:18.651Z"
+      },
+      {
+        "id": "47",
+        "title": "V2 local account login and sessions",
+        "description": "Simple username/password initial account and persistent authenticated sessions across devices.",
+        "details": "",
+        "testStrategy": "Setup once, login, rejected credentials, durable sessions and logout.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T08:42:21.513Z",
+        "metadata": {
+          "verification": "2026-10-23: SQLite account setup/login/logout with independent device sessions implemented. Two auth tests pass; combined auth/runtime/voice suite 19/19 passes. Native Chrome setup/login exercised by UI worker. Production Docker acceptance pending disk-space recovery."
+        }
+      },
+      {
+        "id": "48",
+        "title": "V2 family landing page and theme",
+        "description": "HeroUI landing for adults and children, founder story and accurately described alternatives/features.",
+        "details": "",
+        "testStrategy": "Browser responsive landing; links; no unverified security claims.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.485Z"
+      },
+      {
+        "id": "49",
+        "title": "V2 integrated Docker browser acceptance",
+        "description": "Test real source generation build deploy data persistence through UI and document single-server handoff.",
+        "details": "",
+        "testStrategy": "Computer use end-to-end with real provider bounded usage; Docker restart; verification report.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": "50",
+        "title": "Family BYOK providers and model selection",
+        "description": "Per-account encrypted OpenAI and Anthropic keys, account model discovery and ElevenLabs credentials.",
+        "details": "",
+        "testStrategy": "Account isolation, secret redaction and real selected-provider generation.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.487Z",
+        "metadata": {
+          "verification": "Encrypted owner-scoped provider store and isolation tests pass. Actual OpenAI account catalog and selected gpt-6-sol generation passed in Docker/native Chrome. Actual ElevenLabs owner-key readiness and signed-session issuance passed without audio connection. Anthropic adapter fixture-tested only; no live funded account acceptance. No subscription-to-API equivalence claimed."
+        }
+      },
+      {
+        "id": "51",
+        "title": "Project source ZIP download",
+        "description": "Download current source without node_modules, build outputs, credentials or runtime data.",
+        "details": "",
+        "testStrategy": "Independent ZIP reader and authenticated browser download.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:19:19.300Z",
+        "metadata": {
+          "verifiedEvidence": "Native Chrome downloaded current project ZIP; independent ZIP reader checked 8 source files and archive integrity. Source-only manifest excludes secrets, dependencies, caches and runtime data. Route ownership and export tests pass. Verified 2026-10-23."
+        }
+      },
+      {
+        "id": "52",
+        "title": "Invite-only email OTP accounts",
+        "description": "One verified email per family with shared projects across devices; implement after core deployment.",
+        "details": "",
+        "testStrategy": "OTP expiry, replay/rate limits, invitation limits and cross-account access tests.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:19:29.728Z"
+      },
+      {
+        "id": "53",
+        "title": "Public runtime origin isolation",
+        "description": "Separate generated application origin from studio and account/provider APIs before public rollout.",
+        "details": "",
+        "testStrategy": "Cross-origin requests cannot access studio sessions or keys; preview and sharing still work.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:11:24.949Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T06:55:39.000Z",
-      "taskCount": 43,
-      "completedCount": 35,
+      "lastModified": "2026-10-23T09:35:57.487Z",
+      "taskCount": 53,
+      "completedCount": 41,
       "tags": [
         "master"
       ]

@@ -1,0 +1,5 @@
+import { authorize, failure, requestJson } from "@/lib/v2/http";
+import { withProjectEdit, loadOwnedProject } from "@/lib/v2/jobs";
+import { saveVersion, validateFiles } from "@/lib/v2/store";
+export const runtime="nodejs";
+export async function PUT(request:Request,{params}:{params:Promise<{id:string}>}){const auth=await authorize(request,true);if(auth.response)return auth.response;try{const {id}=await params;const project=await loadOwnedProject(id,auth.session!.userId);if(!project)return Response.json({error:"Project not found."},{status:404});const data=await requestJson(request);const files=validateFiles(data.files);return await withProjectEdit(id,async()=>{const current=await loadOwnedProject(id,auth.session!.userId);if(!current)throw new Error("Project not found.");if(typeof data.expectedVersionId==="string" && current.currentVersionId!==data.expectedVersionId)return Response.json({error:"This project changed in another window. Reload before saving your edits."},{status:409});const version=await saveVersion(current,"Manual source edit",files);return Response.json({project:current,version});});}catch(error){return failure(error);}}

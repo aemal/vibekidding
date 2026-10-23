@@ -54,3 +54,5 @@ next-env.d.ts
 /tests/demo-browser-artifacts/
 
 /.next-demo-ai/
+.vibekidding-v2/
+.next-v2*/

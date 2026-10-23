@@ -42,11 +42,14 @@
     "test:demo-app-ai-browser": "tsx scripts/check-demo-app-ai-browser.ts",
     "test:demo-short-screen-browser": "tsx scripts/check-demo-short-screen-browser.ts",
     "test:demo-drafts-browser": "tsx scripts/check-demo-drafts-browser.ts",
-    "test:demo-data-focus-browser": "tsx scripts/check-demo-data-focus-browser.ts"
+    "test:demo-data-focus-browser": "tsx scripts/check-demo-data-focus-browser.ts",
+    "test:v2": "tsx --test tests/v2-*.test.ts && node --test infra/tests/controller.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@elevenlabs/react": "^1.18.0",
+    "@heroui/react": "^3.2.6",
+    "@heroui/styles": "^3.2.6",
     "@next/env": "^16.4.2",
     "@prisma/adapter-better-sqlite3": "^7.2.0",
     "@prisma/client": "6.19.3",
