@@ -2,6 +2,8 @@
 
 The login-free workshop is at `/demo`. It supports playable starters, prompt-selected template variations, revisions, browser-saved projects, version history, duplication, JSON backup/import, and HTML export. Google sign-in is not required for this demo.
 
+The template workshop includes collector games, memory matching, drawing, addition quizzes, branching stories, same-device tic-tac-toe, a musical garden, and a simple checklist. Music starts only when a note is selected. Checklist entries and play progress last for the preview visit; they are not saved habits or shared multiplayer state.
+
 ## Run locally
 
 Use Node 22.22 or newer in the Node 22 series, then:

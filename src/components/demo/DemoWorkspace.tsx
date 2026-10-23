@@ -6,11 +6,18 @@ import { ArrowLeft, ArrowUpRight, Check, Copy, Download, History, LoaderCircle, 
 import { GeneratedPreview } from "@/components/GeneratedPreview";
 import { sandboxDocument } from "@/lib/studio/sandbox";
 import { starters } from "./starters";
+import { templateProject } from "@/lib/demo-server/template";
 import { BrowserDictation } from "./BrowserDictation";
 import { createShareUrl, DemoShareError, type SharedBuild } from "@/lib/demo-share";
 import { DemoSamanthaVoice } from "./DemoSamanthaVoice";
 
 import { copyProject, MAX_BACKUP_BYTES, MAX_HTML, MAX_PROJECTS, MAX_VERSIONS, parseBackup, persistProjects, ProjectStorageConflictError, serializeBackup, validProjects, type Project, type Version } from "./project-backup";
+
+const workshopStarters = [
+  ...starters,
+  { title: "Music garden", emoji: "🎵", color: "honey", description: "Tap piano notes to make a melody. Sound starts only when you play.", html: templateProject("Make a musical garden piano").html },
+  { title: "Little checklist", emoji: "🌱", color: "sage", description: "Make a little plan. Checkmarks last only for this preview visit.", html: templateProject("Make a garden daily checklist").html },
+];
 
 type Readiness = { enabled: boolean; mode: "ai" | "template"; publicTemplateOnly?: boolean; message?: string; limits?: { promptCharacters?: number } };
 const promptSuggestions = [
@@ -20,6 +27,8 @@ const promptSuggestions = [
   { label: "Branching story", prompt: "Make a garden choose-your-own story" },
   { label: "Collector game", prompt: "Make a blue ocean collector game" },
   { label: "Tic-tac-toe · 2 players", prompt: "Make a garden tic-tac-toe game for two players on the same device" },
+  { label: "Music garden", prompt: "Make a musical garden piano" },
+  { label: "Checklist", prompt: "Make a garden daily checklist" },
 ];
 const speechLanguages = [
   { value: "en-US", label: "English (US)" },
@@ -258,7 +267,7 @@ export function DemoWorkspace() {
   function createFromStarter(index: number) {
     if (busyRef.current) return;
     if (projects.length >= MAX_PROJECTS) { setError("Your shelf is full! Export and delete a project to make room for a new one."); return; }
-    const starter = starters[index];
+    const starter = workshopStarters[index];
     const version: Version = { id: crypto.randomUUID(), html: starter.html, prompt: "Started with " + starter.title, createdAt: eventTimestamp(), mode: "template" };
     const project: Project = { id: crypto.randomUUID(), title: starter.title, emoji: starter.emoji, updatedAt: eventTimestamp(), versions: [version] };
     const saved = save([project, ...projects]);
@@ -383,7 +392,7 @@ export function DemoWorkspace() {
             <button className="demo-primary" type="submit" disabled={locked || !loaded || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
             {busy && <button type="button" className="demo-text-button demo-cancel" onClick={() => requestRef.current?.abort()}>Cancel build</button>}
           </form>
-          <p className="demo-fine">{readiness?.mode === "template" ? "Templates support memory match, drawing, addition quizzes, preset branching stories, collector games, and two-player tic-tac-toe on the same device. Changes use supported themes and colors; custom code changes need AI. " : "Builds are labeled AI or template when ready. "}Nothing is published from this demo.</p>
+          <p className="demo-fine">{readiness?.mode === "template" ? "Templates support memory match, drawing, addition quizzes, preset branching stories, collector games, two-player tic-tac-toe on the same device, a music garden with no autoplay, and checklists whose checkmarks last only for the preview visit. Changes use supported themes and colors; custom code changes need AI. " : "Builds are labeled AI or template when ready. "}Nothing is published from this demo.</p>
           <div className="demo-small-spark"><span>✧</span><p>{readiness?.mode === "template" ? "Try “blue ocean” or “easy memory game.”" : "Try “make it blue” or “add a score.”"}<br />Small changes can make a big difference.</p></div>
         </section>
         <dialog ref={playDialogRef} open className={`demo-panel demo-preview-panel demo-play-dialog${expandedPlay ? " is-expanded" : ""}`} aria-labelledby="preview-heading" aria-modal={expandedPlay ? true : undefined} aria-busy={busy} onCancel={e => { e.preventDefault(); closeLargePlay(); }}>
@@ -394,7 +403,7 @@ export function DemoWorkspace() {
         </dialog>
       </div>
       {history && selected && <section className="demo-panel demo-history" aria-label="Version history"><div className="demo-section-heading"><div><h2>A trail of little discoveries</h2><p>Restore a previous build. We keep the latest {MAX_VERSIONS} versions.</p></div><button className="demo-icon-button" aria-label="Close history" onClick={() => setHistory(false)}><X size={18} /></button></div><ol>{[...selected.versions].reverse().map((v, i) => <li key={v.id}><div><strong>{v.prompt}</strong><span>{date(v.createdAt)} · {v.mode === "ai" ? "AI build" : "Template build"}</span></div>{i === 0 ? <span className="demo-tag">CURRENT</span> : <button disabled={locked} onClick={() => restore(v)}><RotateCcw size={14} /> Restore</button>}</li>)}</ol></section>}
-      <section className="demo-starters" aria-labelledby="starters-heading"><div className="demo-section-heading"><div><p className="demo-eyebrow">A SPARK TO GET YOU STARTED</p><h2 id="starters-heading">Start small. Make it yours.</h2></div><span className="demo-muted">Ready-to-play templates. No AI needed.</span></div><div className="demo-starter-grid">{starters.map((s, i) => <button className={`demo-starter ${s.color}`} key={s.title} onClick={() => createFromStarter(i)} disabled={!loaded || locked}><span className="demo-starter-icon" aria-hidden="true">{s.emoji}</span><h3>{s.title}</h3><p>{s.description}</p><span className="demo-starter-link">Make this mine <ArrowUpRight size={17} /></span></button>)}</div></section>
+      <section className="demo-starters" aria-labelledby="starters-heading"><div className="demo-section-heading"><div><p className="demo-eyebrow">A SPARK TO GET YOU STARTED</p><h2 id="starters-heading">Start small. Make it yours.</h2></div><span className="demo-muted">Ready-to-play templates. No AI needed.</span></div><div className="demo-starter-grid">{workshopStarters.map((s, i) => <button className={`demo-starter ${s.color}`} key={s.title} onClick={() => createFromStarter(i)} disabled={!loaded || locked}><span className="demo-starter-icon" aria-hidden="true">{s.emoji}</span><h3>{s.title}</h3><p>{s.description}</p><span className="demo-starter-link">Make this mine <ArrowUpRight size={17} /></span></button>)}</div></section>
       <section className="demo-gallery" aria-labelledby="gallery-heading"><div className="demo-section-heading"><div><p className="demo-eyebrow">MADE BY YOU</p><h2 id="gallery-heading">Your shelf of wonders <span>({projects.length})</span></h2></div><div className="demo-shelf-actions"><input ref={fileRef} type="file" accept=".json,application/json" hidden aria-label="Import project backup" onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void importBackup(file); }} /><button disabled={locked || !loaded} className="demo-secondary" onClick={() => fileRef.current?.click()}><Upload size={16} /> {importing ? "Importing…" : "Import backup"}</button><button disabled={locked || !loaded} className="demo-secondary" onClick={newProject}><Plus size={16} /> New project</button></div></div>{!loaded ? <p className="demo-gallery-empty">Opening your project shelf…</p> : projects.length === 0 ? <div className="demo-gallery-empty"><span aria-hidden="true">✦</span><p>Your first creation belongs here.<br /><small>Start with a spark above. We’ll keep your projects in this browser.</small></p></div> : <div className="demo-gallery-grid">{projects.map(p => <button key={p.id} disabled={locked} className={`demo-project-card ${p.id === selectedId ? "selected" : ""}`} onClick={() => open(p)} aria-pressed={p.id === selectedId}><span className="demo-project-art" aria-hidden="true">{p.emoji}</span><div><h3>{p.title}</h3><p>{p.versions.length} {p.versions.length === 1 ? "version" : "versions"} · {p.versions.at(-1)?.mode === "ai" ? "AI build" : "Template build"}</p><small>{date(p.updatedAt)}</small></div><ArrowUpRight size={18} /></button>)}</div>}<p className="demo-fine">{readiness?.publicTemplateOnly ? "Template demo" : "Local demo"} · No account needed · Clearing browser data removes saved projects. JSON backups keep your title and versions (up to 8 MB). Imports add a new project, and files stay in your browser. HTML exports keep only the current build. Play progress inside a project is not saved.</p></section>
       <footer className="demo-footer"><span>✦ Made for curious minds.</span><Link href="/"><ArrowLeft size={14} /> About VibeKidding</Link><span>Imagine freely. Build together.</span></footer>
     </main>

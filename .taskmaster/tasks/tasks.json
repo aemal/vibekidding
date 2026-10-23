@@ -817,26 +817,35 @@
         "description": "Broaden the login-free workshop beyond games with a musical garden and a simple checklist.",
         "details": "Preset local oscillator notes start only on interaction; checklist supports bounded add/toggle/remove/reset and explicitly visit-only state. Theme/color revisions and portable links should work. No claims of persistent habits or arbitrary music generation.",
         "testStrategy": "Unit routing/revision tests, actual Chrome note lifecycle and checklist interactions, sandboxed real app generation/revision, mobile layout, no provider calls for templates.",
-        "status": "pending",
+        "status": "in-progress",
         "dependencies": [
-          16,
-          23
+          "16",
+          "23"
         ],
         "priority": "medium",
-        "subtasks": []
+        "subtasks": [],
+        "updatedAt": "2026-10-23T01:47:40.945Z",
+        "metadata": {
+          "localVerification": {
+            "browser": "10 actual app checks on bundled Chromium, 2 real template revisions, zero page/console/prohibited requests",
+            "checklist": "Found and fixed form submission blocked by iframe; click and Enter now verified in sandbox",
+            "music": "Native WebAudio gesture and note lifecycle verified; audible output not claimed",
+            "limits": "Checklist state lasts preview visit; not persistent habits",
+            "release": "Pending PR and CI/deployment"
+          }
+        }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T01:38:42.342Z",
-      "taskCount": 23,
+      "lastModified": "2026-10-23T01:47:40.945Z",
+      "taskCount": 24,
       "completedCount": 14,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T01:45:36.983Z",
-      "description": "Tasks for master context",
-      "updated": "2026-10-23T01:45:36.983Z"
+      "created": "2026-10-23T02:00:33.619Z",
+      "description": "Tasks for master context"
     }
   }
 }

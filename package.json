@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "test:studio": "tsx --test tests/studio.test.ts tests/parent-guard.test.ts tests/mail-queue.test.ts tests/mail-webhook.test.ts tests/guard-evaluation.test.ts tests/supervised-mutations.test.ts tests/privacy-maintenance.test.ts tests/safety-revision.test.ts tests/database-boundaries.test.ts tests/identity-changes.test.ts tests/request-body.test.ts tests/prisma-config.test.ts tests/mail-provider.test.ts tests/model-pricing.test.ts tests/settlement.test.ts tests/voice-policy.test.ts tests/voice-watchdog.test.ts tests/voice-admission.test.ts tests/voice-database-watchdog.test.ts tests/billing-import.test.ts tests/deletion-request.test.ts tests/setup-cli.test.ts tests/app-capability-policy.test.ts tests/published-project.test.ts tests/parent-control.test.ts tests/voice-output-gate.test.ts tests/billing-confirmation.test.ts tests/published-storage.test.ts tests/app-storage-dispatcher.test.ts tests/demo-server.test.ts tests/provider-lazy-init.test.ts tests/demo-server-templates.test.ts tests/demo-backup.test.ts tests/demo-dictation.test.ts tests/demo-server-starters.test.ts tests/demo-voice.test.ts tests/demo-share.test.ts",
+    "test:studio": "tsx --test tests/studio.test.ts tests/parent-guard.test.ts tests/mail-queue.test.ts tests/mail-webhook.test.ts tests/guard-evaluation.test.ts tests/supervised-mutations.test.ts tests/privacy-maintenance.test.ts tests/safety-revision.test.ts tests/database-boundaries.test.ts tests/identity-changes.test.ts tests/request-body.test.ts tests/prisma-config.test.ts tests/mail-provider.test.ts tests/model-pricing.test.ts tests/settlement.test.ts tests/voice-policy.test.ts tests/voice-watchdog.test.ts tests/voice-admission.test.ts tests/voice-database-watchdog.test.ts tests/billing-import.test.ts tests/deletion-request.test.ts tests/setup-cli.test.ts tests/app-capability-policy.test.ts tests/published-project.test.ts tests/parent-control.test.ts tests/voice-output-gate.test.ts tests/billing-confirmation.test.ts tests/published-storage.test.ts tests/app-storage-dispatcher.test.ts tests/demo-server.test.ts tests/provider-lazy-init.test.ts tests/demo-server-templates.test.ts tests/demo-backup.test.ts tests/demo-dictation.test.ts tests/demo-server-starters.test.ts tests/demo-voice.test.ts tests/demo-share.test.ts tests/demo-server-creative-tools.test.ts",
     "typecheck": "tsc --noEmit",
     "setup:release": "tsx scripts/check-studio-setup.ts --strict",
     "setup:check": "tsx scripts/check-studio-setup.ts",
@@ -27,6 +27,8 @@
     "test:runtime-shell-browser": "tsx scripts/check-runtime-shell-browser.ts",
     "test:demo-browser": "tsx scripts/check-demo-browser.ts",
     "test:demo-share-browser": "tsx scripts/check-demo-share-browser.ts",
+    "test:creative-templates-browser": "tsx scripts/check-creative-templates-browser.ts",
+    "test:demo-creative-browser": "tsx scripts/check-demo-creative-browser.ts",
     "dev:demo": "VIBEKIDDING_DEMO_ENABLED=1 VIBEKIDDING_DEMO_PROVIDER=template next dev --webpack --hostname 127.0.0.1 --port 3217",
     "dev:demo-ai": "VIBEKIDDING_DEMO_AI_DEV=1 VIBEKIDDING_PUBLIC_TEMPLATE_DEMO=0 VIBEKIDDING_DEMO_ENABLED=1 VIBEKIDDING_DEMO_PROVIDER=openai next dev --webpack --hostname 127.0.0.1 --port 3219"
   },
