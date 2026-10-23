@@ -98,9 +98,9 @@ async function playCounter(page: Page) {
   await frame.evaluate(`(() => {
     window.counterPointerEpoch = ${interactions.length};
     window.counterPointerEvents = [];
-    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) {
+    for (const type of ['pointermove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) {
       document.addEventListener(type, event => {
-        if (window.counterPointerEvents.length < 25) window.counterPointerEvents.push({ type, target: event.target.id, x: event.clientX, y: event.clientY, at: Date.now() });
+        if (window.counterPointerEvents.length < 25) window.counterPointerEvents.push({ type, trusted: event.isTrusted, target: event.target.id, x: event.clientX, y: event.clientY, at: Date.now() });
       }, { capture: true });
     }
   })()`);
@@ -108,8 +108,23 @@ async function playCounter(page: Page) {
     iframe: await page.locator("iframe").boundingBox(),
     parent: await page.evaluate(() => ({ scrollX, scrollY, active: document.activeElement?.tagName })),
   };
-  await counter.click();
-  try { await expect(page.frameLocator("iframe").getByRole("button", { name: "Count: 1", exact: true })).toBeVisible(); }
+  try {
+    // DOM load/handler readiness does not establish browser input routing into a
+    // newly mounted sandbox frame. Observe a real hover before the one click;
+    // never retry the click, dispatch DOM events, or sleep for an arbitrary delay.
+    await counter.hover();
+    await expect.poll(() => frame.evaluate(`window.counterPointerEvents.some(event =>
+      event.type === 'pointermove' && event.target === 'count' && event.trusted)`)).toBe(true);
+    await counter.click();
+    await expect(page.frameLocator("iframe").getByRole("button", { name: "Count: 1", exact: true })).toBeVisible();
+    assert.deepEqual(await frame.evaluate(`window.counterPointerEvents
+      .filter(event => ['pointerdown', 'pointerup', 'click'].includes(event.type))
+      .map(({type, target, trusted}) => ({type, target, trusted}))`), [
+      { type: "pointerdown", target: "count", trusted: true },
+      { type: "pointerup", target: "count", trusted: true },
+      { type: "click", target: "count", trusted: true },
+    ]);
+  }
   finally {
     interactions.push({
       frame: frameId(frame),
@@ -135,6 +150,7 @@ async function main() {
     } });
   ` });
   const sourcePage = await source.newPage(); const page = await recipient.newPage();
+  let activePage = page;
   let failure: unknown; let sharedUrl = "";
   try {
     await step("source shares only current build without changing shelf", async () => {
@@ -249,13 +265,15 @@ async function main() {
     await step("recipient with existing projects keeps shelf unchanged", async () => {
       const existing = await browser.newContext(); await guard(existing, true); await seed(existing);
       const preserved = await existing.newPage();
-      try {
-        await preserved.goto(sharedUrl); await pending(preserved, fixture.title);
-        const before = await shelf(preserved); assert.equal(before, JSON.stringify([fixture]));
-        await playCounter(preserved); assert.equal(await shelf(preserved), before);
-        await preserved.reload(); await pending(preserved, fixture.title);
-        assert.equal(await shelf(preserved), before);
-      } finally { await existing.close(); }
+      activePage = preserved;
+      await preserved.goto(sharedUrl); await pending(preserved, fixture.title);
+      const before = await shelf(preserved); assert.equal(before, JSON.stringify([fixture]));
+      await playCounter(preserved); assert.equal(await shelf(preserved), before);
+      await preserved.reload(); await pending(preserved, fixture.title);
+      assert.equal(await shelf(preserved), before);
+      // Keep the failing context alive for the outer evidence capture.
+      await existing.close();
+      activePage = page;
     });
     await step("no prohibited APIs, provider requests, or runtime errors", async () => {
       assert.deepEqual(violations, []); assert.deepEqual(pageErrors, []);
@@ -263,11 +281,11 @@ async function main() {
     });
   } catch (error) {
     failure = error;
-    console.log("Failure navigation", page.url(), navigations);
-    artifacts.set("failure.html", await page.content().catch(() => "Page unavailable"));
+    console.log("Failure navigation", activePage.url(), navigations);
+    artifacts.set("failure.html", await activePage.content().catch(() => "Page unavailable"));
     artifacts.set("failure-source.html", await sourcePage.content().catch(() => "Source unavailable"));
     // Only synthetic recipient fixture data; never dump URLs or browser credentials.
-    const frames = await Promise.all(page.frames().filter(frame => frame !== page.mainFrame()).map(async frame => {
+    const frames = await Promise.all(activePage.frames().filter(frame => frame !== activePage.mainFrame()).map(async frame => {
       try { return await frame.evaluate(() => ({
         ready: document.readyState,
         text: document.body?.innerText.slice(0, 2000),
@@ -277,7 +295,7 @@ async function main() {
       })); } catch { return { detached: true }; }
     }));
     artifacts.set("failure-frames.json", JSON.stringify(frames, null, 2));
-    await page.screenshot({ fullPage: true, timeout: 5000 }).then(data => artifacts.set("failure.png", data)).catch(() => {});
+    await activePage.screenshot({ fullPage: true, timeout: 5000 }).then(data => artifacts.set("failure.png", data)).catch(() => {});
   } finally {
     await browser.close();
     await mkdir(output, { recursive: true });
