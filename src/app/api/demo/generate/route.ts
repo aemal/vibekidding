@@ -1,12 +1,9 @@
 import { createDemoHandlers } from "@/lib/demo-server/handler";
-import { DemoUsage } from "@/lib/demo-server/access";
+import { sharedDemoUsage } from "@/lib/demo-server/usage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Keep usage accounting across dev module reloads, scoped to this local Node process.
-const state = globalThis as typeof globalThis & { vibekiddingDemoUsage?: DemoUsage };
-state.vibekiddingDemoUsage ??= new DemoUsage();
-const handlers = createDemoHandlers({ usage: state.vibekiddingDemoUsage });
+const handlers = createDemoHandlers({ usage: sharedDemoUsage() });
 export const GET = handlers.GET;
 export const POST = handlers.POST;

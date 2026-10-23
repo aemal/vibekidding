@@ -9,6 +9,7 @@ export function proxy(req: NextRequest) {
     !path.startsWith("/api/published/") &&
     path !== "/api/demo/generate" &&
     path !== "/api/demo/voice" &&
+    path !== "/api/demo/app-ai" &&
     path !== "/api/parents"
   )
     return NextResponse.json(

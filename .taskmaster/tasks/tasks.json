@@ -1002,19 +1002,25 @@
         "description": "Prevent template-only users following unsupported revision examples or trying to revise custom notes apps that need AI.",
         "details": "Classify selected build capability using existing template validation, not claimed mode label alone. Supported templates show real supported suggestions; custom/notes explain play and save remain available but changes need AI. Actual AI configuration remains able to revise custom builds. No renderer/version format change or production gate changes.",
         "testStrategy": "Browser first-use notes path, canonical template supported suggestion modifies build, custom shared build guidance, AI-configured readiness permits custom revisions, no extra provider calls in fixtures.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "28"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T03:17:29.343Z",
+        "updatedAt": "2026-10-23T03:43:52.569Z",
         "metadata": {
           "verification": {
             "unitTests": 280,
             "browserChecks": 38,
             "checks": "lint and production build passed",
             "boundary": "AI readiness mocked without provider submit; release pending"
+          },
+          "release": {
+            "pr": "https://github.com/aemal/vibekidding/pull/12",
+            "merged": true,
+            "ci": "Both correctness runs passed at ca7dade",
+            "note": "Earlier release-pending verification is superseded by this release; original production integration tasks unchanged"
           }
         }
       },
@@ -1024,13 +1030,13 @@
         "description": "Show a child-readable preview problem and an explicit repair or previous-version path without automatically making paid calls.",
         "details": "Bounded exact frame/session generic runtime error categories only; do not collect DOM, form values, storage or raw diagnostic text. Reset between versions, ignore stale/spoofed messages. Explicit repair prepares a generic prompt for user review, never auto-generates. Existing history restore remains available. Error-free does not imply app correctness.",
         "testStrategy": "Synthetic runtime throw and rejection, staleframe/spoof/flood tests, no false claim for healthy frame, explicit repair preserves history and makes no call until submit, previous version restore.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "30"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T03:19:18.124Z",
+        "updatedAt": "2026-10-23T03:43:57.997Z",
         "metadata": {
           "verification": {
             "unitTests": 285,
@@ -1038,19 +1044,50 @@
             "checks": "lint and corrected production build passed",
             "artifact": "preview-recovery-2026-10-23T03-33-21-259Z/report.json",
             "boundary": "synthetic errors and mocked repair; no live provider repair claim; release pending"
+          },
+          "release": {
+            "pr": "https://github.com/aemal/vibekidding/pull/13",
+            "merged": true,
+            "ci": "Both correctness runs passed at 70bcedc",
+            "note": "Earlier release-pending verification superseded; recovery acceptance uses synthetic failures and mocked AI repair, not live provider repair"
+          }
+        }
+      },
+      {
+        "id": 32,
+        "title": "Enable bounded local AI replies inside created demo apps",
+        "description": "Let local AI-created apps use an optional text-only AI SDK and a ready-to-play idea buddy example, without exposing provider keys or enabling paid public demo calls.",
+        "details": "Local-only same-origin endpoint with server-only fixedmodel/key, max1000 input and256 outputtokens, request abort/timeouts, shared existing20-call generationbudget and concurrency. Per-preview explicit enable and max3replies; reset/revoke on project change. SDK bound to exactframe/session, no arbitrary parent fetch. Publicproduction/template mode disabled. Text rendered as text, no HTML execution. No automatic generation or AIcalls until enable+apprequest. Preserve existing production gates.",
+        "testStrategy": "Server injectedprovider and sharedbudget/concurrency/abort/no-public-calls tests; browser explicitenable, bounded SDK, revoke/stale messages, honest unavailable/quota errors; one real localprovider reply acceptance with fictionalprompt only.",
+        "status": "in-progress",
+        "dependencies": [
+          "28"
+        ],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T03:44:00.685Z",
+        "metadata": {
+          "verification": {
+            "unitTests": 299,
+            "lint": "passed",
+            "productionBuild": "passed",
+            "browserChecks": 34,
+            "browserArtifact": "tests/demo-browser-artifacts/app-ai-2026-10-23T03-52-16-634Z/report.json",
+            "liveAcceptance": "CUA local3219 Idea Buddy explicit parent enable, one actual OpenAI reply displayed, shared app-ai and generation remaining calls both19 after20, disable preserved reply. Public AI disabled.",
+            "release": "PR pending"
           }
         }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T03:26:01.003Z",
-      "taskCount": 31,
-      "completedCount": 21,
+      "lastModified": "2026-10-23T03:44:00.686Z",
+      "taskCount": 32,
+      "completedCount": 23,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T03:35:15.676Z",
+      "created": "2026-10-23T03:55:07.206Z",
       "description": "Tasks for master context"
     }
   }
