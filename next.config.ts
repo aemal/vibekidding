@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
+  // Keep local AI development separate from the production acceptance build.
+  distDir: process.env.VIBEKIDDING_DEMO_AI_DEV === "1" ? ".next-demo-ai" : ".next",
   async headers() {
     return [
       {

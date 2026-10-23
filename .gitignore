@@ -51,3 +51,5 @@ next-env.d.ts
 /work/guard-evaluations/
 
 /tests/demo-browser-artifacts/
+
+/.next-demo-ai/

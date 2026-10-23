@@ -67,6 +67,31 @@ jobs:
             exit 1
           fi
           npm run test:parent-browser
+      - name: Check login-free template workshop in a real browser
+        env:
+          VIBEKIDDING_PUBLIC_TEMPLATE_DEMO: '1'
+          DEMO_BASE_URL: http://127.0.0.1:3217
+        run: |
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3217 > /tmp/studio-demo-ui.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 30); do
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat /tmp/studio-demo-ui.log
+              exit 1
+            fi
+            if curl --fail --silent http://127.0.0.1:3217/api/demo/generate > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            cat /tmp/studio-demo-ui.log
+            exit 1
+          fi
+          npm run test:demo-browser
   dependency-audit:
     runs-on: ubuntu-24.04
     timeout-minutes: 10

@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Check, Copy, Download, History, LoaderCircle, Pencil, Plus, RotateCcw, Sparkles, Trash2, Upload, X } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, Copy, Download, History, LoaderCircle, Maximize2, Pencil, Plus, RotateCcw, Sparkles, Trash2, Upload, X } from "lucide-react";
 import { GeneratedPreview } from "@/components/GeneratedPreview";
 import { sandboxDocument } from "@/lib/studio/sandbox";
 import { starters } from "./starters";
+import { BrowserDictation } from "./BrowserDictation";
 
-import { copyProject, MAX_BACKUP_BYTES, MAX_HTML, MAX_PROJECTS, MAX_VERSIONS, parseBackup, serializeBackup, validProjects, type Project, type Version } from "./project-backup";
+import { copyProject, MAX_BACKUP_BYTES, MAX_HTML, MAX_PROJECTS, MAX_VERSIONS, parseBackup, persistProjects, ProjectStorageConflictError, serializeBackup, validProjects, type Project, type Version } from "./project-backup";
 
 type Readiness = { enabled: boolean; mode: "ai" | "template"; publicTemplateOnly?: boolean; message?: string; limits?: { promptCharacters?: number } };
 const promptSuggestions = [
@@ -16,7 +17,18 @@ const promptSuggestions = [
   { label: "Addition quiz", prompt: "Make an easy space addition quiz" },
   { label: "Branching story", prompt: "Make a garden choose-your-own story" },
   { label: "Collector game", prompt: "Make a blue ocean collector game" },
+  { label: "Tic-tac-toe · 2 players", prompt: "Make a garden tic-tac-toe game for two players on the same device" },
 ];
+const speechLanguages = [
+  { value: "en-US", label: "English (US)" },
+  { value: "de-DE", label: "Deutsch" },
+  { value: "es-ES", label: "Español" },
+  { value: "ar-SA", label: "العربية" },
+  { value: "fr-FR", label: "Français" },
+  { value: "hi-IN", label: "हिन्दी" },
+];
+// This bridge only requests closing large play; the parent checks the iframe identity.
+const playEscapeBridge = `<script>document.addEventListener('keydown',function(event){if(event.key==='Escape'){event.preventDefault();window.parent.postMessage({type:'vibekidding-demo-exit-play'},'*')}});</script>`;
 const STORAGE_KEY = "vibekidding-demo-projects-v1";
 // Called only by user actions and completed generation requests, never during render.
 const eventTimestamp = () => Date.now();
@@ -29,17 +41,25 @@ export function DemoWorkspace() {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [readinessError, setReadinessError] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [speechLanguage, setSpeechLanguage] = useState("en-US");
+  const [dictationContext, setDictationContext] = useState(0);
   const [busy, setBusy] = useState(false);
   const [importing, setImporting] = useState(false);
   const locked = busy || importing;
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [storageError, setStorageError] = useState("");
+  const [storageConflict, setStorageConflict] = useState(false);
+  const storageBaseline = useRef<string | null>(null);
+  const storageBlocked = useRef(false);
   const [history, setHistory] = useState(false);
+  const [expandedPlay, setExpandedPlay] = useState(false);
   const [replay, setReplay] = useState(0);
   const [dialog, setDialog] = useState<"rename" | "delete" | null>(null);
   const [name, setName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const playDialogRef = useRef<HTMLDialogElement>(null);
+  const playToggleRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDialogElement>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const requestRef = useRef<AbortController | null>(null);
@@ -59,7 +79,9 @@ export function DemoWorkspace() {
           if (!validProjects(saved)) throw new Error("unrecognized data");
           setProjects(saved);
         }
+        storageBaseline.current = raw;
       } catch {
+        storageBlocked.current = true;
         setStorageError("We couldn’t read your saved projects. New work will stay in this tab until you can save it. Export anything you want to keep.");
       }
       setLoaded(true);
@@ -94,24 +116,63 @@ export function DemoWorkspace() {
     else modalRef.current?.close();
   }, [dialog]);
 
+  useEffect(() => {
+    if (!expandedPlay) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    playToggleRef.current?.focus();
+    const escapePreview = (event: MessageEvent) => {
+      const preview = playDialogRef.current;
+      const frame = preview?.querySelector("iframe");
+      if (event.source !== frame?.contentWindow || event.data?.type !== "vibekidding-demo-exit-play" || !preview) return;
+      preview.close(); preview.show();
+      setExpandedPlay(false);
+      playToggleRef.current?.focus();
+    };
+    window.addEventListener("message", escapePreview);
+    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("message", escapePreview); };
+  }, [expandedPlay]);
+
+  function closeLargePlay() {
+    const preview = playDialogRef.current;
+    if (!preview || !expandedPlay) return;
+    // Keep the same iframe node and browsing context when returning to inline play.
+    preview.close(); preview.show();
+    setExpandedPlay(false);
+    playToggleRef.current?.focus();
+  }
+  function openLargePlay() {
+    const preview = playDialogRef.current;
+    if (!preview || !current || locked) return;
+    preview.close(); preview.showModal();
+    setExpandedPlay(true);
+  }
+
   // Persist before claiming success. Never silently overwrite unreadable saved data.
   function save(next: Project[]) {
     setProjects(next);
-    if (storageError) return false;
+    if (storageBlocked.current) return false;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      if (localStorage.getItem(STORAGE_KEY) !== JSON.stringify(next)) throw new Error("write failed");
+      storageBaseline.current = persistProjects(localStorage, STORAGE_KEY, storageBaseline.current, next);
       return true;
-    } catch {
+    } catch (e) {
+      storageBlocked.current = true;
+      if (e instanceof ProjectStorageConflictError) {
+        setStorageConflict(true);
+        setStorageError("Another tab changed your saved shelf. This tab’s changes are kept here but are not saved. Select each changed project and Export backup, then reload to see the newer saved shelf. Import your backups afterward to keep both.");
+        return false;
+      }
       setStorageError("Browser storage is unavailable or full. Your work is still here in this tab. Export a backup or HTML to keep a copy before closing it.");
       return false;
     }
   }
 
   function open(project: Project) {
+    setDictationContext(value => value + 1);
     setSelectedId(project.id); setPrompt(""); setHistory(false); setError(""); setMessage(""); setReplay(v => v + 1);
   }
   function newProject() {
+    setDictationContext(value => value + 1);
     setSelectedId(null); setPrompt(""); setHistory(false); setError(""); setMessage(""); promptRef.current?.focus();
   }
   function addVersion(html: string, title: string, mode: Version["mode"], idea: string, emoji = "✦") {
@@ -147,6 +208,10 @@ export function DemoWorkspace() {
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "The workshop couldn’t build that just yet. Please try again.");
       if (typeof data?.html !== "string" || !data.html.trim() || data.html.length > MAX_HTML || typeof data?.title !== "string" || !["ai", "template"].includes(data.mode)) throw new Error("That build didn’t arrive correctly. Your previous work is safe. Please try again.");
+      if (current && data.html === current.html) {
+        setMessage(`No changes were made. Your current version and history are unchanged.${typeof data.message === "string" ? " " + data.message : ""}`);
+        return;
+      }
       const saved = addVersion(data.html, data.title, data.mode, prompt.trim());
       setMessage(`${data.mode === "ai" ? "Your AI build is ready." : "Your template build is ready. This was made from a starter, not by AI."} ${saved ? "Saved in this browser." : "Kept in this tab."}${typeof data.message === "string" ? " " + data.message : ""}`);
     } catch (e) {
@@ -222,8 +287,8 @@ export function DemoWorkspace() {
     </header>
     <main className="demo-main">
       <div className="demo-intro"><div><p className="demo-eyebrow"><span /> A LITTLE IDEA CAN GO A LONG WAY</p><h1>Your idea <em>workshop.</em></h1><p>Dream it. Make it. Give it a little more you.</p></div><div className="demo-mascot" aria-hidden="true"><span>✦</span><div>◕ ‿ ◕</div><small>let’s make something!</small></div></div>
-      <div className="demo-note"><span aria-hidden="true">🌱</span><p><strong>Better together.</strong> Keep a grown-up nearby. Projects stay in this browser. {readiness?.publicTemplateOnly ? "Prompts go to the template service; this demo makes no AI provider calls." : "Prompts go to the demo service and may use AI."} Leave out names, school, and other personal details.</p></div>
-      {storageError && <p className="demo-alert" role="alert">{storageError}</p>}
+      <div className="demo-note"><span aria-hidden="true">🌱</span><p><strong>Better together.</strong> Keep a grown-up nearby. Projects stay in this browser. {readiness?.publicTemplateOnly ? "Prompts go to the template service; project builds make no AI provider calls." : "Prompts go to the demo service and may use AI."} Leave out names, school, and other personal details.</p></div>
+      {storageError && <div className="demo-alert" role="alert"><p>{storageError}</p>{storageConflict && <button type="button" className="demo-secondary" disabled={locked} onClick={() => { if (window.confirm("Reload the saved shelf? Unsaved changes in this tab will be lost. Export a backup of each changed project first.")) window.location.reload(); }}>Reload saved shelf</button>}</div>}
       <div className="demo-feedback" aria-live="polite" role="status">{message && <p><Check size={17} />{message}</p>}</div>
       {error && <p className="demo-alert" role="alert">{error}</p>}
       <div className="demo-workspace">
@@ -236,19 +301,24 @@ export function DemoWorkspace() {
             <label htmlFor="demo-idea">{selected ? "My next change" : "My idea"}</label>
             <textarea ref={promptRef} id="demo-idea" placeholder={selected ? "Make it feel like a magical forest…" : "A game where a panda collects stars…"} value={prompt} maxLength={promptLimit} onChange={e => setPrompt(e.target.value)} disabled={locked || !loaded} />
             {!selected && <div className="demo-prompt-suggestions" role="group" aria-label="Idea suggestions">{promptSuggestions.map(idea => <button key={idea.label} type="button" disabled={locked || !loaded} onClick={() => { setPrompt(idea.prompt); promptRef.current?.focus(); }}>{idea.label}</button>)}</div>}
+            <div className="demo-dictation-area">
+              <label htmlFor="demo-speech-language">Dictation language<select id="demo-speech-language" value={speechLanguage} disabled={locked || !loaded} onChange={e => setSpeechLanguage(e.target.value)}>{speechLanguages.map(language => <option key={language.value} value={language.value}>{language.label}</option>)}</select></label>
+              <BrowserDictation disabled={locked || !loaded || !!dialog || expandedPlay} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { setPrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
+              <p className="demo-fine">Review and edit the words above, then use the build button. Dictation never starts a build. Language availability depends on your browser and speech service.{readiness?.mode === "template" ? " Template instructions currently work best in English; dictation does not translate them." : ""}</p>
+            </div>
             <div className="demo-input-foot"><span>No personal details, just imagination.</span><span>{prompt.length}/{promptLimit}</span></div>
             <button className="demo-primary" type="submit" disabled={locked || !loaded || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
             {busy && <button type="button" className="demo-text-button demo-cancel" onClick={() => requestRef.current?.abort()}>Cancel build</button>}
           </form>
-          <p className="demo-fine">{readiness?.mode === "template" ? "Templates support memory match, drawing, addition quizzes, preset branching stories, and collector games. Changes use supported themes and colors; custom code changes need AI. " : "Builds are labeled AI or template when ready. "}Nothing is published from this demo.</p>
+          <p className="demo-fine">{readiness?.mode === "template" ? "Templates support memory match, drawing, addition quizzes, preset branching stories, collector games, and two-player tic-tac-toe on the same device. Changes use supported themes and colors; custom code changes need AI. " : "Builds are labeled AI or template when ready. "}Nothing is published from this demo.</p>
           <div className="demo-small-spark"><span>✧</span><p>{readiness?.mode === "template" ? "Try “blue ocean” or “easy memory game.”" : "Try “make it blue” or “add a score.”"}<br />Small changes can make a big difference.</p></div>
         </section>
-        <section className="demo-panel demo-preview-panel" aria-labelledby="preview-heading" aria-busy={busy}>
-          <div className="demo-preview-toolbar"><div><span className="demo-step">02 / PLAY & EXPLORE</span><h2 id="preview-heading">{selected?.title || "A little space for big possibilities"}</h2></div>{current && <span className={`demo-mode ${current.mode}`}>{current.mode === "ai" ? "AI build" : "Template build"}</span>}</div>
-          {current ? <div className="demo-frame-wrap"><GeneratedPreview key={`${current.id}-${replay}`} html={current.html} title={`${selected?.title} play preview`} className="demo-frame" />{busy && <div className="demo-building"><LoaderCircle className="demo-spin" size={24} /><strong>Building your next version…</strong><span>Your current creation is safe.</span></div>}</div> : <div className="demo-empty"><div className="demo-empty-art" aria-hidden="true"><span>✦</span><span>◒</span><span>✧</span></div><h3>It all starts with “what if?”</h3><p>Pick a starter below or tell us your idea.<br />Your creation will come to life right here.</p><span className="demo-empty-caption">A PLACE TO TINKER, TRY, AND TRY AGAIN</span></div>}
-          <div className="demo-preview-bottom"><span>{current ? "Play preview · starts fresh when reopened" : "Your imagination is welcome here."}</span>{current && <button className="demo-text-button" disabled={locked} onClick={() => setReplay(v => v + 1)}><RotateCcw size={14} /> Restart play</button>}</div>
+        <dialog ref={playDialogRef} open className={`demo-panel demo-preview-panel demo-play-dialog${expandedPlay ? " is-expanded" : ""}`} aria-labelledby="preview-heading" aria-modal={expandedPlay ? true : undefined} aria-busy={busy} onCancel={e => { e.preventDefault(); closeLargePlay(); }}>
+          <div className="demo-preview-toolbar"><div><span className="demo-step">02 / PLAY & EXPLORE</span><h2 id="preview-heading">{selected?.title || "A little space for big possibilities"}</h2></div>{current && <div className="demo-play-toolbar-actions"><span className={`demo-mode ${current.mode}`}>{current.mode === "ai" ? "AI build" : "Template build"}</span><button ref={playToggleRef} type="button" className="demo-secondary" disabled={locked} onClick={expandedPlay ? closeLargePlay : openLargePlay}>{expandedPlay ? <ArrowLeft size={15} /> : <Maximize2 size={15} />}{expandedPlay ? "Back to workshop" : "Play large"}</button></div>}</div>
+          {current ? <div className="demo-frame-wrap"><GeneratedPreview key={`${current.id}-${replay}`} html={current.html + playEscapeBridge} title={`${selected?.title} play preview`} className="demo-frame" />{busy && <div className="demo-building"><LoaderCircle className="demo-spin" size={24} /><strong>Building your next version…</strong><span>Your current creation is safe.</span></div>}</div> : <div className="demo-empty"><div className="demo-empty-art" aria-hidden="true"><span>✦</span><span>◒</span><span>✧</span></div><h3>It all starts with “what if?”</h3><p>Pick a starter below or tell us your idea.<br />Your creation will come to life right here.</p><span className="demo-empty-caption">A PLACE TO TINKER, TRY, AND TRY AGAIN</span></div>}
+          <div className="demo-preview-bottom"><span>{current ? (expandedPlay ? "Large play · press Escape to return" : "Play preview · starts fresh when reopened") : "Your imagination is welcome here."}</span>{current && <button className="demo-text-button" disabled={locked} onClick={() => setReplay(v => v + 1)}><RotateCcw size={14} /> Restart play</button>}</div>
           {selected && <div className="demo-project-actions"><button disabled={locked} onClick={() => { setName(selected.title); setDialog("rename"); }}><Pencil size={15} /> Rename</button><button disabled={locked} aria-expanded={history} onClick={() => setHistory(!history)}><History size={15} /> History ({selected.versions.length})</button><button disabled={locked} onClick={duplicateProject}><Copy size={15} /> Duplicate</button><button disabled={locked} onClick={exportBackup}><Download size={15} /> Export backup</button><button disabled={locked} onClick={exportHtml}><Download size={15} /> Export HTML</button><button disabled={locked} onClick={() => setDialog("delete")} aria-label={`Delete ${selected.title}`}><Trash2 size={15} /></button></div>}
-        </section>
+        </dialog>
       </div>
       {history && selected && <section className="demo-panel demo-history" aria-label="Version history"><div className="demo-section-heading"><div><h2>A trail of little discoveries</h2><p>Restore a previous build. We keep the latest {MAX_VERSIONS} versions.</p></div><button className="demo-icon-button" aria-label="Close history" onClick={() => setHistory(false)}><X size={18} /></button></div><ol>{[...selected.versions].reverse().map((v, i) => <li key={v.id}><div><strong>{v.prompt}</strong><span>{date(v.createdAt)} · {v.mode === "ai" ? "AI build" : "Template build"}</span></div>{i === 0 ? <span className="demo-tag">CURRENT</span> : <button disabled={locked} onClick={() => restore(v)}><RotateCcw size={14} /> Restore</button>}</li>)}</ol></section>}
       <section className="demo-starters" aria-labelledby="starters-heading"><div className="demo-section-heading"><div><p className="demo-eyebrow">A SPARK TO GET YOU STARTED</p><h2 id="starters-heading">Start small. Make it yours.</h2></div><span className="demo-muted">Ready-to-play templates. No AI needed.</span></div><div className="demo-starter-grid">{starters.map((s, i) => <button className={`demo-starter ${s.color}`} key={s.title} onClick={() => createFromStarter(i)} disabled={!loaded || locked}><span className="demo-starter-icon" aria-hidden="true">{s.emoji}</span><h3>{s.title}</h3><p>{s.description}</p><span className="demo-starter-link">Make this mine <ArrowUpRight size={17} /></span></button>)}</div></section>
