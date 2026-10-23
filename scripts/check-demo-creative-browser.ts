@@ -23,6 +23,41 @@ const generatedModes: string[] = [];
 const audioObservations: unknown[] = [];
 let generationRequests = 0;
 let activeStep = "startup";
+const pointerDiagnostics: unknown[] = [];
+async function observePointerFrame(page: Page) {
+  const frame = await (await page.locator('iframe.demo-frame').elementHandle())?.contentFrame();
+  assert.ok(frame);
+  await frame.waitForLoadState('load');
+  const lifecycle: unknown[] = [];
+  page.on('framenavigated', changed => { if (changed === frame && lifecycle.length < 20) lifecycle.push({ event: 'navigated', at: Date.now() }); });
+  page.on('framedetached', changed => { if (changed === frame && lifecycle.length < 20) lifecycle.push({ event: 'detached', at: Date.now() }); });
+  await page.evaluate(() => {
+    const events: unknown[] = [];
+    (window as unknown as { __parentPointer: unknown[] }).__parentPointer = events;
+    for (const type of ['pointerdown', 'pointerup', 'click']) document.addEventListener(type, event => {
+      if (events.length >= 20) return;
+      const e = event as MouseEvent;
+      const target = event.target as HTMLElement;
+      events.push({ type, tag: target.tagName, id: target.id, x: e.clientX, y: e.clientY });
+    }, true);
+  });
+  await frame.evaluate(() => {
+    const state = { epoch: performance.timeOrigin, events: [] as unknown[] };
+    (window as unknown as { __pointerEvidence: typeof state }).__pointerEvidence = state;
+    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'keydown']) {
+      document.addEventListener(type, event => {
+        if (state.events.length >= 40) return;
+        const target = event.target as HTMLElement;
+        const pointer = event as MouseEvent;
+        state.events.push({ type, id: target.id, label: target.getAttribute('aria-label'), text: target.textContent?.slice(0, 70), x: pointer.clientX, y: pointer.clientY, at: performance.now() });
+      }, true);
+    }
+  });
+  return async (label: string) => {
+    pointerDiagnostics.push({ label, lifecycle: [...lifecycle], frameDetached: frame.isDetached(), parent: await page.evaluate(() => ({ x: scrollX, y: scrollY, active: document.activeElement?.tagName, events: (window as unknown as { __parentPointer: unknown[] }).__parentPointer })), box: await page.locator('iframe.demo-frame').boundingBox(), child: await frame.evaluate(() => ({ evidence: (window as unknown as { __pointerEvidence: unknown }).__pointerEvidence, ready: document.readyState, x: scrollX, y: scrollY, active: document.activeElement?.outerHTML.slice(0, 200), status: document.querySelector('#status')?.textContent, cells: Array.from(document.querySelectorAll('#tic-board button')).map(b => b.textContent) })).catch(error => ({ error: String(error) })) });
+  };
+}
+
 async function step(name: string, action: () => Promise<void>) {
   activeStep = name;
   try { await action(); steps.push({ name, status: "passed" }); console.log(`PASS ${name}`); }
@@ -109,7 +144,10 @@ async function main() {
     });
     await step("music pointer and keyboard gestures activate native audio; mute does not autoplay", async () => {
       const before = await shelf(page); const frame = await preview(page);
+      const record = await observePointerFrame(page);
+      await record("before C4");
       await frame.getByRole("button", { name: "Play C4", exact: true }).click();
+      await record("after C4");
       audioObservations.push({ after: "C4 pointer", ...await audioState(frame), status: await frame.locator("#status").innerText() });
       await expect.poll(async () => (await audioState(frame)).starts).toBe(1);
       assert.ok((await audioState(frame)).states.includes("running"));
@@ -199,7 +237,7 @@ async function main() {
   } finally {
     await browser.close(); await mkdir(output, { recursive: true });
     for (const [name, data] of artifacts) await writeFile(path.join(output, name), data);
-    await writeFile(path.join(output, "report.json"), JSON.stringify({ timestamp: new Date().toISOString(), base: base.href, passive, passed: !failure, activeStep, steps, generatedModes, audioObservations, prohibited, errors, consoleErrors, evidence: "Local Chromium UI and real template endpoint. Web Audio constructor/start observation delegates to native APIs; no audible or physical-device acceptance. No voice sessions or AI provider calls.", failure: failure ? String(failure) : undefined }, null, 2));
+    await writeFile(path.join(output, "report.json"), JSON.stringify({ timestamp: new Date().toISOString(), base: base.href, passive, passed: !failure, activeStep, steps, generatedModes, audioObservations, pointerDiagnostics, prohibited, errors, consoleErrors, evidence: "Local Chromium UI and real template endpoint. Web Audio constructor/start observation delegates to native APIs; no audible or physical-device acceptance. No voice sessions or AI provider calls.", failure: failure ? String(failure) : undefined }, null, 2));
   }
   console.log(`Evidence: ${output}`); if (failure) throw failure;
   console.log(`PASS ${steps.length} creative checks`);
