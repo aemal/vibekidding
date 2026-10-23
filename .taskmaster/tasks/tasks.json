@@ -972,13 +972,13 @@
         "description": "Let families explicitly back up a projects saved notes or other bounded runtime data separately from source backups and public sharing.",
         "details": "Versioned bounded JSON data export and explicit selected-project restore with preview of key count/size and overwrite confirmation. Never include runtime data in public share/QR or existing source backup. Validate keys, string values, byte limits and unexpected fields. Preserve unsaved current data on parse/quota/conflict failure. Restore resets preview only after successful write; existing code/history unaffected.",
         "testStrategy": "Unit schema/limits/prototype/quota/conflict checks; browser real notes export, restore to fresh project, reopen; original namespace unchanged; corrupt/oversized input no mutation; cancel no mutation; public links exclude data.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "28"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T03:06:23.297Z",
+        "updatedAt": "2026-10-23T03:26:01.003Z",
         "metadata": {
           "verification": {
             "unitTests": 276,
@@ -986,6 +986,13 @@
             "checks": "lint, types, production build pass",
             "artifact": "data-backup-2026-10-23T03-11-02-178Z/report.json",
             "boundary": "local browser evidence; no cloud sync; release pending"
+          },
+          "release": {
+            "pr": "https://github.com/aemal/vibekidding/pull/11",
+            "merged": true,
+            "ci": "Both correctness runs passed at de0bb63",
+            "publicBrowser": "Hosted Saved app data dialog available; export request acknowledged; saved note retained",
+            "boundary": "45 local browser checks include actual download/restore; public download file not independently inspected; browser-local only"
           }
         }
       },
@@ -1023,18 +1030,27 @@
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T03:19:18.124Z"
+        "updatedAt": "2026-10-23T03:19:18.124Z",
+        "metadata": {
+          "verification": {
+            "unitTests": 285,
+            "browserChecks": 32,
+            "checks": "lint and corrected production build passed",
+            "artifact": "preview-recovery-2026-10-23T03-33-21-259Z/report.json",
+            "boundary": "synthetic errors and mocked repair; no live provider repair claim; release pending"
+          }
+        }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T03:21:49.273Z",
+      "lastModified": "2026-10-23T03:26:01.003Z",
       "taskCount": 31,
-      "completedCount": 20,
+      "completedCount": 21,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T03:23:15.711Z",
+      "created": "2026-10-23T03:35:15.676Z",
       "description": "Tasks for master context"
     }
   }

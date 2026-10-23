@@ -29,3 +29,5 @@
 .demo-starter.sage{background:#edf2e5;border-color:#d8e1cd}
 
 .demo-data-dialog{width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto}.demo-data-tools{display:flex;gap:10px;flex-wrap:wrap}.demo-data-tools button{min-height:44px}.demo-data-review{border:1px solid #e4d9c9;border-radius:10px;padding:14px;margin-top:18px}.demo-data-review h3{font-size:16px;margin:0}.demo-data-review ul{max-height:130px;overflow:auto;font-size:13px;overflow-wrap:anywhere}.demo-data-dialog .demo-icon-button{min-width:44px;min-height:44px;justify-content:center;align-items:center}
+
+.demo-preview-problem{padding:14px 18px;background:#fff2df;border-top:1px solid #e7d4b7;color:#715536;font-size:13px;flex-shrink:0}.demo-preview-problem p{margin:0 0 10px;line-height:1.5}.demo-preview-problem>div{display:flex;gap:8px;flex-wrap:wrap}.demo-preview-problem .demo-fine{margin:10px 0 0}.demo-play-dialog.is-expanded .demo-preview-problem{max-height:35dvh;overflow:auto}

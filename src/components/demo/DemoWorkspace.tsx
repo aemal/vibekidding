@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Check, Copy, Download, History, LoaderCircle, Maximize2, Pencil, Plus, RotateCcw, Share2, Sparkles, Trash2, Upload, X } from "lucide-react";
 import { DemoProjectPreview } from "./DemoProjectPreview";
 import { DemoDataBackup } from "./DemoDataBackup";
+import { PREVIEW_PROBLEM_MESSAGE, PREVIEW_REPAIR_PROMPT } from "@/lib/demo-preview-diagnostics";
 import { revisionGuidance } from "@/lib/demo-revision-guidance";
 import { notesStarter } from "@/lib/demo-notes-starter";
 import { deleteProjectData } from "@/lib/demo-project-storage";
@@ -78,6 +79,7 @@ export function DemoWorkspace() {
   const [history, setHistory] = useState(false);
   const [expandedPlay, setExpandedPlay] = useState(false);
   const [replay, setReplay] = useState(0);
+  const [problemKey, setProblemKey] = useState<string | null>(null);
   const [dialog, setDialog] = useState<"rename" | "delete" | null>(null);
   const [name, setName] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
@@ -111,6 +113,9 @@ export function DemoWorkspace() {
   const generationEpoch = useRef(0);
   const selected = projects.find(p => p.id === selectedId);
   const current = selected?.versions.at(-1);
+  const previewKey = JSON.stringify([selected?.id, current?.id, replay]);
+  const previewProblem = !!current && problemKey === previewKey;
+  const previousVersion = selected?.versions.at(-2);
   const revision = revisionGuidance(readiness?.mode, current?.html);
   const promptLimit = Math.min(2000, Math.max(1, readiness?.limits?.promptCharacters || 2000));
 
@@ -408,6 +413,19 @@ export function DemoWorkspace() {
       if (ownsRequest()) { requestRef.current = null; busyRef.current = false; setBusy(false); }
     }
   }
+  function prepareRepair() {
+    if (locked || readiness?.mode !== "ai" || !previewProblem) return;
+    if (PREVIEW_REPAIR_PROMPT.length > promptLimit) {
+      setError("The repair suggestion is longer than this workshop’s prompt limit. Your idea has not changed.");
+      return;
+    }
+    if (prompt.trim() && !window.confirm("Replace your current idea with a repair suggestion? Cancel to keep your words.")) return;
+    setPrompt(PREVIEW_REPAIR_PROMPT);
+    setError("");
+    setMessage("Repair suggestion prepared. Review it, then choose Make this change when you’re ready.");
+    if (expandedPlay) closeLargePlay();
+    promptRef.current?.focus();
+  }
   function restore(version: Version) {
     if (!selected) return;
     const restored = { ...version, id: crypto.randomUUID(), prompt: `Restored: ${version.prompt}`.slice(0, 4000), createdAt: eventTimestamp() };
@@ -513,7 +531,8 @@ export function DemoWorkspace() {
         </section>
         <dialog ref={playDialogRef} open className={`demo-panel demo-preview-panel demo-play-dialog${expandedPlay ? " is-expanded" : ""}`} aria-labelledby="preview-heading" aria-modal={expandedPlay ? true : undefined} aria-busy={busy} onCancel={e => { e.preventDefault(); closeLargePlay(); }}>
           <div className="demo-preview-toolbar"><div><span className="demo-step">02 / PLAY & EXPLORE</span><h2 id="preview-heading">{selected?.title || "A little space for big possibilities"}</h2></div>{current && <div className="demo-play-toolbar-actions"><span className={`demo-mode ${current.mode}`}>{versionLabel(current.mode)}</span><button ref={playToggleRef} type="button" className="demo-secondary" disabled={locked} onClick={expandedPlay ? closeLargePlay : openLargePlay}>{expandedPlay ? <ArrowLeft size={15} /> : <Maximize2 size={15} />}{expandedPlay ? "Back to workshop" : "Play large"}</button></div>}</div>
-          {current ? <div className="demo-frame-wrap"><DemoProjectPreview key={`${selected!.id}-${current.id}-${replay}`} projectId={selected!.id} html={current.html + playEscapeBridge} title={`${selected?.title} play preview`} className="demo-frame" />{busy && <div className="demo-building"><LoaderCircle className="demo-spin" size={24} /><strong>Building your next version…</strong><span>Your current creation is safe.</span></div>}</div> : <div className="demo-empty"><div className="demo-empty-art" aria-hidden="true"><span>✦</span><span>◒</span><span>✧</span></div><h3>It all starts with “what if?”</h3><p>Pick a starter below or tell us your idea.<br />Your creation will come to life right here.</p><span className="demo-empty-caption">A PLACE TO TINKER, TRY, AND TRY AGAIN</span></div>}
+          {current ? <div className="demo-frame-wrap"><DemoProjectPreview key={previewKey} projectId={selected!.id} onProblem={() => setProblemKey(previewKey)} html={current.html + playEscapeBridge} title={`${selected?.title} play preview`} className="demo-frame" />{busy && <div className="demo-building"><LoaderCircle className="demo-spin" size={24} /><strong>Building your next version…</strong><span>Your current creation is safe.</span></div>}</div> : <div className="demo-empty"><div className="demo-empty-art" aria-hidden="true"><span>✦</span><span>◒</span><span>✧</span></div><h3>It all starts with “what if?”</h3><p>Pick a starter below or tell us your idea.<br />Your creation will come to life right here.</p><span className="demo-empty-caption">A PLACE TO TINKER, TRY, AND TRY AGAIN</span></div>}
+          {previewProblem && <section className="demo-preview-problem" aria-label="Preview recovery"><p role="status"><strong>{PREVIEW_PROBLEM_MESSAGE}</strong></p><p>{readiness?.mode === "ai" ? "Prepare a suggestion, then review and submit it yourself. Preparing does not start an AI request." : "Code repair needs AI mode. You can restart play, restore an earlier version if available, or choose New idea."}</p><div>{readiness?.mode === "ai" && <button type="button" className="demo-secondary" disabled={locked} onClick={prepareRepair}>Prepare repair</button>}{previousVersion && <button type="button" className="demo-secondary" disabled={locked} onClick={() => restore(previousVersion)}>Restore previous version</button>}</div>{previousVersion && <p className="demo-fine">Restoring adds an earlier build as a new version. Saved app data stays unchanged.</p>}</section>}
           <div className="demo-preview-bottom"><span>{current ? (expandedPlay ? "Large play · press Escape to return" : "Play preview · notes can stay in this browser") : "Your imagination is welcome here."}</span>{current && <button className="demo-text-button" disabled={locked} onClick={() => setReplay(v => v + 1)}><RotateCcw size={14} /> Restart play</button>}</div>
           {selected && <div className="demo-project-actions"><button disabled={locked} onClick={() => { setName(selected.title); setDialog("rename"); }}><Pencil size={15} /> Rename</button><button disabled={locked} aria-expanded={history} onClick={() => setHistory(!history)}><History size={15} /> History ({selected.versions.length})</button><button disabled={locked} onClick={duplicateProject}><Copy size={15} /> Duplicate</button><button disabled={locked} onClick={openShare}><Share2 size={15} /> Share playable link</button><button disabled={locked} onClick={exportBackup}><Download size={15} /> Export backup</button><button disabled={locked} onClick={exportHtml}><Download size={15} /> Export HTML</button><button disabled={locked} onClick={() => setDataProject(selected.id)}>Saved app data</button><button disabled={locked} onClick={() => setDialog("delete")} aria-label={`Delete ${selected.title}`}><Trash2 size={15} /></button></div>}
         </dialog>
