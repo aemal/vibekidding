@@ -101,7 +101,7 @@ async function main() {
     });
     await step("music starter is silent before a gesture and uses an isolated preview", async () => {
       await page.locator(".demo-starter").filter({ has: page.getByRole("heading", { name: "Music garden", exact: true }) }).click();
-      await expect(page.locator("#preview-heading")).toHaveText("Music garden");
+      await expect(page.locator("#preview-heading")).toHaveText("Garden Music Studio");
       const frame = await preview(page);
       await expect(frame.getByRole("button", { name: "Play C4", exact: true })).toBeVisible();
       assert.deepEqual(await audioState(frame), { contexts: 0, starts: 0, states: [] });
@@ -134,7 +134,7 @@ async function main() {
     });
     await step("checklist starter adds, toggles and removes text-only tasks", async () => {
       await page.locator(".demo-starter").filter({ has: page.getByRole("heading", { name: "Little checklist", exact: true }) }).click();
-      await expect(page.locator("#preview-heading")).toHaveText("Little checklist");
+      await expect(page.locator("#preview-heading")).toHaveText("Garden Daily Checklist");
       const before = await shelf(page); const frame = await preview(page);
       await expect(frame.locator("#items input[type=checkbox]")).toHaveCount(3);
       await expect(frame.locator("#progress")).toHaveText("0 / 3 completed");

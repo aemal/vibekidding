@@ -21,7 +21,9 @@ For optional **local-only AI**, set `VIBEKIDDING_DEMO_ENABLED=1` and `VIBEKIDDIN
 
 ## Share a playable creation
 
-Choose **Share playable link**, then create and copy a link to the current version. The recipient sees a confirmation before playing. Links contain the title and HTML, not prompt history or conversation notes; anyone with the link can inspect and copy that snapshot. They are not cloud saves, live updates, or revocable publications. The recipient's shelf is unchanged.
+Choose **Share playable link**, then create and copy a link to the current version. The recipient sees a confirmation before playing. Links contain either frozen template settings or the current title and HTML, not prompt history or conversation notes; anyone with the link can inspect and copy that snapshot. They are not cloud saves, live updates, or revocable publications. The recipient's shelf is unchanged.
+
+Unmodified template builds use short, versioned links and offer **Show QR code**. QR images are generated locally; another device opens its own copy, not a multiplayer session. Renamed or custom HTML uses the original compressed format with copy/export options instead of an unreadably dense QR code. Existing links remain supported.
 
 Links are limited to 8,000 characters and decoded snapshots to 80 KiB. Larger projects can use the existing HTML or JSON backup export. Some messaging services may truncate long links. On localhost, links normally work only on that device. After deploying `/demo/play`, set the public build variable `NEXT_PUBLIC_DEMO_SHARE_ORIGIN` to that site's HTTPS origin to offer an explicit hosted-reader option for local AI creations. The code travels inside the link; creating it does not upload the project to a server.
 

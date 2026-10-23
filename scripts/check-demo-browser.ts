@@ -114,7 +114,7 @@ async function main() {
     });
     await step("starter creation and playable isolated preview", async () => {
       await page.getByRole("button", { name: /Space explorer.*Make this mine/ }).click();
-      await expect(page.locator("#preview-heading")).toHaveText("Space explorer");
+      await expect(page.locator("#preview-heading")).toHaveText("Star Collector");
       const preview = page.frameLocator("iframe.demo-frame");
       await preview.getByRole("button", { name: "Start game", exact: true }).click();
       await preview.getByRole("button", { name: "Collect target", exact: true }).press("Enter");
@@ -464,7 +464,7 @@ async function main() {
         await stale.getByRole("button", { name: /Animal match.*Make this mine/ }).click();
         await expect(stale.locator(".demo-alert")).toContainText("Another tab changed your saved shelf");
         await expect(stale.locator(".demo-alert")).toContainText("not saved");
-        await expect(stale.locator("#preview-heading")).toHaveText("Animal match");
+        await expect(stale.locator("#preview-heading")).toHaveText("Ocean Memory Match");
         await expect(stale.locator(".demo-feedback")).not.toContainText("saved in this browser");
         assert.deepEqual(await saved(stale), originalShelf);
         // Preserve the unsaved creation through the actual backup download.
@@ -474,13 +474,13 @@ async function main() {
         const downloadedPath = await download.path();
         assert.ok(downloadedPath);
         const backup = await readFile(downloadedPath);
-        assert.equal(JSON.parse(backup.toString("utf8")).project.title, "Animal match");
+        assert.equal(JSON.parse(backup.toString("utf8")).project.title, "Ocean Memory Match");
         artifacts.set("conflict-recovery.vibekidding.json", backup);
         let warned = false;
         stale.once("dialog", dialog => { warned = /unsaved|not saved|backup/i.test(dialog.message()); void dialog.dismiss(); });
         await stale.getByRole("button", { name: "Reload saved shelf", exact: true }).click();
         assert.equal(warned, true);
-        await expect(stale.locator("#preview-heading")).toHaveText("Animal match");
+        await expect(stale.locator("#preview-heading")).toHaveText("Ocean Memory Match");
         assert.deepEqual(await saved(stale), originalShelf);
         stale.once("dialog", dialog => { void dialog.accept(); });
         await stale.getByRole("button", { name: "Reload saved shelf", exact: true }).click();
@@ -492,7 +492,7 @@ async function main() {
         const recovered = await saved(stale);
         assert.equal(recovered.length, 2);
         assert.deepEqual(recovered.find(item => item.id === originalShelf[0].id), originalShelf[0]);
-        assert.ok(recovered.some(item => item.title === "Animal match"));
+        assert.ok(recovered.some(item => item.title === "Ocean Memory Match"));
         await first.reload({ waitUntil: "domcontentloaded" });
         await expect(first.getByLabel("My idea", { exact: true })).toBeEnabled();
         assert.deepEqual(await saved(first), recovered);

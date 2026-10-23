@@ -802,14 +802,23 @@
         "description": "Share a snapshot of current project HTML and title in a compressed URL; recipient explicitly chooses Play without Google, database or provider calls.",
         "details": "Versioned bounded fragment codec, current build only, clear copy/manual fallback, separate demo/play reader, no execution before Play. Initial scope excludes Save copy, cloud publishing, live sync and multiplayer. Oversize projects retain HTML/backup export.",
         "testStrategy": "Codec bounds/malformed cases, six templates fit, browser sender and fresh recipient, confirmation/cancel, no paid API calls, mobile play, deployed acceptance.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "17",
           "20"
         ],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T01:34:49.880Z"
+        "updatedAt": "2026-10-23T02:11:40.716Z",
+        "metadata": {
+          "verification": {
+            "pr": "https://github.com/aemal/vibekidding/pull/5",
+            "merge": "e29572d4aee40ce82f22323399afd49e6a5bb863",
+            "tests": "240 unit;25 workshop and12 sharing local browser checks;both PR5 correctness CI passed",
+            "deployed": "2026-10-23 CUA public demo created saved tic-tac-toe v1 link; recipient consent then Play; first square changed to X and player O turn",
+            "limits": "Snapshot only; no online multiplayer. Later PR6 Linux run exposed intermittent pointer test failure under investigation; not all CI green because dependency audit fails."
+          }
+        }
       },
       {
         "id": 24,
@@ -834,17 +843,40 @@
             "release": "Pending PR and CI/deployment"
           }
         }
+      },
+      {
+        "id": 25,
+        "title": "Compact template links and QR sharing",
+        "description": "Offer short versioned links and locally rendered QR codes for exact built-in template snapshots, retaining full snapshot links for custom projects.",
+        "details": "Frozen renderer version, strict settings and exact HTML/title equality before compact encoding. Existing v1 links remain supported. QR opens an independent playable copy, not realtime multiplayer. No external QR service, cloud shortener or provider calls. Dense/custom links retain copy/export fallback.",
+        "testStrategy": "Canonical roundtrips/tamper rejection/version errors, old snapshot regressions, independent QR decode equals URL, real app sender/reader/mobile acceptance. Physical phone scanning remains explicitly unverified.",
+        "status": "in-progress",
+        "dependencies": [
+          "23",
+          "24"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T02:06:48.517Z",
+        "metadata": {
+          "verification": {
+            "local": "248 unit tests;lint;typecheck;production build;55 sequential bundledChromium checks:QR8/share12/demo25/creative10",
+            "qr": "Independent jsQR decoded rendered desktop and mobile QR pixels including complete t1 fragment; actual new Music starter tested",
+            "compatibility": "1512 exact canonical settings roundtrip with frozen fingerprint; renamed/custom HTML uses v1; legacy links supported",
+            "limits": "Physical phone scan and deployment not yet verified"
+          }
+        }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T01:47:40.945Z",
-      "taskCount": 24,
-      "completedCount": 14,
+      "lastModified": "2026-10-23T02:11:40.716Z",
+      "taskCount": 25,
+      "completedCount": 15,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T02:00:33.619Z",
+      "created": "2026-10-23T02:14:07.979Z",
       "description": "Tasks for master context"
     }
   }
