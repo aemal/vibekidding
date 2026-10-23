@@ -142,6 +142,7 @@ async function main() {
       await page.getByRole("group", { name: "Idea suggestions" }).getByRole("button", { name: "Music garden", exact: true }).click();
       await expect(page.getByLabel("My idea", { exact: true })).toHaveValue(/music/i);
       await page.getByRole("group", { name: "Idea suggestions" }).getByRole("button", { name: "Checklist", exact: true }).click();
+      await page.getByRole("dialog", { name: "Replace your idea?", exact: true }).getByRole("button", { name: "Use this idea", exact: true }).click();
       await expect(page.getByLabel("My idea", { exact: true })).toHaveValue(/checklist/i);
       assert.equal(await shelf(page), null);
       await expect(page.locator("iframe.demo-frame")).toHaveCount(0);

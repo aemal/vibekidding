@@ -118,7 +118,7 @@ function VoiceControls({ disabled = false, contextKey, maxIdeaLength, onIdea, re
   }
   function chooseIdea(text: string) {
     if (disabled) return;
-    stop("Idea added to the editor. Review it, then use the build button when you’re ready.");
+    stop("Idea selected. Review it in the workshop before building.");
     onIdea(text.slice(0, Math.max(0, Math.min(2000, maxIdeaLength))));
   }
   const sdkEnding = !active && (conversation.status === "connected" || conversation.status === "connecting");
@@ -130,6 +130,6 @@ function VoiceControls({ disabled = false, contextKey, maxIdeaLength, onIdea, re
     <div className="demo-samantha-controls">{active ? <><button type="button" className="demo-secondary" onClick={() => stop()}>End Samantha conversation</button>{conversation.status === "connected" && <button type="button" className="demo-secondary" onClick={() => { try { setMuted(!conversation.isMuted); } catch { stop("Voice stopped. You can start again or keep typing."); } }}>{conversation.isMuted ? "Unmute microphone" : "Mute microphone"}</button>}</> : <button type="button" className="demo-secondary" disabled={disabled || !confirmed || sdkEnding} onClick={() => void start()}>Start Samantha conversation</button>}</div>
     <p role="status" aria-live="polite">{notice}{active && conversation.status === "connected" ? ` ${conversation.isMuted ? "Microphone muted." : conversation.isSpeaking ? "Samantha is speaking." : "Listening."}` : ""}</p>
     <small>Session limit: {Math.min(60, readiness.maxDurationSeconds || 60)} seconds. The service setup is checked when you start.</small>
-    {transcript.length > 0 && <div className="demo-voice-transcript"><div className="demo-section-heading"><strong>Conversation notes</strong><button type="button" className="demo-text-button" onClick={() => setTranscript([])}>Clear notes</button></div><ol>{transcript.map(line => <li key={line.id}><span>{line.role === "agent" ? "Samantha · AI" : "You"}</span><p>{line.text}</p>{line.role === "agent" && <button type="button" className="demo-text-button" disabled={disabled || maxIdeaLength <= 0} onClick={() => chooseIdea(line.text)}>Use this idea</button>}</li>)}</ol><small>“Use this idea” replaces the idea box with that text for you to review.</small></div>}
+    {transcript.length > 0 && <div className="demo-voice-transcript"><div className="demo-section-heading"><strong>Conversation notes</strong><button type="button" className="demo-text-button" onClick={() => setTranscript([])}>Clear notes</button></div><ol>{transcript.map(line => <li key={line.id}><span>{line.role === "agent" ? "Samantha · AI" : "You"}</span><p>{line.text}</p>{line.role === "agent" && <button type="button" className="demo-text-button" disabled={disabled || maxIdeaLength <= 0} onClick={() => chooseIdea(line.text)}>Use this idea</button>}</li>)}</ol><small>“Use this idea” asks before replacing any unfinished idea. It never starts a build.</small></div>}
   </section>;
 }
