@@ -112,6 +112,9 @@ async function playCounter(page: Page) {
     // DOM load/handler readiness does not establish browser input routing into a
     // newly mounted sandbox frame. Observe a real hover before the one click;
     // never retry the click, dispatch DOM events, or sleep for an arbitrary delay.
+    // A replacement frame can occupy the previous counter's exact coordinates.
+    // Start outside the iframe so this hover always represents actual entry.
+    await page.locator("#playing-project-title").hover();
     await counter.hover();
     await expect.poll(() => frame.evaluate(`window.counterPointerEvents.some(event =>
       event.type === 'pointermove' && event.target === 'count' && event.trusted)`)).toBe(true);

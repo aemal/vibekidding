@@ -42,3 +42,21 @@ Task Master tasks 11 through 37 cover the implemented demo work; their statuses 
 The latest informational configuration check found no configured Supabase account/database integration, administrator IDs, mail provider/webhook, or production notification scheduler. The original production voice environment is also incomplete; the dedicated demo Samantha configuration uses different variables and is not proof of that production integration.
 
 Google/OTP accounts, reviewed parent approval, cloud persistence and multiplayer, production voice relay/accounting, provider billing reconciliation, email delivery, and the deferred safety/compliance work still require their own implementation/configuration and live acceptance. No credentials, consent, delivery, billing records, physical-device results, or production acceptance have been fabricated.
+
+## Authorized one-hour extension
+
+The user extended work until 06:58:13 UTC and confirmed that the requested login-free entry is the game-building studio. The local AI studio now opens directly at [http://127.0.0.1:3219/](http://127.0.0.1:3219/). Its banner explains browser-local storage; the separate account studio remains available at `/account-studio`. Public and production authentication was not disabled.
+
+Game generation and revisions now use GPT-6 Sol with medium reasoning and a 6,000-token total completion budget. The user's replacement `.env` key was tested successfully; a stale `.env.local` override was removed without changing the replacement key. Optional short in-app AI replies retain their separate lightweight model.
+
+Native Google Chrome computer use verified an actual generated Moon Rabbit carrot game: collect three carrots, win, replay, request a title and win-message revision, reload with two versions retained, and win with the revised message. These were two real game-generation requests, not mocked responses. The same saved game appeared at the new login-free root. This is one end-to-end example, not a guarantee that every generated game works.
+
+Additional completed fixes:
+
+- PR18 (`619adad`): retry a failed browser save explicitly while refusing to overwrite a changed external shelf. Five browser flows use injected storage failures; both GitHub correctness checks passed.
+- PR19 (`86c0e18`): confirm before suggestions replace a different unfinished idea. Six browser flows passed; native Chrome also verified that **Keep my idea** retained the typed draft. Samantha insertion coverage used a synthetic callback, not microphone acceptance.
+- PR20 (`85b08a0`): local login-free studio entry. Six browser flows, four account-studio regressions, and two unit tests passed. GitHub correctness run `39910018771` passed.
+
+The assembled extension passed 319 tests and a production webpack build. The rebuilt public-template server remains available at [http://127.0.0.1:3217/demo](http://127.0.0.1:3217/demo). Task Master records tasks39–41 as done through MCP, with task38 awaiting the model-upgrade merge.
+
+PR21's first correctness run encountered an intermittent shared-counter pointer test failure. PR22 adds real hover acknowledgment before a single click, asserts the trusted pointer event sequence and unchanged counter result, and captures the actual failing page. It does not change application behavior or retry clicks. The revised 12-check sharing suite passed against the assembled production server. PR22 merged as `5ecca96` after correctness run `39910983338` passed. The assembled PR21 correctness run `39911100192` passed, but duplicate run `39911105984` failed at the new hover acknowledgment before clicking. The original input-routing cause remains inferred, and the additional failure is being investigated rather than ignored. Final CI/merge results are recorded below when available.
