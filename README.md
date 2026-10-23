@@ -17,6 +17,12 @@ For a hosted or production-build template demo, set `VIBEKIDDING_PUBLIC_TEMPLATE
 
 For optional **local-only AI**, set `VIBEKIDDING_DEMO_ENABLED=1` and `VIBEKIDDING_DEMO_PROVIDER=openai` or `anthropic`, with a working server-side provider key, then run Next development bound to `127.0.0.1`. For the OpenAI mode, `npm run dev:demo-ai` opens http://127.0.0.1:3219/demo and uses a separate generated build directory. Public template mode takes precedence. Provider errors fall back to labeled templates. The local OpenAI configuration has passed real app generation and revision of a playable dinosaur game. The hosted demo remains template-only.
 
+## Share a playable creation
+
+Choose **Share playable link**, then create and copy a link to the current version. The recipient sees a confirmation before playing. Links contain the title and HTML, not prompt history or conversation notes; anyone with the link can inspect and copy that snapshot. They are not cloud saves, live updates, or revocable publications. The recipient's shelf is unchanged.
+
+Links are limited to 8,000 characters and decoded snapshots to 80 KiB. Larger projects can use the existing HTML or JSON backup export. Some messaging services may truncate long links. On localhost, links normally work only on that device. After deploying `/demo/play`, set the public build variable `NEXT_PUBLIC_DEMO_SHARE_ORIGIN` to that site's HTTPS origin to offer an explicit hosted-reader option for local AI creations. The code travels inside the link; creating it does not upload the project to a server.
+
 ## Optional local Samantha conversation
 
 The workshop separates browser dictation from an ElevenLabs conversation. Voice is disabled in public and production mode. For a local conversation, configure `VIBEKIDDING_SAMANTHA_API_KEY` server-side in ignored `.env.local`. Review `npx tsx scripts/setup-demo-voice.ts --llm gpt-4o-mini` (dry run), then explicitly run it with `--create` to create a dedicated agent and save its ID. It never modifies existing business agents or workspace settings. After verified setup, set `VIBEKIDDING_SAMANTHA_DEMO_ENABLED=1` and use the loopback AI development server.

@@ -47,6 +47,7 @@ next-env.d.ts
 *.db-journal
 
 !.env.studio.example
+!.env.example
 
 /work/guard-evaluations/
 
