@@ -1225,13 +1225,14 @@
         "description": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
         "details": "Use the user verified .env key, remove stale local override, migrate bounded game generation to GPT-6 Sol and verify actual Chrome create/revise/play/save. Keep app-AI short replies independently scoped.",
         "testStrategy": "Focused checks plus actual browser UI acceptance. Record live versus synthetic evidence.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T06:03:57.936Z",
+        "updatedAt": "2026-10-23T06:44:48.364Z",
         "metadata": {
-          "verification": "Native Google Chrome computer use: actual GPT-6 Sol generation of Moon Rabbit carrot game, score3/3 win, replay reset, actual revision of title and win text, reload retained2versions, revised win verified. Two live game calls using effective key verified equal to user .env; stale .env.local override removed.29focused tests, targeted lint and TypeScript pass. PR21 pending merge. Short app-AI reply workload intentionally unchanged."
+          "verification": "Native Google Chrome computer use: actual GPT-6 Sol generation of Moon Rabbit carrot game, score3/3 win, replay reset, actual revision of title and win text, reload retained2versions, revised win verified. Two live game calls using effective key verified equal to user .env; stale .env.local override removed.29focused tests, targeted lint and TypeScript pass. PR21 pending merge. Short app-AI reply workload intentionally unchanged.",
+          "release": "PR21 merged5d99429. Combined321tests pass; correctness39912840205 passed full pipeline. Duplicate39912845376 failed a separate saved-data pointer interaction, retained as an investigated test issue rather than hidden. Model generation and revision verified with two actual GPT-6 Sol requests in native Chrome, win/replay/revised win/reload with2versions retained. PR25 input diagnostics merged565ddf9 after both correctness runs passed. Public AI remains disabled."
         }
       },
       {
@@ -1285,18 +1286,33 @@
         "description": "Allow top-level document navigation from an external link to the local development studio without account sign-in; retain local host and mode validation and unchanged API gates.",
         "details": "QA found external navigation to root used mutation-origin checks and could show account UI. Scope is read-only local document navigation only.",
         "testStrategy": "Real browser external-origin link click reaches local workshop; production, forwarded-host and API cross-site rejection remain verified. No provider calls.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
         "subtasks": [],
-        "updatedAt": "2026-10-23T06:33:08.046Z"
+        "updatedAt": "2026-10-23T06:40:32.334Z",
+        "metadata": {
+          "verification": "PR24 merged2050e5b after both GitHub correctness runs39912435967 and39912443439 passed. Actual Chrome external-origin anchor reached local studio; wire metadata confirmed cross-site user document navigation. Production root retained sign-in and actual cross-site POST returned403. Four focused unit tests and combined321tests passed. No provider calls."
+        }
+      },
+      {
+        "id": "43",
+        "title": "Verify saved-data browser input delivery",
+        "description": "Investigate CI39912845376 saved-data test retaining Unsaved changes after Save click; preserve all persistence assertions and capture actual input events.",
+        "details": "Separate from the verified live model upgrade. No blind retries, synthetic clicks, weakened assertions or provider calls.",
+        "testStrategy": "Browser input evidence and existing persistence, memory-only fallback and quota assertions; reviewed PR with CI evidence.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T06:45:38.399Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T06:33:08.046Z",
-      "taskCount": 42,
-      "completedCount": 32,
+      "lastModified": "2026-10-23T06:45:38.400Z",
+      "taskCount": 43,
+      "completedCount": 34,
       "tags": [
         "master"
       ]
