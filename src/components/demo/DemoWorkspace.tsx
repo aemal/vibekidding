@@ -7,6 +7,8 @@ import { DemoProjectPreview } from "./DemoProjectPreview";
 import { DemoDataBackup } from "./DemoDataBackup";
 import { PREVIEW_PROBLEM_MESSAGE, PREVIEW_REPAIR_PROMPT } from "@/lib/demo-preview-diagnostics";
 import { revisionGuidance } from "@/lib/demo-revision-guidance";
+import { ideaBuddyStarter } from "@/lib/demo-idea-buddy-starter";
+import type { AppAIState } from "@/lib/demo-app-ai-bridge";
 import { notesStarter } from "@/lib/demo-notes-starter";
 import { deleteProjectData } from "@/lib/demo-project-storage";
 import { sandboxDocument } from "@/lib/studio/sandbox";
@@ -22,6 +24,7 @@ import { copyProject, MAX_BACKUP_BYTES, MAX_HTML, MAX_PROJECTS, MAX_VERSIONS, pa
 
 const workshopStarters = [
   ...starters,
+  { ...ideaBuddyStarter, projectTitle: ideaBuddyStarter.title, color: "honey" },
   { ...notesStarter, title: "Remembering notes", projectTitle: notesStarter.title, color: "sage" },
   { title: "Music garden", emoji: "🎵", color: "honey", description: "Tap piano notes to make a melody. Sound starts only when you play.", html: templateProject("Make a musical garden piano").html },
   { title: "Little checklist", emoji: "🌱", color: "sage", description: "Make a little plan. Checkmarks last only for this preview visit.", html: templateProject("Make a garden daily checklist").html },
@@ -80,6 +83,9 @@ export function DemoWorkspace() {
   const [expandedPlay, setExpandedPlay] = useState(false);
   const [replay, setReplay] = useState(0);
   const [problemKey, setProblemKey] = useState<string | null>(null);
+  const [appAIAvailable, setAppAIAvailable] = useState(false);
+  const [aiEnabledKey, setAIEnabledKey] = useState<string | null>(null);
+  const [aiStatus, setAIStatus] = useState<{ key: string; state: AppAIState } | null>(null);
   const [dialog, setDialog] = useState<"rename" | "delete" | null>(null);
   const [name, setName] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
@@ -114,6 +120,10 @@ export function DemoWorkspace() {
   const selected = projects.find(p => p.id === selectedId);
   const current = selected?.versions.at(-1);
   const previewKey = JSON.stringify([selected?.id, current?.id, replay]);
+  const canEnableAppAI = appAIAvailable && readiness?.mode === "ai" && readiness.publicTemplateOnly !== true;
+  const aiEnabled = canEnableAppAI && aiEnabledKey === previewKey;
+  const aiAttempts = aiStatus?.key === previewKey ? aiStatus.state.attempts : 0;
+  const aiPending = aiStatus?.key === previewKey && aiStatus.state.pending;
   const previewProblem = !!current && problemKey === previewKey;
   const previousVersion = selected?.versions.at(-2);
   const revision = revisionGuidance(readiness?.mode, current?.html);
@@ -168,6 +178,19 @@ export function DemoWorkspace() {
       .catch(() => { if (active && !controller.signal.aborted) setReadinessError(true); })
       .finally(() => clearTimeout(timeout));
     return () => { active = false; clearTimeout(timeout); controller.abort(); };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let live = true;
+    const deadline = setTimeout(() => controller.abort(), 10_000);
+    fetch("/api/demo/app-ai", { signal: controller.signal, cache: "no-store" })
+      .then(async response => {
+        if (!response.ok) return;
+        const value = await response.json();
+        if (live && !controller.signal.aborted) setAppAIAvailable(value.enabled === true && value.configured === true && value.localOnly === true);
+      }).catch(() => {}).finally(() => clearTimeout(deadline));
+    return () => { live = false; clearTimeout(deadline); controller.abort(); };
   }, []);
 
   useEffect(() => {
@@ -531,7 +554,8 @@ export function DemoWorkspace() {
         </section>
         <dialog ref={playDialogRef} open className={`demo-panel demo-preview-panel demo-play-dialog${expandedPlay ? " is-expanded" : ""}`} aria-labelledby="preview-heading" aria-modal={expandedPlay ? true : undefined} aria-busy={busy} onCancel={e => { e.preventDefault(); closeLargePlay(); }}>
           <div className="demo-preview-toolbar"><div><span className="demo-step">02 / PLAY & EXPLORE</span><h2 id="preview-heading">{selected?.title || "A little space for big possibilities"}</h2></div>{current && <div className="demo-play-toolbar-actions"><span className={`demo-mode ${current.mode}`}>{versionLabel(current.mode)}</span><button ref={playToggleRef} type="button" className="demo-secondary" disabled={locked} onClick={expandedPlay ? closeLargePlay : openLargePlay}>{expandedPlay ? <ArrowLeft size={15} /> : <Maximize2 size={15} />}{expandedPlay ? "Back to workshop" : "Play large"}</button></div>}</div>
-          {current ? <div className="demo-frame-wrap"><DemoProjectPreview key={previewKey} projectId={selected!.id} onProblem={() => setProblemKey(previewKey)} html={current.html + playEscapeBridge} title={`${selected?.title} play preview`} className="demo-frame" />{busy && <div className="demo-building"><LoaderCircle className="demo-spin" size={24} /><strong>Building your next version…</strong><span>Your current creation is safe.</span></div>}</div> : <div className="demo-empty"><div className="demo-empty-art" aria-hidden="true"><span>✦</span><span>◒</span><span>✧</span></div><h3>It all starts with “what if?”</h3><p>Pick a starter below or tell us your idea.<br />Your creation will come to life right here.</p><span className="demo-empty-caption">A PLACE TO TINKER, TRY, AND TRY AGAIN</span></div>}
+          {current && <section className="demo-app-ai" aria-label="Optional app AI replies"><strong>Optional AI replies · grown-up control</strong><p>{canEnableAppAI ? "App questions go to an AI service only after you enable replies for this play session. Leave out private details. Up to 3 attempts, including failures; the local demo also has a shared limit." : "AI replies are unavailable here. A grown-up must configure the optional local AI service. Public and template demos do not send app questions to AI."}</p>{canEnableAppAI && <><button type="button" className="demo-secondary" disabled={!aiEnabled && (locked || aiAttempts >= 3)} onClick={() => setAIEnabledKey(aiEnabled ? null : previewKey)}>{aiEnabled ? "Disable AI replies" : "Enable AI replies for this play session"}</button><span role="status">{aiAttempts} / 3 attempts used{aiPending ? " · Waiting for reply…" : aiEnabled ? " · Enabled" : " · Disabled"}</span></>}</section>}
+          {current ? <div className="demo-frame-wrap"><DemoProjectPreview key={previewKey} projectId={selected!.id} onProblem={() => setProblemKey(previewKey)} aiEnabled={aiEnabled} onAIState={state => setAIStatus({ key: previewKey, state })} html={current.html + playEscapeBridge} title={`${selected?.title} play preview`} className="demo-frame" />{busy && <div className="demo-building"><LoaderCircle className="demo-spin" size={24} /><strong>Building your next version…</strong><span>Your current creation is safe.</span></div>}</div> : <div className="demo-empty"><div className="demo-empty-art" aria-hidden="true"><span>✦</span><span>◒</span><span>✧</span></div><h3>It all starts with “what if?”</h3><p>Pick a starter below or tell us your idea.<br />Your creation will come to life right here.</p><span className="demo-empty-caption">A PLACE TO TINKER, TRY, AND TRY AGAIN</span></div>}
           {previewProblem && <section className="demo-preview-problem" aria-label="Preview recovery"><p role="status"><strong>{PREVIEW_PROBLEM_MESSAGE}</strong></p><p>{readiness?.mode === "ai" ? "Prepare a suggestion, then review and submit it yourself. Preparing does not start an AI request." : "Code repair needs AI mode. You can restart play, restore an earlier version if available, or choose New idea."}</p><div>{readiness?.mode === "ai" && <button type="button" className="demo-secondary" disabled={locked} onClick={prepareRepair}>Prepare repair</button>}{previousVersion && <button type="button" className="demo-secondary" disabled={locked} onClick={() => restore(previousVersion)}>Restore previous version</button>}</div>{previousVersion && <p className="demo-fine">Restoring adds an earlier build as a new version. Saved app data stays unchanged.</p>}</section>}
           <div className="demo-preview-bottom"><span>{current ? (expandedPlay ? "Large play · press Escape to return" : "Play preview · notes can stay in this browser") : "Your imagination is welcome here."}</span>{current && <button className="demo-text-button" disabled={locked} onClick={() => setReplay(v => v + 1)}><RotateCcw size={14} /> Restart play</button>}</div>
           {selected && <div className="demo-project-actions"><button disabled={locked} onClick={() => { setName(selected.title); setDialog("rename"); }}><Pencil size={15} /> Rename</button><button disabled={locked} aria-expanded={history} onClick={() => setHistory(!history)}><History size={15} /> History ({selected.versions.length})</button><button disabled={locked} onClick={duplicateProject}><Copy size={15} /> Duplicate</button><button disabled={locked} onClick={openShare}><Share2 size={15} /> Share playable link</button><button disabled={locked} onClick={exportBackup}><Download size={15} /> Export backup</button><button disabled={locked} onClick={exportHtml}><Download size={15} /> Export HTML</button><button disabled={locked} onClick={() => setDataProject(selected.id)}>Saved app data</button><button disabled={locked} onClick={() => setDialog("delete")} aria-label={`Delete ${selected.title}`}><Trash2 size={15} /></button></div>}
