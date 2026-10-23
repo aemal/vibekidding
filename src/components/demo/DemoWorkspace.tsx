@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowUpRight, Check, Copy, Download, History, LoaderCircle, 
 import { DemoProjectPreview } from "./DemoProjectPreview";
 import { DemoDataBackup } from "./DemoDataBackup";
 import { PREVIEW_PROBLEM_MESSAGE, PREVIEW_REPAIR_PROMPT } from "@/lib/demo-preview-diagnostics";
+import { DEMO_DRAFTS_KEY, draftText, emptyDrafts, encodeDrafts, parseDrafts, selectDraft, writeDraft } from "@/lib/demo-drafts";
 import { revisionGuidance } from "@/lib/demo-revision-guidance";
 import { ideaBuddyStarter } from "@/lib/demo-idea-buddy-starter";
 import type { AppAIState } from "@/lib/demo-app-ai-bridge";
@@ -66,6 +67,10 @@ export function DemoWorkspace() {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [readinessError, setReadinessError] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [draftNotice, setDraftNotice] = useState("");
+  const drafts = useRef(emptyDrafts());
+  const draftProjectIds = useRef<string[]>([]);
+  const draftStorageBlocked = useRef(false);
   const [voiceInputMode, setVoiceInputMode] = useState<"dictation" | "samantha">("dictation");
   const [speechLanguage, setSpeechLanguage] = useState("en-US");
   const [dictationContext, setDictationContext] = useState(0);
@@ -140,11 +145,20 @@ export function DemoWorkspace() {
           const saved: unknown = JSON.parse(raw);
           if (!validProjects(saved)) throw new Error("unrecognized data");
           setProjects(saved);
+          draftProjectIds.current = saved.map(project => project.id);
         }
         storageBaseline.current = raw;
       } catch {
         storageBlocked.current = true;
         setStorageError("We couldn’t read your saved projects. New work will stay in this tab until you can save it. Export anything you want to keep.");
+      }
+      try {
+        drafts.current = parseDrafts(sessionStorage.getItem(DEMO_DRAFTS_KEY), draftProjectIds.current);
+        setSelectedId(drafts.current.activeProjectId);
+        setPrompt(draftText(drafts.current));
+      } catch {
+        draftStorageBlocked.current = true;
+        setDraftNotice("Draft recovery is unavailable. New drafts stay in memory in this page and may be lost on reload. Copy your words before leaving.");
       }
       setLoaded(true);
     });
@@ -336,6 +350,7 @@ export function DemoWorkspace() {
   // Persist before claiming success. Never silently overwrite unreadable saved data.
   function save(next: Project[]) {
     setProjects(next);
+    draftProjectIds.current = next.map(project => project.id);
     if (storageBlocked.current) return false;
     try {
       storageBaseline.current = persistProjects(localStorage, STORAGE_KEY, storageBaseline.current, next);
@@ -358,16 +373,37 @@ export function DemoWorkspace() {
     playDialogRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
   }, [selectedId, replay]);
 
+  function persistDrafts() {
+    if (draftStorageBlocked.current) return;
+    try { sessionStorage.setItem(DEMO_DRAFTS_KEY, encodeDrafts(drafts.current)); }
+    catch {
+      draftStorageBlocked.current = true;
+      setDraftNotice("Drafts are kept in memory on this page, but could not be saved for reload. Copy your words before leaving.");
+    }
+  }
+  function updatePrompt(value: string | ((previous: string) => string)) {
+    const text = (typeof value === "function" ? value(draftText(drafts.current)) : value).slice(0, 2000);
+    drafts.current = writeDraft(drafts.current, text, draftProjectIds.current);
+    setPrompt(text);
+    persistDrafts();
+  }
+  function switchDraft(projectId: string | null, submitted = false) {
+    if (submitted) drafts.current = writeDraft(drafts.current, "", draftProjectIds.current);
+    drafts.current = selectDraft(drafts.current, projectId, draftProjectIds.current);
+    setPrompt(draftText(drafts.current));
+    persistDrafts();
+  }
+
   function open(project: Project) {
     setDataProject(null);
     revealPreview.current = true;
     setDictationContext(value => value + 1);
-    setSelectedId(project.id); setPrompt(""); setHistory(false); setError(""); setMessage(""); setReplay(v => v + 1);
+    setSelectedId(project.id); switchDraft(project.id); setHistory(false); setError(""); setMessage(""); setReplay(v => v + 1);
   }
   function newProject() {
     setDataProject(null);
     setDictationContext(value => value + 1);
-    setSelectedId(null); setPrompt(""); setHistory(false); setError(""); setMessage(""); promptRef.current?.focus();
+    setSelectedId(null); switchDraft(null); setHistory(false); setError(""); setMessage(""); promptRef.current?.focus();
   }
   function addVersion(html: string, title: string, mode: Version["mode"], idea: string, emoji = "✦") {
     const version: Version = { id: crypto.randomUUID(), html, prompt: idea, createdAt: eventTimestamp(), mode };
@@ -375,7 +411,7 @@ export function DemoWorkspace() {
       ? { ...selected, updatedAt: eventTimestamp(), versions: [...selected.versions, version].slice(-MAX_VERSIONS) }
       : { id: crypto.randomUUID(), title: title.trim().slice(0, 70) || "My little creation", emoji, updatedAt: eventTimestamp(), versions: [version] };
     const saved = save([project, ...projects.filter(p => p.id !== project.id)]);
-    setSelectedId(project.id); setPrompt(""); setReplay(v => v + 1);
+    setSelectedId(project.id); switchDraft(project.id, true); setReplay(v => v + 1);
     return saved;
   }
   function createFromStarter(index: number) {
@@ -443,7 +479,7 @@ export function DemoWorkspace() {
       return;
     }
     if (prompt.trim() && !window.confirm("Replace your current idea with a repair suggestion? Cancel to keep your words.")) return;
-    setPrompt(PREVIEW_REPAIR_PROMPT);
+    updatePrompt(PREVIEW_REPAIR_PROMPT);
     setError("");
     setMessage("Repair suggestion prepared. Review it, then choose Make this change when you’re ready.");
     if (expandedPlay) closeLargePlay();
@@ -525,6 +561,7 @@ export function DemoWorkspace() {
       <div className="demo-intro"><div><p className="demo-eyebrow"><span /> A LITTLE IDEA CAN GO A LONG WAY</p><h1>Your idea <em>workshop.</em></h1><p>Dream it. Make it. Give it a little more you.</p></div><div className="demo-mascot" aria-hidden="true"><span>✦</span><div>◕ ‿ ◕</div><small>let’s make something!</small></div></div>
       <div className="demo-note"><span aria-hidden="true">🌱</span><p><strong>Better together.</strong> Keep a grown-up nearby. Projects stay in this browser. {readiness?.publicTemplateOnly ? "Prompts go to the template service; project builds make no AI provider calls." : "Prompts go to the demo service and may use AI."} Leave out names, school, and other personal details.</p></div>
       {copyRequest?.status === "dismissed" && <div className="demo-copy-notice"><span>Shared copy not saved. Your shelf is unchanged.</span><button type="button" className="demo-text-button" disabled={locked} onClick={reviewCopy}>Review copy link</button></div>}
+      {draftNotice && <p className="demo-alert" role="status">{draftNotice}</p>}
       {storageError && <div className="demo-alert" role="alert"><p>{storageError}</p>{storageConflict && <button type="button" className="demo-secondary" disabled={locked} onClick={() => { if (window.confirm("Reload the saved shelf? Unsaved changes in this tab will be lost. Export a backup of each changed project first.")) window.location.reload(); }}>Reload saved shelf</button>}</div>}
       <div className="demo-feedback" aria-live="polite" role="status">{message && <p><Check size={17} />{message}</p>}</div>
       {error && <p className="demo-alert" role="alert">{error}</p>}
@@ -536,15 +573,16 @@ export function DemoWorkspace() {
           <div className="demo-readiness" role="status"><strong>{readiness ? !readiness.enabled ? "Prompt builds are unavailable" : readiness.mode === "template" ? (readiness.publicTemplateOnly ? "Templates ready · no AI calls" : "Offline templates ready") : "AI mode configured" : readinessError ? "Build service status unavailable" : "Checking the workshop…"}</strong><span>{readiness?.message || (readinessError ? "You can still use the ready-to-play starters below." : readiness ? "Ready-to-play starters also work without AI." : "Ready-to-play starters are available below.")}</span></div>
           <form onSubmit={e => { e.preventDefault(); void generate(); }}>
             <label htmlFor="demo-idea">{selected ? "My next change" : "My idea"}</label>
-            <textarea ref={promptRef} id="demo-idea" placeholder={selected ? revision.placeholder : "A game where a panda collects stars…"} value={prompt} maxLength={promptLimit} onChange={e => setPrompt(e.target.value)} disabled={locked || !loaded || revision.blocked} />
-            {!selected && <div className="demo-prompt-suggestions" role="group" aria-label="Idea suggestions">{promptSuggestions.map(idea => <button key={idea.label} type="button" disabled={locked || !loaded} onClick={() => { setPrompt(idea.prompt); promptRef.current?.focus(); }}>{idea.label}</button>)}</div>}
+            <textarea ref={promptRef} id="demo-idea" placeholder={selected ? revision.placeholder : "A game where a panda collects stars…"} value={prompt} maxLength={promptLimit} onChange={e => updatePrompt(e.target.value)} disabled={locked || !loaded || revision.blocked} />
+            {!selected && <div className="demo-prompt-suggestions" role="group" aria-label="Idea suggestions">{promptSuggestions.map(idea => <button key={idea.label} type="button" disabled={locked || !loaded} onClick={() => { updatePrompt(idea.prompt); promptRef.current?.focus(); }}>{idea.label}</button>)}</div>}
             <div className="demo-voice-mode" role="group" aria-label="Optional voice mode"><button type="button" aria-pressed={voiceInputMode === "dictation"} onClick={() => setVoiceInputMode("dictation")}>Dictate text</button><button type="button" aria-pressed={voiceInputMode === "samantha"} onClick={() => setVoiceInputMode("samantha")}>Talk with Samantha</button></div>
             <div className="demo-dictation-area" hidden={voiceInputMode !== "dictation"}>
               <label htmlFor="demo-speech-language">Dictation language<select id="demo-speech-language" value={speechLanguage} disabled={locked || !loaded} onChange={e => setSpeechLanguage(e.target.value)}>{speechLanguages.map(language => <option key={language.value} value={language.value}>{language.label}</option>)}</select></label>
-              <BrowserDictation disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "dictation"} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { setPrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
+              <BrowserDictation disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "dictation"} language={speechLanguage} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxLength={Math.max(0, promptLimit - prompt.length - (prompt.length ? 1 : 0))} onTranscript={text => { updatePrompt(previous => `${previous}${previous ? " " : ""}${text}`.slice(0, promptLimit)); promptRef.current?.focus(); }} />
               <p className="demo-fine">Review and edit the words above, then use the build button. Dictation never starts a build. Language availability depends on your browser and speech service.{readiness?.mode === "template" ? " Template instructions currently work best in English; dictation does not translate them." : ""}</p>
             </div>
-            <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={text => { setPrompt(text.slice(0, promptLimit)); promptRef.current?.focus(); }} /></div>
+            <div hidden={voiceInputMode !== "samantha"}><DemoSamanthaVoice disabled={locked || !loaded || revision.blocked || !!dialog || shareOpen || copyDialogOpen || expandedPlay || voiceInputMode !== "samantha"} contextKey={`${selectedId ?? "new"}:${current?.id ?? ""}:${dictationContext}`} maxIdeaLength={promptLimit} onIdea={text => { updatePrompt(text.slice(0, promptLimit)); promptRef.current?.focus(); }} /></div>
+            <p className="demo-fine">Unsent ideas stay with each project in this tab, including reloads when browser storage is available. Drafts are not included in project backups or shared links.</p>
             <div className="demo-input-foot"><span>No personal details, just imagination.</span><span>{prompt.length}/{promptLimit}</span></div>
             <button className="demo-primary" type="submit" disabled={locked || !loaded || revision.blocked || !prompt.trim() || readiness?.enabled === false}>{busy ? <LoaderCircle className="demo-spin" size={18} /> : <Sparkles size={18} />}{busy ? "Making a little magic…" : revision.blocked ? "Changes need AI mode" : selected ? "Make this change" : "Bring my idea to life"}<ArrowUpRight size={18} /></button>
             {busy && <button type="button" className="demo-text-button demo-cancel" onClick={() => cancelGeneration()}>Cancel build</button>}

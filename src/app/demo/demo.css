@@ -32,3 +32,5 @@
 
 .demo-preview-problem{padding:14px 18px;background:#fff2df;border-top:1px solid #e7d4b7;color:#715536;font-size:13px;flex-shrink:0}.demo-preview-problem p{margin:0 0 10px;line-height:1.5}.demo-preview-problem>div{display:flex;gap:8px;flex-wrap:wrap}.demo-preview-problem .demo-fine{margin:10px 0 0}.demo-play-dialog.is-expanded .demo-preview-problem{max-height:35dvh;overflow:auto}
 .demo-app-ai{padding:12px 18px;border-top:1px solid #e7dfd2;background:#f7f2e8;font-size:12px;color:#6b5944;flex-shrink:0}.demo-app-ai p{margin:6px 0 10px;line-height:1.5}.demo-app-ai>span{display:block;margin-top:8px}.demo-play-dialog.is-expanded .demo-app-ai{max-height:25dvh;overflow:auto}
+/* Keep a usable play area on short screens; the dialog scrolls to other controls. */
+.demo-play-dialog.is-expanded{overflow-y:auto}.demo-play-dialog.is-expanded .demo-frame-wrap{flex:1 0 200px;min-height:200px}.demo-play-dialog.is-expanded .demo-frame{min-height:200px}

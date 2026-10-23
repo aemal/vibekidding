@@ -75,7 +75,7 @@ test("malformed and oversized input fails before provider access", async () => {
     assert.equal((await h.POST(request(body))).status, 400);
   assert.equal(calls, 0);
   assert.equal((await handlers().POST(request({ prompt: "ok" }, { "content-type": "text/plain" }))).status, 415);
-  assert.equal((await handlers().POST(request({ prompt: "a".repeat(100001) }))).status, 413);
+  assert.equal((await handlers().POST(request({ prompt: "a".repeat(DEMO_LIMITS.bodyBytes + 1) }))).status, 413);
 });
 
 test("AI path sends bounded server-side requests and preserves revision input", async () => {
@@ -201,7 +201,7 @@ test("public templates retain origin, body and usage bounds", async () => {
   const url = "https://demo.example/api/demo/generate";
   assert.equal((await h.POST(request({ prompt: "space" }, { origin: "https://evil.example" }, url))).status, 403);
   assert.equal((await h.POST(request({ prompt: "x".repeat(2001) }, {}, url))).status, 400);
-  assert.equal((await h.POST(request({ prompt: "x".repeat(100001) }, {}, url))).status, 413);
+  assert.equal((await h.POST(request({ prompt: "x".repeat(DEMO_LIMITS.bodyBytes + 1) }, {}, url))).status, 413);
   for (let i = 0; i < 8; i++) assert.equal((await h.POST(request({ prompt: "space" }, {}, url))).status, 200);
   assert.equal((await h.POST(request({ prompt: "space" }, {}, url))).status, 429);
 });

@@ -1,5 +1,7 @@
 # VibeKidding: current demo
 
+For a first session, see the [parent quickstart](docs/DEMO_QUICKSTART.md), including the public and local links and backup instructions.
+
 The login-free workshop is at `/demo`. It supports playable starters, prompt-selected template variations, revisions, browser-saved projects, version history, duplication, JSON backup/import, and HTML export. Google sign-in is not required for this demo. Cancel build stops waiting immediately, preserves your idea and previous version, and signals the server to abort generation. A provider may already have incurred usage, so cancellation does not refund the reserved call budget.
 
 The template workshop includes collector games, memory matching, drawing, addition quizzes, branching stories, same-device tic-tac-toe, a musical garden, and a simple checklist. Music starts only when a note is selected. Checklist entries and play progress last for the preview visit; they are not saved habits or shared multiplayer state.
@@ -34,6 +36,12 @@ Choose **Share playable link**, then create and copy a link to the current versi
 Unmodified template builds use short, versioned links and offer **Show QR code**. QR images are generated locally; another device opens its own copy, not a multiplayer session. Renamed or custom HTML uses the original compressed format with copy/export options instead of an unreadably dense QR code. Existing links remain supported.
 
 Links are limited to 8,000 characters and decoded snapshots to 80 KiB. Larger projects can use the existing HTML or JSON backup export. Some messaging services may truncate long links. On localhost, links normally work only on that device. After deploying `/demo/play`, set the public build variable `NEXT_PUBLIC_DEMO_SHARE_ORIGIN` to that site's HTTPS origin to offer an explicit hosted-reader option for local AI creations. The code travels inside the link; creating it does not upload the project to a server.
+
+## Optional AI replies inside apps
+
+With local OpenAI mode and `VIBEKIDDING_DEMO_APP_AI_ENABLED=1`, generated apps can call `window.vibeAI.ask(text)` after a grown-up explicitly enables replies for that preview. Idea Buddy is a ready-to-play example. The SDK allows one pending question and three attempts per preview, including failures. Replies and code generation share the server process budget. Public, template and production modes keep this capability disabled.
+
+Actual local browser verification generated a Robot Drawing Ideas app, requested a real AI suggestion, saved it with the storage SDK, and restored the same favorite after a full page reload. This verifies that specific example; generated code still needs review. Shared/exported apps do not inherit workshop AI access.
 
 ## Optional local Samantha conversation
 

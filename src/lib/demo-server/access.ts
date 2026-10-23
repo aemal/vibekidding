@@ -1,9 +1,15 @@
 export type DemoEnvironment = Record<string, string | undefined>;
 
+const promptCharacters = 2000;
+const htmlBytes = 80000;
+// A JSON string can encode each UTF-16 unit as six ASCII bytes (\\uXXXX).
+// HTML's UTF-8 byte bound also bounds its UTF-16 unit count. Keep a finite
+// framing/whitespace allowance; decoded field limits still apply before billing.
+const bodyBytes = 6 * (htmlBytes + promptCharacters) + 1024;
 export const DEMO_LIMITS = {
-  promptCharacters: 2000,
-  htmlBytes: 80000,
-  bodyBytes: 100000,
+  promptCharacters,
+  htmlBytes,
+  bodyBytes,
   outputTokens: 6000,
   requestsPerMinute: 10,
   providerCallsPerProcess: 20,
