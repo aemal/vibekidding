@@ -866,17 +866,39 @@
             "limits": "Physical phone scan and deployment not yet verified"
           }
         }
+      },
+      {
+        "id": 26,
+        "title": "Save and remix a shared project in the login-free workshop",
+        "description": "Let a recipient explicitly save an independent copy of a shared snapshot to their browser shelf and open it for revisions without login, preserving existing projects and avoiding automatic execution or generation.",
+        "details": "Reuse existing project backup validation and local storage persistence. Explicit user action only; independent project ID and one imported version; no prompt or conversation history; graceful storage failure and stale hash protection; no provider call until a later build action. Shared reader remains playback-only until action.",
+        "testStrategy": "Unit validation plus real browser shared link -> explicit copy -> workshop shelf -> revision with template where supported; preserve existing shelf, cancel/no auto writes, storage failure, old/new link compatibility.",
+        "status": "in-progress",
+        "dependencies": [
+          "23",
+          "25"
+        ],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T02:16:07.916Z",
+        "metadata": {
+          "verification": {
+            "local": "255 unit;lint;typecheck;production build;47 browser checks including10 remix",
+            "scenarios": "t1/v1 independent copy,confirm/cancel,shared provenance,source shelf preserved,reload,real template revision,quota/full shelf and stale links",
+            "limits": "CI and deployed acceptance pending; no live provider calls in remix tests"
+          }
+        }
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T02:11:40.716Z",
-      "taskCount": 25,
+      "lastModified": "2026-10-23T02:16:07.916Z",
+      "taskCount": 26,
       "completedCount": 15,
       "tags": [
         "master"
       ],
-      "created": "2026-10-23T02:14:07.979Z",
+      "created": "2026-10-23T02:25:15.204Z",
       "description": "Tasks for master context"
     }
   }
