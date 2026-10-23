@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 
-const nunito = Nunito({
+const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
-  variable: "--font-nunito",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "VibeKidding 🎨 - Create Magic with Your Voice!",
+  title: "VibeKidding — Build something together",
   description:
-    "A fun coding playground for kids! Just speak and watch your ideas come to life!",
+    "An open-ended app studio for parents, children, and curious makers. Describe an idea, build real software, and make it your own.",
 };
 
 export default function RootLayout({
@@ -22,29 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${nunito.variable} antialiased`}>
-
-          {/* Decorative blobs */}
-          <div
-            className="decoration-blob"
-            style={{
-              width: "400px",
-              height: "400px",
-              background: "linear-gradient(135deg, #fd79a8, #a29bfe)",
-              top: "-100px",
-              right: "-100px",
-            }}
-          />
-          <div
-            className="decoration-blob"
-            style={{
-              width: "300px",
-              height: "300px",
-              background: "linear-gradient(135deg, #55efc4, #74b9ff)",
-              bottom: "-50px",
-              left: "-50px",
-            }}
-          />
+      <body className={`${inter.variable} antialiased`}>
           {children}
 
       </body>

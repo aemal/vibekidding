@@ -36,7 +36,9 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     ".next-demo-ai/types/**/*.ts",
-    ".next-demo-ai/dev/types/**/*.ts"
+    ".next-demo-ai/dev/types/**/*.ts",
+    ".next-v2-ui/types/**/*.ts",
+    ".next-v2-ui/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
