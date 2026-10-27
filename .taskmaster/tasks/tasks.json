@@ -1474,13 +1474,25 @@
         "priority": "high",
         "subtasks": [],
         "updatedAt": "2026-10-27T12:08:37.370Z"
+      },
+      {
+        "id": "55",
+        "title": "Apply SoloFlight theme and finish HeroUI controls across V2 platform",
+        "description": "Use SoloFlight warm paper/violet tokens across landing, studio, authentication, provider settings and voice controls. Replace remaining native V2 model picker, checkbox and buttons with HeroUI. Preserve generated project UI and runtime data.",
+        "details": "",
+        "testStrategy": "Typecheck, scoped lint, production Docker build and browser desktop/mobile plus model dropdown and dark theme verification.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:19:32.544Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-27T12:08:37.370Z",
-      "taskCount": 54,
-      "completedCount": 45,
+      "lastModified": "2026-10-27T12:19:32.544Z",
+      "taskCount": 55,
+      "completedCount": 46,
       "tags": [
         "master"
       ]

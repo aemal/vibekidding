@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, Checkbox } from "@heroui/react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 
 type VoiceReadiness = {
@@ -295,15 +295,10 @@ function VoiceControls({
         Nothing from the conversation builds or changes a project automatically.
       </p>
       {!active && (
-        <label className="demo-voice-confirm">
-          <input
-            type="checkbox"
-            checked={confirmed}
-            disabled={disabled}
-            onChange={(e) => setConfirmed(e.target.checked)}
-          />{" "}
-          I’m ready to connect to the voice service.
-        </label>
+        <Checkbox className="demo-voice-confirm" isSelected={confirmed} isDisabled={disabled} onChange={setConfirmed}>
+          <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+          <Checkbox.Content>I’m ready to connect to the voice service.</Checkbox.Content>
+        </Checkbox>
       )}
       <div className="demo-samantha-controls">
         {active ? (

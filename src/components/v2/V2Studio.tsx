@@ -368,10 +368,10 @@ export function V2Studio() {
     <div className="v2-root" data-theme={theme}>
       <div className="v2-shell">
         {sidebar && (
-          <button
+          <Button
             className="v2-sidebar-backdrop"
             aria-label="Close project menu"
-            onClick={() => setSidebar(false)}
+            onPress={() => setSidebar(false)}
           />
         )}
         <aside className={`v2-sidebar ${sidebar ? "is-open" : ""}`}>
@@ -616,10 +616,10 @@ export function V2Studio() {
                           .includes(search.toLowerCase()),
                       )
                       .map((project, index) => (
-                        <button
+                        <Button
                           className="v2-project-card"
                           key={project.id}
-                          onClick={() => navigate(project.id)}
+                          onPress={() => navigate(project.id)}
                         >
                           <div className={`v2-project-art tone-${index % 4}`}>
                             <Code2 size={34} />
@@ -642,7 +642,7 @@ export function V2Studio() {
                               <ArrowRight size={17} />
                             </div>
                           </div>
-                        </button>
+                        </Button>
                       ))}
                   </div>
                 )}

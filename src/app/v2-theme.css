@@ -1,72 +1,12 @@
-/* VibeBoard palette and HeroUI semantic tokens, scoped to the V2 studio. */
-.v2-root,
-.v2-theme {
-  --bg: #f4f6f8;
-  --panel: #ffffff;
-  --border: #e4e8ee;
-  --ink: #202735;
-  --muted: #697386;
-  --accent: #087f69;
-  --soft: #e5f5ee;
-  --background: var(--bg);
-  --foreground: var(--ink);
-  --surface: var(--panel);
-  --surface-foreground: var(--ink);
-  --overlay: var(--panel);
-  --overlay-foreground: var(--ink);
-  --field-background: #f7f9fb;
-  --field-foreground: var(--ink);
-  --field-placeholder: var(--muted);
-  --field-border: var(--border);
-  --field-border-width: 1px;
-  --field-radius: 12px;
-  --default: #edf0f4;
-  --default-foreground: var(--ink);
-  --default-hover: #e4e9ef;
-  --accent-foreground: #ffffff;
-  --accent-hover: #076b59;
-  --accent-soft: var(--soft);
-  --accent-soft-foreground: #076b59;
-  --focus: var(--accent);
-  --radius: 12px;
-  --separator: var(--border);
-  --surface-secondary: #f7f9fb;
-  --panel-shadow: 0 3px 8px #172b4d03, 0 14px 40px #172b4d05;
+/* Layout and component styling; colors live in soloflight-theme.css. */
+.v2-root, .v2-theme {
   min-height: 100dvh;
   background: var(--bg);
   color: var(--ink);
-  font-family:
-    var(--font-inter),
-    Inter,
-    ui-sans-serif,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   letter-spacing: -0.012em;
-  color-scheme: light;
-}
-.v2-root[data-theme="dark"],
-.v2-theme[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #11151b;
-  --panel: #1a2029;
-  --border: #2c3542;
-  --ink: #eef2f7;
-  --muted: #a3afbf;
-  --accent: #64d9b4;
-  --soft: #193b32;
-  --overlay: #202834;
-  --field-background: #151b23;
-  --default: #283240;
-  --default-hover: #334052;
-  --accent-foreground: #10271f;
-  --accent-hover: #8be6c9;
-  --accent-soft-foreground: #8be6c9;
-  --surface-secondary: #151b23;
-  --panel-shadow: 0 12px 36px #00000016;
 }
 .v2-root *,
 .v2-root *::before,
@@ -1763,7 +1703,7 @@
   font-weight: 600;
   margin-bottom: 8px;
 }
-.v2-provider-model select {
+.v2-provider-model .select__trigger {
   display: block;
   width: 100%;
   min-height: 44px;
@@ -1821,3 +1761,9 @@
   font-size: 12px;
   margin: 0 0 10px;
 }
+
+.v2-root .v2-project-card.button { display: block; height: auto; padding: 0; white-space: normal; border: 1px solid var(--border); background: var(--panel); border-radius: 17px; }
+.v2-root .v2-sidebar-backdrop.button { border-radius: 0; padding: 0; }
+.v2-model-popover { max-width: min(440px, calc(100vw - 32px)); }
+.v2-provider-model .select { width: 100%; }
+.v2-provider-model .select__trigger { justify-content: space-between; }

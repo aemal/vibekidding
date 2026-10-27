@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Button, Input } from "@heroui/react";
+import { Button, Input, Select, ListBox, Label } from "@heroui/react";
 import { Check, RefreshCw, Trash2 } from "lucide-react";
 import { api } from "./api";
 
@@ -193,29 +193,22 @@ function ProviderCard({
         </Button>
       </form>
       <div className="v2-provider-model">
-        <label htmlFor={`provider-model-${info.provider}`}>
-          Generation model
-        </label>
-        <select
-          id={`provider-model-${info.provider}`}
-          value={currentModel}
-          onChange={(event) => setModel(event.target.value)}
-          disabled={busy || !info.configured}
-        >
-          <option value="">Choose a model from your account</option>
-          {info.model &&
-            !info.models.some((item) => item.id === info.model) && (
-              <option value={info.model}>{info.model} (saved selection)</option>
-            )}
-          {info.models.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-              {item.capability === "unverified"
-                ? " · capability unverified"
-                : ""}
-            </option>
-          ))}
-        </select>
+        <Select aria-label="Generation model" value={currentModel || null} onChange={(value) => setModel(String(value || ""))} isDisabled={busy || !info.configured} placeholder="Choose a model from your account">
+          <Label>Generation model</Label>
+          <Select.Trigger><Select.Value /><Select.Indicator /></Select.Trigger>
+          <Select.Popover className="v2-model-popover">
+            <ListBox>
+              {info.model && !info.models.some((item) => item.id === info.model) && (
+                <ListBox.Item id={info.model} textValue={info.model}>{info.model} (saved selection)</ListBox.Item>
+              )}
+              {info.models.map((item) => (
+                <ListBox.Item key={item.id} id={item.id} textValue={item.label}>
+                  {item.label}{item.capability === "unverified" ? " · capability unverified" : ""}
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
         <p>
           Provider model listings may include models that cannot generate app
           code. A successful model lookup does not verify a paid generation

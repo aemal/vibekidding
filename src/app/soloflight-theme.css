@@ -1,0 +1,61 @@
+/* Shared Solo Flight palette. Source: soloflight/apps/website/app/globals.css.
+   Semantic tokens also reach HeroUI popovers rendered outside the studio root. */
+:root, .v2-root, .v2-theme {
+  color-scheme: light;
+  --paper: #f7f6f2;
+  --bg: var(--paper);
+  --panel: #ffffff;
+  --ink: #27252c;
+  --muted: #746b7d;
+  --violet: #7757d8;
+  --purple: #6950cb;
+  --line: #e8e5df;
+  --border: var(--line);
+  --accent: #7255d5;
+  --soft: #eee8fa;
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --surface: var(--panel);
+  --surface-foreground: var(--ink);
+  --surface-secondary: #f2eff7;
+  --overlay: var(--panel);
+  --overlay-foreground: var(--ink);
+  --field-background: #fcfbf8;
+  --field-foreground: var(--ink);
+  --field-placeholder: var(--muted);
+  --field-border: var(--border);
+  --field-border-width: 1px;
+  --field-radius: 14px;
+  --default: #efedf2;
+  --default-foreground: var(--ink);
+  --default-hover: #e7e1ef;
+  --accent-foreground: #ffffff;
+  --accent-hover: #5e43ba;
+  --accent-soft: var(--soft);
+  --accent-soft-foreground: #5e43ba;
+  --focus: #9877d7;
+  --radius: 14px;
+  --separator: var(--border);
+  --panel-shadow: 0 3px 8px #27252c03, 0 14px 40px #6950cb08;
+}
+:root:has([data-theme="dark"]), .v2-root[data-theme="dark"], .v2-theme[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #19171f;
+  --panel: #24212d;
+  --ink: #f5f1fb;
+  --muted: #b9afc7;
+  --line: #3c3549;
+  --violet: #c1a8ff;
+  --purple: #b69af6;
+  --accent: #b69af6;
+  --soft: #352b4c;
+  --field-background: #201c29;
+  --default: #322c3e;
+  --default-hover: #42374f;
+  --accent-foreground: #231536;
+  --accent-hover: #c9b0ff;
+  --accent-soft-foreground: #d7c4ff;
+  --focus: #c1a8ff;
+  --surface-secondary: #292333;
+  --panel-shadow: 0 12px 36px #00000020;
+}
