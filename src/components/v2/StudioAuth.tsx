@@ -7,10 +7,12 @@ import { EmailSignIn } from "./EmailSignIn";
 export function StudioAuth({
   setupRequired,
   inviteOnly = false,
+  localTestAccess = false,
   onAuthenticated,
 }: {
   setupRequired: boolean;
   inviteOnly?: boolean;
+  localTestAccess?: boolean;
   onAuthenticated(): void;
 }) {
   const [emailMode, setEmailMode] = useState(inviteOnly);
@@ -20,6 +22,16 @@ export function StudioAuth({
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  async function openLocalStudio() {
+    setBusy(true);
+    setError("");
+    try {
+      await api("/api/v2/auth/local", { method: "POST" });
+      onAuthenticated();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Could not open the local studio.");
+    } finally { setBusy(false); }
+  }
   async function submit(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
@@ -79,6 +91,15 @@ export function StudioAuth({
             ? "Create your studio account. Use the same account on your computer and phone."
             : "Sign in to your studio and pick up where you left off."}
         </p>
+        {localTestAccess && !inviteOnly && (
+          <div>
+            <Button className="v2-primary" isDisabled={busy} onPress={openLocalStudio}>
+              {busy ? <LoaderCircle className="v2-spin" size={18} /> : <ArrowRight size={18} />}
+              {busy ? "Opening studio…" : "Open local studio"}
+            </Button>
+            <p>Local testing on this computer. Your existing projects and settings are preserved.</p>
+          </div>
+        )}
         <div
           className="v2-auth-methods"
           role="group"

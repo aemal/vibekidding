@@ -80,9 +80,11 @@ test('restart marks interrupted deployments failed and preserves published route
   await fs.writeFile(path.join(root, 'controller', 'state.json'), JSON.stringify({
     deployments: { pending: { status: 'building' } }, routes: { app: { container: 'previous-live' } },
   }));
-  const controller = await createController({ root, token });
+  const calls = [];
+  const controller = await createController({ root, token, controllerContainer: 'recreated-controller', docker: async args => { calls.push(args); return ''; } });
   assert.equal(controller.state.deployments.pending.status, 'failed');
   assert.equal(controller.state.routes.app.container, 'previous-live');
+  assert.ok(calls.some(args => JSON.stringify(args) === JSON.stringify(['network', 'connect', 'vibekidding-project-app', 'recreated-controller'])));
 });
 
 test('runtime settings reject system overrides and use an env file without leaking values into deployment records or Docker arguments', async t => {

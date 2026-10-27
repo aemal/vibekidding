@@ -36,6 +36,33 @@ export function needsSetup() {
   return withDb(db => (db.prepare("SELECT count(*) AS count FROM accounts").get() as { count: number }).count === 0);
 }
 
+export function localTestAccessEnabled(request: Request) {
+  if (process.env.VIBEKIDDING_LOCAL_TEST_ACCESS !== "1" || process.env.VIBEKIDDING_PUBLIC_MODE !== "0") return false;
+  try {
+    const configured = new URL(process.env.PUBLIC_ORIGIN || "");
+    const requestHost = request.headers.get("host") || new URL(request.url).host;
+    return ["http:", "https:"].includes(configured.protocol)
+      && ["localhost", "127.0.0.1", "[::1]"].includes(configured.hostname)
+      && !configured.username && !configured.password
+      && configured.host === requestHost.toLowerCase()
+      && sameOriginMutation(request);
+  } catch { return false; }
+}
+
+export function localTestAccount(request: Request): StudioUser {
+  if (!localTestAccessEnabled(request)) throw new Error("Local test access is not enabled for this address.");
+  return withDb(db => db.transaction(() => {
+    const accounts = db.prepare("SELECT id AS userId, username FROM accounts LIMIT 2").all() as StudioUser[];
+    if (accounts.length > 1) throw new Error("This studio has multiple accounts. Sign in to choose your account.");
+    if (accounts.length === 1) return accounts[0];
+    const user = { userId: randomBytes(16).toString("hex"), username: "local-tester" };
+    // The local entry uses normal sessions; no reusable password is exposed.
+    db.prepare("INSERT INTO accounts(id,username,salt,password_hash,created_at) VALUES (?, ?, ?, ?, ?)")
+      .run(user.userId, user.username, randomBytes(16).toString("hex"), randomBytes(64).toString("hex"), Date.now());
+    return user;
+  }).immediate());
+}
+
 export async function setupAccount(username: string, password: string): Promise<StudioUser> {
   if (process.env.VIBEKIDDING_PUBLIC_MODE === "1") throw new Error("This studio is invite-only. Use your invited email to sign in.");
   username = username.trim().toLowerCase();

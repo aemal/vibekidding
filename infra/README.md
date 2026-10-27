@@ -18,6 +18,20 @@ The generated controller credential lives only in ignored `infra/local/stack.env
 
 The Next.js image runs a production build and starts on its internal port 3000. Only Nginx publishes a host port. The studio and controller share the source-project volume; generated app containers do not receive that volume or the Docker socket.
 
+## Hands-on local testing
+
+For a single-account installation on this computer, set these values in the ignored `infra/local/stack.env`:
+
+```dotenv
+BIND_ADDRESS=127.0.0.1
+PUBLIC_ORIGIN=http://localhost:3230
+PUBLIC_PORT=3230
+VIBEKIDDING_PUBLIC_MODE=0
+VIBEKIDDING_LOCAL_TEST_ACCESS=1
+```
+
+Rebuild/start with `deploy.sh`, then open `/studio` and choose **Open local studio**. This reuses the sole existing account and its projects/provider settings. It creates a local tester only for an empty installation and refuses to choose among multiple accounts. It is disabled on public hosts and in public mode. Email delivery, production approval workflows and the dependency audit do not block this local test workflow.
+
 ## Contract with the studio
 
 The studio writes immutable source versions to:

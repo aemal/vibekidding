@@ -359,6 +359,7 @@ export function V2Studio() {
           key={session.inviteOnly ? "invited" : "local"}
           setupRequired={session.setupRequired}
           inviteOnly={session.inviteOnly}
+          localTestAccess={session.localTestAccess}
           onAuthenticated={() => void loadSession()}
         />
       </div>

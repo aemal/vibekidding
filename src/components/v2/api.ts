@@ -10,6 +10,7 @@ export type StudioSession = {
   user: { userId: string; username: string } | null;
   setupRequired: boolean;
   inviteOnly?: boolean;
+  localTestAccess?: boolean;
 };
 export async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {

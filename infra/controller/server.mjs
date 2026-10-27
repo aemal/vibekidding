@@ -217,10 +217,9 @@ export async function createController(options = {}) {
 
   // Upgrade existing managed runtimes in place without changing names or data.
   // In public mode a failed isolation migration prevents serving any traffic.
-  if (runtimeConfig.publicMode) {
-    for (const [projectId, route] of Object.entries(state.routes)) {
-      await connectToProjectNetwork(projectId, route.container);
-    }
+  // A recreated controller loses dynamically attached networks in either mode.
+  for (const [projectId, route] of Object.entries(state.routes)) {
+    await connectToProjectNetwork(projectId, runtimeConfig.publicMode ? route.container : undefined);
   }
 
   async function deploy(deployment, source) {
