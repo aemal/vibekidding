@@ -1,0 +1,108 @@
+name: vibekidding
+services:
+  initialize-data:
+    image: alpine:3.21
+    command: ["sh", "-c", "mkdir -p /data/projects && chown 1000:1000 /data /data/projects"]
+    volumes:
+      - projects:/data
+    restart: "no"
+
+  gateway:
+    image: nginx:1.28-alpine
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PUBLIC_PORT:-3000}:80"
+    environment:
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
+      VIBEKIDDING_PUBLIC_MODE: ${VIBEKIDDING_PUBLIC_MODE:-0}
+      NGINX_ENVSUBST_FILTER: BASE_DOMAIN|VIBEKIDDING_PUBLIC_MODE
+    volumes:
+      - ./infra/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+    depends_on:
+      studio:
+        condition: service_healthy
+      controller:
+        condition: service_healthy
+    networks: [platform]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+  studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VIBEKIDDING_RUNTIME_ORIGIN: ${VIBEKIDDING_RUNTIME_ORIGIN:-http://apps.localhost:3000}
+    environment:
+      VIBEKIDDING_V2_ENABLED: "1"
+      VIBEKIDDING_LOCAL_TEST_ACCESS: ${VIBEKIDDING_LOCAL_TEST_ACCESS:-0}
+      VIBEKIDDING_PUBLIC_MODE: ${VIBEKIDDING_PUBLIC_MODE:-0}
+      VIBEKIDDING_RUNTIME_ORIGIN: ${VIBEKIDDING_RUNTIME_ORIGIN:-http://apps.localhost:3000}
+      VIBEKIDDING_DATA_DIR: /var/lib/vibekidding
+      VIBEKIDDING_V2_DATA_DIR: /var/lib/vibekidding
+      VIBEKIDDING_CONTROLLER_URL: http://controller:4000
+      VIBEKIDDING_CONTROLLER_TOKEN: ${VIBEKIDDING_CONTROLLER_TOKEN:?Run infra/scripts/bootstrap.sh to configure the controller token}
+      VIBEKIDDING_PUBLIC_SCHEME: ${VIBEKIDDING_PUBLIC_SCHEME:-http}
+      VIBEKIDDING_INVITED_EMAILS: ${VIBEKIDDING_INVITED_EMAILS:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      STUDIO_MAIL_FROM: ${STUDIO_MAIL_FROM:-}
+      VIBEKIDDING_PROVIDER_ENCRYPTION_KEY: ${VIBEKIDDING_PROVIDER_ENCRYPTION_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      VIBEKIDDING_SAMANTHA_DEMO_ENABLED: ${VIBEKIDDING_SAMANTHA_DEMO_ENABLED:-0}
+      SAMANTHA_API_KEY: ${SAMANTHA_API_KEY:-}
+      SAMANTHA_AGENT_ID: ${SAMANTHA_AGENT_ID:-}
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:3000}
+    volumes:
+      - projects:/var/lib/vibekidding
+    networks: [platform]
+    depends_on:
+      initialize-data:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 12
+
+  controller:
+    build:
+      context: .
+      dockerfile: infra/controller/Dockerfile
+    environment:
+      VIBEKIDDING_PUBLIC_MODE: ${VIBEKIDDING_PUBLIC_MODE:-0}
+      VIBEKIDDING_RUNTIME_ORIGIN: ${VIBEKIDDING_RUNTIME_ORIGIN:-http://apps.localhost:3000}
+      VIBEKIDDING_DATA_DIR: /var/lib/vibekidding
+      VIBEKIDDING_CONTROLLER_TOKEN: ${VIBEKIDDING_CONTROLLER_TOKEN:?Run bootstrap.sh}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:3000}
+      VIBEKIDDING_APP_NETWORK_PREFIX: vibekidding-project-
+      VIBEKIDDING_APP_VOLUME_PREFIX: vibekidding-data-
+      VIBEKIDDING_APP_MEMORY: ${VIBEKIDDING_APP_MEMORY:-512m}
+      VIBEKIDDING_APP_CPUS: ${VIBEKIDDING_APP_CPUS:-1}
+      VIBEKIDDING_BUILD_TIMEOUT_MS: ${VIBEKIDDING_BUILD_TIMEOUT_MS:-600000}
+    volumes:
+      - projects:/var/lib/vibekidding
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks: [platform]
+    depends_on:
+      initialize-data:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  projects:
+    name: vibekidding-projects
+networks:
+  platform:
+    name: vibekidding-platform

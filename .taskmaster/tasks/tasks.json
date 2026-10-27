@@ -26,7 +26,7 @@
       {
         "id": "3",
         "title": "Live identity and parent approval",
-        "status": "blocked",
+        "status": "deferred",
         "description": "Configure Supabase and apply reviewed migrations. Verify Google, OTP, consent gates and separate accounts.",
         "details": "Added npm run setup:check and admin setup checklist. No secret values are exposed and no provider calls made. Supabase config and administrator UUID still missing; live auth/OTP/approval not verified. Migration 010 invalidates studio approval, consent, supervision, parent unlocks and publication on Auth email change or confirmation revocation; preserves credits and suspension. 61 tests pass with all ten migrations in embedded PostgreSQL. Supabase Auth integration remains unverified; see docs/GUARDIAN_IDENTITY_CHANGES.md. Migration 011 makes approval/suspension atomic with audit, rejects outdated admin review revisions, and revokes supervision/unlocks/publication on suspension. 63 local tests pass; live admin/Auth concurrency remains outstanding. Parent UI/API and migration 012 now support explicit consent withdrawal after fresh OTP unlock, stopping access/publication and preserving projects/credits. 64 local tests pass across all twelve migrations; live OTP withdrawal flow remains unverified. Parent screen now clears displayed history/rule text on unlock expiry or 401/403 rejection; API returns unlock expiry. Local Chrome fixture confirms both paths using synthetic mocked responses. Real OTP/Auth acceptance remains outstanding. Bundled Chromium 156.0.8078.4 now passes the preview isolation fixture and parent history clearing against a separate local production server. Parent fixture supports the CI browser and aborts all other API requests. CI now includes bounded server startup/cleanup and parent expiry/rejection checks. Targeted lint, typecheck and workflow YAML validation pass. Mocked account responses only; hosted Linux, real OTP and deployment remain unverified. Migration 015 finalizes OTP unlock under the profile lock using pre-verification email/revision. Stale checks reject; 67 local tests and fourteen concurrency scenarios pass, plus lint/types/build. No live OTP acceptance. Migration 016 adds concurrency-safe parent-code send and OTP attempt limits before provider calls. Three sends and ten attempts per account per fifteen minutes; provider errors do not refund attempts. 76 local tests, fifteen PostgreSQL races, lint/types/build pass; live OTP remains unverified. Migration025 moves final parent-session validation for start/rules under profile/session locks. Revoked/expired tokens reject after lock wait; database-owned 30-minute duration and bounded rule arrays. 128 local tests, 23 independent PostgreSQL concurrency scenarios, full zero-warning lint and typecheck pass. No live migration or OTP acceptance. Production build also passed. Migration026 extends atomic parent checks to clear-history, consent withdrawal and deletion requests. Other-family history isolation and waiting-clear revocation verified. After correcting an invalid fixture role, 131 local tests, 24 independent PostgreSQL races, zero-warning lint, types and production build pass. No real deletion, live migration or OTP acceptance. Studio clears private project/model/prompt/account state on auth change and rejects stale reload, generation, review and credit responses. Actual component browser fixture passes in Chrome and bundled Chromium with synthetic auth/API and delayed generation after account switch. Zero-warning lint, types and production build pass. Added fixture to CI; no hosted CI or live Supabase acceptance. Existing 133-test SQL/unit count unchanged, not rerun for this UI-only change. Admin panel now clears sensitive family/model data on auth changes or failed requests and rejects stale privileged loads/catalog replies. Chrome admin fixture and bundled Chromium Studio/Admin fixtures pass with synthetic auth/API. Full zero-warning lint/types and production build pass. Parent account-change UI check remains separate work; no live role-change acceptance. Parent controls now invalidates pending operations and clears history/rules/code on account change, expiry and unmount. Late refresh cannot restore prior-family content. Chrome parent fixture and combined Chromium Studio/Admin/Parent fixtures pass with synthetic auth/API; full zero-warning lint/types and build pass. Live OTP/cross-tab provider behavior remains unverified. Status audit: Local guardian controls, atomic admin review and parent attempt limits are verified. Remaining acceptance needs configured Supabase Google/OTP, separate real accounts and human consent-eligibility review.",
         "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
@@ -83,12 +83,13 @@
             "testStrategy": "Synthetic PostgreSQL unit and independent-connection contention checks.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-27T12:00:06.109Z"
       },
       {
         "id": "4",
         "title": "Safety provider acceptance",
-        "status": "blocked",
+        "status": "deferred",
         "description": "Configure TypeSafe. Evaluate multilingual attacks, false positives and provider failure paths with reviewed fixtures and live results.",
         "details": "Added 23 synthetic cases across seven languages, shared 15-second/64-KiB provider adapter, zero-width normalization, strict outcome scoring and an explicit-call/budget-limited live CLI. Dry-run verified, no provider calls. 41 tests, targeted lint, typecheck and production build pass. Live TypeSafe configuration, human label review and real classifier acceptance remain required. Read docs/GUARD_EVALUATION.md. Safety provider adapter now has a whole-attempt deadline, strict UTF-8 bounded body reader and nonblocking cancellation. Stalled/ignored-abort/oversized/malformed/late-success fixtures remain unavailable with no retry. 137 local tests, full zero-warning lint, typecheck and production build pass. No live TypeSafe call or accuracy/billing acceptance; uncertain usage remains reserved. Status audit: Local fail-closed classifier adapter and synthetic evaluations are verified. Remaining acceptance needs human multilingual-label review and configured live safety provider.",
         "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
@@ -125,7 +126,8 @@
             "testStrategy": "Use linked parent task evidence. Done means this milestone only; pending live acceptance remains explicit.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-27T12:00:06.114Z"
       },
       {
         "id": "5",
@@ -182,7 +184,7 @@
       {
         "id": "6",
         "title": "Provider cost reconciliation",
-        "status": "in-progress",
+        "status": "deferred",
         "description": "Resolve ambiguous OpenAI and TypeSafe reservations using verified provider records. Never automatically refund uncertain billed requests.",
         "details": "Migration 005 and administrator UI support audited manual reconciliation with provider evidence, one-hour minimum reservation age, bounded charge, atomic refund and conflict/idempotency checks. Provider IDs captured when available. Tests pass. Automated provider billing import and live reconciliation remain incomplete. Migration 009 binds reservations to the checked safety revision and current supervision under the profile lock. Tests reject pause/resume stale requests without debiting credits and deny unchecked service access. Live provider/concurrency acceptance still outstanding. Independent local PostgreSQL connections now confirm overlapping identical reconciliation calls refund once and write one audit record. Provider evidence/import acceptance remains outstanding. Migration 013 claims build UUIDs before any paid classifier/generator call, preventing duplicate requests from buying repeat safety checks. 65 local tests pass; actual PostgreSQL runner covers overlapping claims. No automatic retry/refund is inferred from failure; see docs/GENERATION_RETRIES.md. Generation now checks account model grant, enabled/bounded/recent pricing and live model catalog before claiming the request or invoking paid safety checks. Invalid/future/stale timestamps and unsafe numeric pricing fail closed; unavailable pricing is hidden from model choices. 83 tests, lint/types/build pass. Grant revocation during an already-running call remains subject to reservation recheck; no live provider acceptance. Migration 018 rejects conflicting settlement replay and invalid charge/token values, while preserving identical replay and paired unknown token counts for reviewed reconciliation. 85 local tests and sixteen independent PostgreSQL race checks pass; corrected test typing then reran focused tests, lint/types/build successfully. No provider billing import or live reconciliation acceptance. Added normalized reviewed billing-import CLI with read-only default, explicit apply, bounded strict JSON, source SHA-256, stored request matching and atomic batch reconciliation. Migration021 enforces provider/request uniqueness and identical replay. 107 local tests, 19 PostgreSQL races, targeted lint/types pass. No live provider evidence obtained or imported. See docs/BILLING_IMPORT.md. Billing CLI now validates exact confirmation mode/counts/fields, enforces a ten-second submission deadline with no automatic retries, redacts transport exceptions and treats malformed/late outcomes as unconfirmed. Four focused tests and all 151 local tests pass; TypeScript and zero-warning lint pass. No live credits or provider evidence accessed.",
         "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
@@ -229,7 +231,8 @@
             "testStrategy": "Preview makes no credit changes; invalid row rolls back batch; duplicate concurrent imports reconcile once. Does not prove provider-source authenticity.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-27T12:00:06.118Z"
       },
       {
         "id": "7",
@@ -420,7 +423,7 @@
       {
         "id": "10",
         "title": "Production readiness",
-        "status": "in-progress",
+        "status": "deferred",
         "description": "Consent eligibility, privacy retention/deletion, dependency review, deployment and end-to-end acceptance.",
         "details": "Added migration 007 and service-only, bounded privacy maintenance endpoint, independent of mail configuration. Proposed 30-day activity retention cascades related notification metadata; expired sessions/rooms and old orphan mail events also cleaned. All seven migrations tested together; 49 local tests, targeted lint and production build pass; unauthenticated maintenance returns 401. No live migration or schedule installed. Human retention/consent review, full account deletion/provider retention, dependency review, deployment and end-to-end acceptance remain outstanding. See docs/PRIVACY_MAINTENANCE.md. Reviewed audit and upgraded matching Prisma/client 6.19.3, moving Effect to 3.21.0. Build and 58 tests pass; high audit entries reduced from nine to eight. DeepmergeTS/braces chains and machina Node >=22.22 warning remain unresolved. See docs/DEPENDENCY_REVIEW.md. Added local GitHub Actions workflow for build/types, SQL/unit, PostgreSQL concurrency and Chromium fixture checks, plus a separate failing-on-high dependency audit. Pinned actions, read-only permission, no provider credentials. YAML parsed; lint/typecheck/local Chrome pass. No push, hosted CI run or branch protection configured. See docs/CONTINUOUS_CHECKS.md. Migration 014 adds service-only structural schema preflight; approved studio requests fail closed on mismatch. Read-only setup:database CLI has a ten-second timeout and prints no secrets. 66 local tests pass including simulated RLS/privilege/trigger drift. CLI missing-config path verified with no request. Live database check still blocked; see docs/DATABASE_PREFLIGHT.md. Node 22.23.3 is now installed and pinned in .nvmrc; package engines and CI require >=22.22 <23, satisfying the machina engine requirement. 66 local tests, ten independent PostgreSQL concurrency scenarios, Chrome preview isolation, production build and typecheck pass on this runtime. Existing running dev process was not restarted; no live voice or hosted CI acceptance. Eight high audit entries remain from the last audit. Bundled Chromium 156.0.8078.4 now passes the preview isolation fixture and parent history clearing against a separate local production server. Parent fixture supports the CI browser and aborts all other API requests. CI now includes bounded server startup/cleanup and parent expiry/rejection checks. Targeted lint, typecheck and workflow YAML validation pass. Mocked account responses only; hosted Linux, real OTP and deployment remain unverified. Shared studio/parent JSON body reader now enforces a ten-second total read deadline, strict UTF-8/object validation and 120000-byte limit; stalled/aborted/oversized/broken streams return controlled errors without awaiting a hanging cancellation hook. Full 72-test suite and build passed; an additional exact-byte/multibyte boundary case passed in the six-test focused suite. Targeted lint/types pass. No deployment load or gateway-rate-limit acceptance. Migration 017 adds parent-only family data inventory and manual deletion-review email draft. Counts are scoped and contain no content/provider IDs; unresolved charges and active mail leases are visible. 77 tests, targeted lint/types/build and Chromium parent-expiry fixture pass. No automatic erasure or message sending; provider retention and actual erasure execution remain unfinished. Reviewed a scoped @prisma/config@6.19.3 override to deepmerge-ts 8.0.2. Actual config-loader regression, 77 existing tests, production build, lint/types pass. Audit reduced from eight to five high entries, all in unpatched braces/Next lint chain. No forced Prisma major upgrade or deployment. See dependency review for Map-merge compatibility limits. Deletion request workflow now implemented with database hold and admin visibility. 109 local tests, 20 PostgreSQL race scenarios, targeted lint/types, production build and mocked Chrome parent confirmation/expiry checks pass. Full account deletion remains in progress.",
         "testStrategy": "Record reproducible evidence; local tests do not establish live acceptance.",
@@ -507,7 +510,8 @@
             "testStrategy": "Temporary isolated environment fixtures verify strict/informational exit behavior, unknown flags, secret redaction and review gates.",
             "parentId": "undefined"
           }
-        ]
+        ],
+        "updatedAt": "2026-10-27T12:00:06.121Z"
       },
       {
         "id": "11",
@@ -1309,13 +1313,222 @@
         "metadata": {
           "verification": "PR26 merged55bb40f after full correctness39913441283 passed. Duplicate39913472835 still pending at merge. Eleven existing storage assertions pass in Chromium and Chrome; coordinator repeated eleven against production3217. Trusted pointer entry and exact click sequence recorded without retries or handler changes. Deliberately broken Save handler still failed original memory-only status assertion. Root cause remains inferred; no provider calls."
         }
+      },
+      {
+        "id": "44",
+        "title": "V2 Docker deployment and local routing",
+        "description": "Single-machine Compose with Nginx, trusted build/deploy controller, durable app volumes and deployment scripts.",
+        "details": "",
+        "testStrategy": "Docker startup, routing, restart persistence and backup restore.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.480Z",
+        "metadata": {
+          "verification": "Docker Desktop restarted successfully with user permission. Compose config validates; controller tests 5/5 pass, including local HTTP/WebSocket cookie forwarding. Actual Docker build failed with disk I/O errors; host under 300MB free. Awaiting exact generated-cache cleanup approval. No Docker deployment acceptance claimed.",
+          "verifiedEvidence": "Docker studio/controller/gateway healthy on3230. Real npm build/start, SQLite across revision, WebSockets through Nginx and failed-build rollback passed. Backup checksums pass; app data restored to isolated volume passes SQLite integrity and retains room. Full live-stack restore not attempted to avoid disrupting acceptance."
+        }
+      },
+      {
+        "id": "45",
+        "title": "V2 multifile app generation and deployment",
+        "description": "Open-ended source generation, dependencies, immutable versions, builds and per-app persistent backend.",
+        "details": "",
+        "testStrategy": "Generate deploy revise application; data survives version changes.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.483Z",
+        "metadata": {
+          "verification": "2026-10-23 native Chrome on Docker3230: real family-key gpt-6-sol generation creates8files; npm build and deployment succeed. Counter and note persist refresh, manual UI source revision saves new version and redeploys with data retained. ZIP current revision and share QR verified. Embedded preview pending final CSP image rebuild. Restart recovery being improved after review."
+        }
+      },
+      {
+        "id": "46",
+        "title": "V2 responsive HeroUI studio",
+        "description": "HeroUI3 with VibeBoard theme; project conversation files preview and voice on desktop/mobile.",
+        "details": "",
+        "testStrategy": "Browser create/revise/preview and responsive flows.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:48:19.435Z",
+        "metadata": {
+          "verification": "Native Chrome final Docker image c630060 at 390px: header and actions fit, embedded preview loads, saved counter and note persist. Desktop generation/source edit/deployment/sharing and provider settings verified. HeroUI/VibeBoard light and dark themes checked."
+        }
+      },
+      {
+        "id": "47",
+        "title": "V2 local account login and sessions",
+        "description": "Simple username/password initial account and persistent authenticated sessions across devices.",
+        "details": "",
+        "testStrategy": "Setup once, login, rejected credentials, durable sessions and logout.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T08:42:21.513Z",
+        "metadata": {
+          "verification": "2026-10-23: SQLite account setup/login/logout with independent device sessions implemented. Two auth tests pass; combined auth/runtime/voice suite 19/19 passes. Native Chrome setup/login exercised by UI worker. Production Docker acceptance pending disk-space recovery."
+        }
+      },
+      {
+        "id": "48",
+        "title": "V2 family landing page and theme",
+        "description": "HeroUI landing for adults and children, founder story and accurately described alternatives/features.",
+        "details": "",
+        "testStrategy": "Browser responsive landing; links; no unverified security claims.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.485Z"
+      },
+      {
+        "id": "49",
+        "title": "V2 integrated Docker browser acceptance",
+        "description": "Test real source generation build deploy data persistence through UI and document single-server handoff.",
+        "details": "",
+        "testStrategy": "Computer use end-to-end with real provider bounded usage; Docker restart; verification report.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "metadata": {
+          "verification": "Final Docker/native Chrome acceptance passed: live account-key GPT-6 Sol generation, npm build/deploy, SQLite persistence, manual source revision and redeploy, ZIP download, QR sharing, embedded preview, mobile390px, password login and honest OTP invitation error. Docker backup copies restore with SQLite integrity. GitHub correctness suite passes on c630060. PR29 remains unmerged due preexisting unpatched development dependency audit; real email delivery and spoken voice remain unverified."
+        },
+        "updatedAt": "2026-10-23T09:48:19.438Z"
+      },
+      {
+        "id": "50",
+        "title": "Family BYOK providers and model selection",
+        "description": "Per-account encrypted OpenAI and Anthropic keys, account model discovery and ElevenLabs credentials.",
+        "details": "",
+        "testStrategy": "Account isolation, secret redaction and real selected-provider generation.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:35:57.487Z",
+        "metadata": {
+          "verification": "Encrypted owner-scoped provider store and isolation tests pass. Actual OpenAI account catalog and selected gpt-6-sol generation passed in Docker/native Chrome. Actual ElevenLabs owner-key readiness and signed-session issuance passed without audio connection. Anthropic adapter fixture-tested only; no live funded account acceptance. No subscription-to-API equivalence claimed."
+        }
+      },
+      {
+        "id": "51",
+        "title": "Project source ZIP download",
+        "description": "Download current source without node_modules, build outputs, credentials or runtime data.",
+        "details": "",
+        "testStrategy": "Independent ZIP reader and authenticated browser download.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:19:19.300Z",
+        "metadata": {
+          "verifiedEvidence": "Native Chrome downloaded current project ZIP; independent ZIP reader checked 8 source files and archive integrity. Source-only manifest excludes secrets, dependencies, caches and runtime data. Route ownership and export tests pass. Verified 2026-10-23."
+        }
+      },
+      {
+        "id": "52",
+        "title": "Invite-only email OTP accounts",
+        "description": "One verified email per family with shared projects across devices; implement after core deployment.",
+        "details": "",
+        "testStrategy": "OTP expiry, replay/rate limits, invitation limits and cross-account access tests.",
+        "status": "blocked",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:43:03.029Z",
+        "metadata": {
+          "verification": "Invite-only OTP request/verify implemented, durable expiry/resend/attempt limits and singleuse tests pass. Two real SQLite account/session route tests isolate projects, jobs, sources, env, providers anddownloads. Chrome verifies honest uninvitederror and passwordfallback. Realemaildelivery blocked: no RESEND_API_KEY or STUDIO_MAIL_FROM configured. Userquestionpending; noemail sent.",
+          "publicSignupVerification": "Fresh public installations cannot bypass invitations through password setup: service and route reject registration, session reports inviteOnly=true and setupRequired=false. Existing password accounts remain usable. Regression and full V2 suites pass (24 V2 plus7 controller tests). Rebuilt Docker confirms setup403 and correct session flags. Real email delivery still requires configured sender and key."
+        }
+      },
+      {
+        "id": "53",
+        "title": "Public runtime origin isolation",
+        "description": "Separate generated application origin from studio and account/provider APIs before public rollout.",
+        "details": "",
+        "testStrategy": "Cross-origin requests cannot access studio sessions or keys; preview and sharing still work.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-23T09:44:09.150Z",
+        "metadata": {
+          "verification": "Actual Docker/Nginx publicmode: studio apps404, matching perprojecthost200, otherprojecthost404, runtime studioAPI404, bare runtimehost404. Independent project network cannot reachappIP. Hostonlystudio cookie and crossoriginAPI checks; twoaccount routes isolate keys/data. Chrome embeddedpreview and sharing work afterCSP image rebuild. Not full hostileworkload or publicdeployment certification."
+        }
+      },
+      {
+        "id": "54",
+        "title": "Restart and verify the local hands-on V2 test environment",
+        "description": "Recover Docker and restart the VibeKidding stack without deleting data. Add explicit loopback-only one-click entry so email configuration does not block local building. Verify existing projects, real generation/revision/deploy/persistence and source export in Chrome.",
+        "details": "",
+        "testStrategy": "Local-entry route tests, full V2 tests/typecheck, Docker health and real Chrome workflow. Keep email delivery and production hardening separate.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:08:37.370Z"
+      },
+      {
+        "id": "55",
+        "title": "Apply SoloFlight theme and finish HeroUI controls across V2 platform",
+        "description": "Use SoloFlight warm paper/violet tokens across landing, studio, authentication, provider settings and voice controls. Replace remaining native V2 model picker, checkbox and buttons with HeroUI. Preserve generated project UI and runtime data.",
+        "details": "",
+        "testStrategy": "Typecheck, scoped lint, production Docker build and browser desktop/mobile plus model dropdown and dark theme verification.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:19:32.544Z"
+      },
+      {
+        "id": "56",
+        "title": "Explain self-funded family project and promote Aemal AI workshops",
+        "description": "Add landing workshop section with Berlin, online and international formats and CTA to verified workshop site. Explain VibeKidding is not a business, Aemal pays hosting and families bring their own API keys and pay provider usage. Remove em dashes from landing copy and title.",
+        "details": "",
+        "testStrategy": "Production build and desktop/mobile browser review of section, CTA and copy.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:22:36.106Z"
+      },
+      {
+        "id": "57",
+        "title": "Add generated family imagery and truthful parental-controls landing section",
+        "description": "Four generated images: father/son and mother/daughter co-building, child needing guidance, safely parked father reviewing phone. Add responsive gallery and roadmap section for phone insights, push alerts and remote locking; explicitly planned, with accurate current privacy copy.",
+        "details": "",
+        "testStrategy": "Inspect generated assets, lint, production build, desktop/mobile page and image loading checks.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:28:16.703Z"
+      },
+      {
+        "id": "58",
+        "title": "Present the first-version screenshots in the founder story",
+        "description": "Rename founder section as the story behind VibeKidding and present all nine archived V1 screenshots in a large HeroUI gallery with thumbnails, previous/next, keyboard navigation and zoom.",
+        "details": "",
+        "testStrategy": "ESLint, TypeScript, Docker production build; in-app browser desktop/mobile checks for opening, wraparound navigation, keyboard arrows, zoom and closing.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:44:15.524Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-23T06:55:39.000Z",
-      "taskCount": 43,
-      "completedCount": 35,
+      "lastModified": "2026-10-27T12:44:15.524Z",
+      "taskCount": 58,
+      "completedCount": 49,
       "tags": [
         "master"
       ]

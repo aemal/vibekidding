@@ -22,16 +22,17 @@ function denied(request: Request, env: DemoEnvironment) {
 function configured(env: DemoEnvironment) {
   return !!env.VIBEKIDDING_SAMANTHA_API_KEY?.trim() && validVoiceAgentId(env.VIBEKIDDING_SAMANTHA_AGENT_ID);
 }
-export function createVoiceHandlers(options: { environment?: () => DemoEnvironment; fetcher?: typeof fetch; usage?: VoiceIssuanceLimit } = {}) {
+export function createVoiceHandlers(options: { environment?: () => DemoEnvironment; fetcher?: typeof fetch; usage?: VoiceIssuanceLimit; accessError?: (request: Request, env: DemoEnvironment) => string | null } = {}) {
   const environment = options.environment ?? (() => process.env), fetcher = options.fetcher ?? fetch, usage = options.usage ?? new VoiceIssuanceLimit();
+  const accessError = options.accessError ?? denied;
   return {
     async GET(request: Request) {
-      const env = environment(), reason = denied(request, env);
+      const env = environment(), reason = accessError(request, env);
       return json({ enabled: !reason, localOnly: true, configured: !reason && configured(env), ...VOICE_LIMITS,
         message: reason ?? (configured(env) ? "Local voice configured. Provider settings are verified when you explicitly start. Speech is processed by ElevenLabs." : "Dedicated Samantha demo credentials and a new reviewed agent are required.") });
     },
     async POST(request: Request) {
-      const env = environment(), reason = denied(request, env);
+      const env = environment(), reason = accessError(request, env);
       if (reason) return json({ error: reason }, 403);
       if (!configured(env)) return json({ error: "Dedicated local voice configuration is missing." }, 503);
       if (request.headers.get("content-type")?.split(";")[0].trim() !== "application/json") return json({ error: "Send application/json." }, 415);

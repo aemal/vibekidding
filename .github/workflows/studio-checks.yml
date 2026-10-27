@@ -29,6 +29,7 @@ jobs:
       - run: npm ci
       - run: npm run lint -- --max-warnings=0
       - run: npm run test:studio
+      - run: npm run test:v2
       - run: npm run build
       - run: npm run typecheck
       - name: Install isolated test prerequisites
