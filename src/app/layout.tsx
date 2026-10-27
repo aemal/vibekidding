@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "VibeKidding — Build something together",
+  title: "VibeKidding | Build something together",
   description:
     "An open-ended app studio for parents, children, and curious makers. Describe an idea, build real software, and make it your own.",
 };
