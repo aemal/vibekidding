@@ -1498,13 +1498,25 @@
         "priority": "medium",
         "subtasks": [],
         "updatedAt": "2026-10-27T12:22:36.106Z"
+      },
+      {
+        "id": "57",
+        "title": "Add generated family imagery and truthful parental-controls landing section",
+        "description": "Four generated images: father/son and mother/daughter co-building, child needing guidance, safely parked father reviewing phone. Add responsive gallery and roadmap section for phone insights, push alerts and remote locking; explicitly planned, with accurate current privacy copy.",
+        "details": "",
+        "testStrategy": "Inspect generated assets, lint, production build, desktop/mobile page and image loading checks.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:28:16.703Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-27T12:22:36.106Z",
-      "taskCount": 56,
-      "completedCount": 47,
+      "lastModified": "2026-10-27T12:28:16.703Z",
+      "taskCount": 57,
+      "completedCount": 48,
       "tags": [
         "master"
       ]
