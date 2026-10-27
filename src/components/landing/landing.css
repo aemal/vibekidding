@@ -48,3 +48,28 @@
 .vl-privacy-today h3 { font-size:20px; margin-bottom:10px; }
 .vl-privacy-today p { font-size:13px; color:var(--muted); line-height:1.8; }
 @media(max-width:680px) { .vl-family-grid,.vl-control-grid { grid-template-columns:1fr; gap:18px; } .vl-family-grid figcaption { padding:20px; } .vl-roadmap-notice,.vl-privacy-today { padding:20px; } .vl-privacy-today { flex-direction:column; gap:12px; } }
+
+.vl-v1-gallery { margin-top:26px; }
+.v2-landing .vl-v1-open { white-space:normal; text-align:left; padding:12px 16px; background:var(--soft); color:var(--accent-soft-foreground); }
+.vl-v1-open>span { font-size:11px; opacity:.8; }
+.vl-story .vl-v1-hint { font-size:12px; margin:12px 0; }
+.vl-v1-thumbnails { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+.v2-landing .vl-v1-thumbnails .button { display:block; position:relative; padding:0; border:1px solid var(--border); overflow:hidden; border-radius:8px; min-height:0; height:auto; }
+.vl-v1-thumbnails img { display:block; width:100%; aspect-ratio:1.5; object-fit:cover; }
+.vl-v1-thumbnails span { position:absolute; bottom:3px; right:3px; background:#211c32; color:white; padding:1px 5px; border-radius:4px; font-size:10px; }
+.vl-v1-backdrop { background:#13101de6; backdrop-filter:blur(8px); z-index:100; }
+.vl-v1-container { width:98vw!important; max-width:1800px!important; margin:auto; }
+.vl-v1-dialog { max-width: min(98vw, 1800px)!important; display:flex; flex-direction:column; height:94dvh; max-height:94dvh; width:100%; background:var(--panel); color:var(--ink); border:1px solid var(--border); border-radius:18px; overflow:hidden; font-family:Arial,Helvetica,sans-serif; padding:0!important; }
+.vl-v1-header { flex-direction:row!important; display:flex; justify-content:space-between; align-items:center; padding:16px 22px; flex-shrink:0; }
+.vl-v1-header h2 { font-size:20px; margin:0; }
+.vl-v1-header p { font-size:12px; color:var(--muted); margin:4px 0 0; }
+.vl-v1-stage { flex:1; min-height:0; overflow:auto; background:#0d0c12; display:flex; align-items:center; justify-content:center; }
+.vl-v1-stage img { display:block; width:100%; height:100%; object-fit:contain; }
+.vl-v1-stage.is-zoomed { display:block; }
+.vl-v1-stage.is-zoomed img { width:180%; max-width:none; height:auto; object-fit:initial; }
+.vl-v1-controls { display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; padding:12px 20px 5px; flex-shrink:0; }
+.vl-v1-controls .button { min-height:44px; }
+.vl-v1-controls a { font-size:13px; color:var(--accent); }
+.vl-v1-count { min-width:48px; text-align:center; font-variant-numeric:tabular-nums; }
+.vl-v1-keyboard { text-align:center; font-size:11px; color:var(--muted); margin:5px 10px 12px; }
+@media(max-width:680px) { .vl-v1-thumbnails { grid-template-columns:repeat(3,minmax(0,1fr)); } .vl-v1-header { padding:12px; } .vl-v1-header h2 { font-size:17px; } .vl-v1-controls { gap:8px; padding:10px 8px 4px; } .vl-v1-controls .button { font-size:12px; } .vl-v1-open { width:100%; } .vl-v1-dialog { height:96dvh; max-height:96dvh; } }

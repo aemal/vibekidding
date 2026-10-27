@@ -1510,13 +1510,25 @@
         "priority": "medium",
         "subtasks": [],
         "updatedAt": "2026-10-27T12:28:16.703Z"
+      },
+      {
+        "id": "58",
+        "title": "Present the first-version screenshots in the founder story",
+        "description": "Rename founder section as the story behind VibeKidding and present all nine archived V1 screenshots in a large HeroUI gallery with thumbnails, previous/next, keyboard navigation and zoom.",
+        "details": "",
+        "testStrategy": "ESLint, TypeScript, Docker production build; in-app browser desktop/mobile checks for opening, wraparound navigation, keyboard arrows, zoom and closing.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [],
+        "updatedAt": "2026-10-27T12:44:15.524Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-27T12:28:16.703Z",
-      "taskCount": 57,
-      "completedCount": 48,
+      "lastModified": "2026-10-27T12:44:15.524Z",
+      "taskCount": 58,
+      "completedCount": 49,
       "tags": [
         "master"
       ]
